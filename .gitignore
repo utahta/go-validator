@@ -1,0 +1,17 @@
+### macos
+.DS_Store
+
+### Go
+*.test
+vendor/
+/cover.out
+
+### IntelliJ IDEA
+.idea/
+*.iml
+
+### vim
+*.swp
+
+### Temporary directory
+tmp/
