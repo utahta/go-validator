@@ -115,8 +115,14 @@ func (v *Validator) validate(field Field, tag Tag) error {
 	}
 
 	var errs Errors
-	if tag.IsRequired() && !validateFn(field, tag.Params...) {
-		errs = append(errs, Error{Field: field, Tag: tag})
+	if tag.IsRequired() {
+		valid, err := validateFn(field, tag.Params...)
+		if err != nil {
+			return err
+		}
+		if !valid {
+			errs = append(errs, Error{Field: field, Tag: tag})
+		}
 	}
 
 	var val = field.val
@@ -130,7 +136,11 @@ func (v *Validator) validate(field Field, tag Tag) error {
 			break // prevent duplicate validation
 		}
 
-		if !validateFn(field, tag.Params...) {
+		valid, err := validateFn(field, tag.Params...)
+		if err != nil {
+			return err
+		}
+		if !valid {
 			errs = append(errs, Error{Field: field, Tag: tag})
 		}
 

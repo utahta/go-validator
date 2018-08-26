@@ -6,7 +6,7 @@ import (
 )
 
 type (
-	Func    func(Field, ...string) bool
+	Func    func(Field, ...string) (bool, error)
 	FuncMap map[string]Func
 )
 
@@ -27,79 +27,76 @@ var defaultFuncMap = FuncMap{
 	"uuid5":           isUUID5,
 }
 
-func hasValue(f Field, _ ...string) bool {
+func hasValue(f Field, _ ...string) (bool, error) {
 	v := f.val
 	switch v.Kind() {
 	case reflect.String, reflect.Array:
-		return v.Len() != 0
+		return v.Len() != 0, nil
 	case reflect.Map, reflect.Slice:
-		return v.Len() != 0 && !v.IsNil()
+		return v.Len() != 0 && !v.IsNil(), nil
 	case reflect.Bool:
-		return v.Bool()
+		return v.Bool(), nil
 	case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
-		return v.Int() != 0
+		return v.Int() != 0, nil
 	case reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64, reflect.Uintptr:
-		return v.Uint() != 0
+		return v.Uint() != 0, nil
 	case reflect.Float32, reflect.Float64:
-		return v.Float() != 0
+		return v.Float() != 0, nil
 	case reflect.Interface, reflect.Ptr:
-		return !v.IsNil()
+		return !v.IsNil(), nil
 	}
-	return v.IsValid() && v.Interface() != reflect.Zero(v.Type()).Interface()
+	return v.IsValid() && v.Interface() != reflect.Zero(v.Type()).Interface(), nil
 }
 
-func isAlpha(f Field, _ ...string) bool {
-	return alphaRegex.MatchString(f.Value())
+func isAlpha(f Field, _ ...string) (bool, error) {
+	return alphaRegex.MatchString(f.Value()), nil
 }
 
-func isAlphaNum(f Field, _ ...string) bool {
-	return alphaNumericRegex.MatchString(f.Value())
+func isAlphaNum(f Field, _ ...string) (bool, error) {
+	return alphaNumericRegex.MatchString(f.Value()), nil
 }
 
-func isAlphaUnicode(f Field, _ ...string) bool {
-	return alphaUnicodeRegex.MatchString(f.Value())
+func isAlphaUnicode(f Field, _ ...string) (bool, error) {
+	return alphaUnicodeRegex.MatchString(f.Value()), nil
 }
 
-func isAlphaNumUnicode(f Field, _ ...string) bool {
-	return alphaNumericUnicodeRegex.MatchString(f.Value())
+func isAlphaNumUnicode(f Field, _ ...string) (bool, error) {
+	return alphaNumericUnicodeRegex.MatchString(f.Value()), nil
 }
 
-func isEmail(f Field, _ ...string) bool {
-	return emailRegex.MatchString(f.Value())
+func isEmail(f Field, _ ...string) (bool, error) {
+	return emailRegex.MatchString(f.Value()), nil
 }
 
-func isURL(f Field, _ ...string) bool {
+func isURL(f Field, _ ...string) (bool, error) {
 	u, err := url.ParseRequestURI(f.Value())
-	if err != nil || len(u.Scheme) == 0 {
-		return false
-	}
-	return true
+	return err == nil && len(u.Scheme) > 0, nil
 }
 
-func isURI(f Field, _ ...string) bool {
+func isURI(f Field, _ ...string) (bool, error) {
 	_, err := url.ParseRequestURI(f.Value())
-	return err == nil
+	return err == nil, nil
 }
 
-func isNumeric(f Field, _ ...string) bool {
-	return numericRegex.MatchString(f.Value())
+func isNumeric(f Field, _ ...string) (bool, error) {
+	return numericRegex.MatchString(f.Value()), nil
 }
 
-func isNumber(f Field, _ ...string) bool {
-	return numberRegex.MatchString(f.Value())
+func isNumber(f Field, _ ...string) (bool, error) {
+	return numberRegex.MatchString(f.Value()), nil
 }
 
-func isUUID(f Field, _ ...string) bool {
-	return uuidRegex.MatchString(f.Value())
+func isUUID(f Field, _ ...string) (bool, error) {
+	return uuidRegex.MatchString(f.Value()), nil
 }
 
-func isUUID3(f Field, _ ...string) bool {
-	return uuid3Regex.MatchString(f.Value())
+func isUUID3(f Field, _ ...string) (bool, error) {
+	return uuid3Regex.MatchString(f.Value()), nil
 }
 
-func isUUID4(f Field, _ ...string) bool {
-	return uuid4Regex.MatchString(f.Value())
+func isUUID4(f Field, _ ...string) (bool, error) {
+	return uuid4Regex.MatchString(f.Value()), nil
 }
-func isUUID5(f Field, _ ...string) bool {
-	return uuid5Regex.MatchString(f.Value())
+func isUUID5(f Field, _ ...string) (bool, error) {
+	return uuid5Regex.MatchString(f.Value()), nil
 }
