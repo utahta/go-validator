@@ -11,24 +11,26 @@ const (
 
 type (
 	Validator struct {
+		FuncMap FuncMap
 	}
 )
 
 func New() *Validator {
-	return &Validator{}
+	return &Validator{
+		FuncMap: defaultFuncMap,
+	}
 }
 
 // ValidateStruct validates struct that use tags for fields.
 func (v *Validator) ValidateStruct(s interface{}) error {
-	return v.validateStruct(s, nil)
-}
-
-func (v *Validator) validateStruct(s interface{}, parent *vField) error {
 	if s == nil {
 		return nil
 	}
+	return v.validateStruct(Field{val: reflect.ValueOf(s)})
+}
 
-	val := reflect.ValueOf(s)
+func (v *Validator) validateStruct(field Field) error {
+	val := field.val
 	if val.Kind() == reflect.Interface || val.Kind() == reflect.Ptr {
 		val = val.Elem()
 	}
@@ -55,9 +57,9 @@ func (v *Validator) validateStruct(s interface{}, parent *vField) error {
 
 		var err error
 		if valueField.Kind() == reflect.Struct || (valueField.Kind() == reflect.Ptr && valueField.Elem().Kind() == reflect.Struct) {
-			err = v.validateStruct(valueField.Interface(), &vField{name: typeField.Name, parent: parent})
+			err = v.validateStruct(Field{name: typeField.Name, val: valueField, parent: &field})
 		} else {
-			err = v.validateVar(valueField.Interface(), typeField.Tag.Get(tagName), vField{name: typeField.Name, parent: parent})
+			err = v.validateVar(Field{name: typeField.Name, val: valueField, parent: &field}, typeField.Tag.Get(tagName))
 		}
 		if err != nil {
 			if es, ok := err.(Errors); ok {
@@ -74,21 +76,25 @@ func (v *Validator) validateStruct(s interface{}, parent *vField) error {
 	return nil
 }
 
-func (v *Validator) ValidateVar(s interface{}, tag string) error {
-	return v.validateVar(s, tag, vField{})
+func (v *Validator) ValidateVar(s interface{}, rawTag string) error {
+	return v.validateVar(Field{val: reflect.ValueOf(s)}, rawTag)
 }
 
-func (v *Validator) validateVar(s interface{}, tag string, field vField) error {
-	if tag == "-" {
+func (v *Validator) validateVar(field Field, rawTag string) error {
+	if rawTag == "-" || rawTag == "" {
 		return nil
 	}
 
+	tags, err := parseTag(rawTag)
+	if err != nil {
+		return err
+	}
+
 	var errs Errors
-	for _, t := range parseTag(tag) {
-		err := v.validate(s, t, field)
-		if err != nil {
-			if e, ok := err.(Error); ok {
-				errs = append(errs, e)
+	for _, tag := range tags {
+		if err := v.validate(field, tag); err != nil {
+			if es, ok := err.(Errors); ok {
+				errs = append(errs, es...)
 			} else {
 				return err
 			}
@@ -101,13 +107,116 @@ func (v *Validator) validateVar(s interface{}, tag string, field vField) error {
 	return nil
 }
 
-func (v *Validator) validate(s interface{}, tag vTag, field vField) error {
-	val := reflect.ValueOf(s)
-	if val.Kind() == reflect.Interface || val.Kind() == reflect.Ptr {
-		val = val.Elem()
+func (v *Validator) validate(field Field, tag Tag) error {
+	validate, ok := v.FuncMap[tag.Name]
+	if !ok {
+		//FIXME define error
+		return fmt.Errorf("unknown tag")
 	}
 
-	fmt.Printf("%v %v \n", field.Name(), val.Kind())
+	var errs Errors
+	if !validate(field, tag.Params...) {
+		errs = append(errs, Error{Field: field, Tag: tag})
+	}
 
+	var val = field.val
+	switch val.Kind() {
+	case reflect.Map:
+		for _, k := range val.MapKeys() {
+			value := val.MapIndex(k)
+
+			var err error
+			if value.Kind() == reflect.Struct || (value.Kind() == reflect.Ptr && value.Elem().Kind() == reflect.Struct) {
+				err = v.validateStruct(Field{name: fmt.Sprintf("[%v]", k), val: value, parent: &field})
+			} else {
+				err = v.validate(Field{name: fmt.Sprintf("[%v]", k), val: value, parent: &field}, tag)
+			}
+
+			if err != nil {
+				if es, ok := err.(Errors); ok {
+					errs = append(errs, es...)
+				} else {
+					return err
+				}
+			}
+		}
+
+	case reflect.Slice, reflect.Array:
+		for i := 0; i < val.Len(); i++ {
+			value := val.Index(i)
+
+			var err error
+			if value.Kind() == reflect.Struct || (value.Kind() == reflect.Ptr && value.Elem().Kind() == reflect.Struct) {
+				err = v.validateStruct(Field{name: fmt.Sprintf("[%d]", i), val: value, parent: &field})
+			} else {
+				err = v.validate(Field{name: fmt.Sprintf("[%d]", i), val: value, parent: &field}, tag)
+			}
+
+			if err != nil {
+				if es, ok := err.(Errors); ok {
+					errs = append(errs, es...)
+				} else {
+					return err
+				}
+			}
+		}
+
+	case reflect.Interface:
+		if val.IsNil() {
+			break
+		}
+		value := val.Elem()
+
+		var err error
+		if value.Kind() == reflect.Struct || (value.Kind() == reflect.Ptr && value.Elem().Kind() == reflect.Struct) {
+			err = v.validateStruct(Field{val: value, parent: &field})
+		} else {
+			err = v.validate(Field{val: value, parent: &field}, tag)
+		}
+
+		if err != nil {
+			if es, ok := err.(Errors); ok {
+				errs = append(errs, es...)
+			} else {
+				return err
+			}
+		}
+
+	case reflect.Ptr:
+		if val.IsNil() {
+			break
+		}
+		value := val.Elem()
+
+		var err error
+		if value.Kind() == reflect.Struct || (value.Kind() == reflect.Ptr && value.Elem().Kind() == reflect.Struct) {
+			err = v.validateStruct(Field{val: value, parent: &field})
+		} else {
+			err = v.validate(Field{val: value, parent: &field}, tag)
+		}
+
+		if err != nil {
+			if es, ok := err.(Errors); ok {
+				errs = append(errs, es...)
+			} else {
+				return err
+			}
+		}
+
+	case reflect.Struct:
+		err := v.validateStruct(Field{val: val, parent: &field})
+		if err != nil {
+			if es, ok := err.(Errors); ok {
+				errs = append(errs, es...)
+			} else {
+				return err
+			}
+		}
+
+	}
+
+	if len(errs) > 0 {
+		return errs
+	}
 	return nil
 }
