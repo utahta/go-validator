@@ -8,9 +8,10 @@ import (
 
 type (
 	Field struct {
-		name   string
-		val    reflect.Value
-		parent *Field
+		name       string
+		val        reflect.Value
+		parent     *Field
+		cacheValue string
 	}
 )
 
@@ -20,10 +21,8 @@ const (
 
 func (f Field) Name() string {
 	var s []string
-	if f.parent != nil {
-		if f.parent.Name() != "" {
-			s = append(s, f.parent.Name())
-		}
+	if f.parent != nil && f.parent.Name() != "" {
+		s = append(s, f.parent.Name())
 	}
 
 	if f.name != "" {
@@ -33,7 +32,7 @@ func (f Field) Name() string {
 }
 
 func (f Field) ShortValue() string {
-	const maxSize = 10
+	const maxSize = 32
 	s := f.Value()
 	if len(s) > maxSize {
 		return s[:maxSize] + "..."
@@ -42,6 +41,13 @@ func (f Field) ShortValue() string {
 }
 
 func (f Field) Value() string {
+	if f.cacheValue == "" {
+		f.cacheValue = f.value()
+	}
+	return f.cacheValue
+}
+
+func (f Field) value() string {
 	switch f.val.Kind() {
 	case reflect.Bool,
 		reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64,
@@ -53,22 +59,22 @@ func (f Field) Value() string {
 		return f.val.String()
 
 	case reflect.Map:
-		return "Map"
+		return "<Map>"
 
 	case reflect.Slice, reflect.Array:
-		return "Array"
+		return "<Array>"
 
 	case reflect.Interface:
-		if f.val.IsNil() {
+		if !f.val.IsNil() {
 			return "<nil>"
 		}
-		return "Interface"
+		return "<Interface>"
 
 	case reflect.Ptr:
 		if f.val.IsNil() {
 			return "<nil>"
 		}
-		return "Ptr"
+		return "<Ptr>"
 	}
-	return ""
+	return "<Unknown>"
 }

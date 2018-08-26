@@ -108,19 +108,32 @@ func (v *Validator) validateVar(field Field, rawTag string) error {
 }
 
 func (v *Validator) validate(field Field, tag Tag) error {
-	validate, ok := v.FuncMap[tag.Name]
+	validateFn, ok := v.FuncMap[tag.Name]
 	if !ok {
 		//FIXME define error
 		return fmt.Errorf("unknown tag")
 	}
 
 	var errs Errors
-	if !validate(field, tag.Params...) {
+	if tag.IsRequired() && !validateFn(field, tag.Params...) {
 		errs = append(errs, Error{Field: field, Tag: tag})
 	}
 
 	var val = field.val
 	switch val.Kind() {
+	case reflect.Bool,
+		reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64,
+		reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64, reflect.Uintptr,
+		reflect.Float32, reflect.Float64,
+		reflect.String:
+		if tag.IsRequired() {
+			break // prevent duplicate validation
+		}
+
+		if !validateFn(field, tag.Params...) {
+			errs = append(errs, Error{Field: field, Tag: tag})
+		}
+
 	case reflect.Map:
 		for _, k := range val.MapKeys() {
 			value := val.MapIndex(k)

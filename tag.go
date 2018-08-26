@@ -27,6 +27,10 @@ func (t Tag) String() string {
 	return t.Name
 }
 
+func (t Tag) IsRequired() bool {
+	return t.Name == "required"
+}
+
 func parseTag(rawTag string) ([]Tag, error) {
 	var tags []Tag
 	for _, t := range strings.Split(rawTag, tagSeparator) {
