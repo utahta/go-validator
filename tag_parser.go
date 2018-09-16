@@ -67,7 +67,7 @@ loop:
 			if orParsing {
 				tags[len(tags)-1].Params = append(tags[len(tags)-1].Params, lit)
 			} else {
-				tags = append(tags, Tag{Name: "or", Params: []string{lit}, Enable: enable, dig: true, validate: v.FuncMap["or"]})
+				tags = append(tags, Tag{Name: "or", Params: []string{lit}, Enable: enable, dig: true, validateFn: v.FuncMap["or"]})
 			}
 			orParsing = true
 
@@ -134,16 +134,16 @@ func (v *Validator) newTag(lit string, enable, dig bool) (Tag, error) {
 		}
 	}
 
-	validate, ok := v.FuncMap[name]
+	fn, ok := v.FuncMap[name]
 	if !ok {
 		return Tag{}, fmt.Errorf("parse: tag %s function not found", name)
 	}
 
 	return Tag{
-		Name:     name,
-		Params:   params,
-		Enable:   enable,
-		dig:      dig,
-		validate: validate,
+		Name:       name,
+		Params:     params,
+		Enable:     enable,
+		dig:        dig,
+		validateFn: fn,
 	}, nil
 }

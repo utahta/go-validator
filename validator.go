@@ -46,7 +46,7 @@ func (v *Validator) validateStruct(field Field) error {
 	}
 
 	if val.Kind() != reflect.Struct {
-		return fmt.Errorf("invalid argument error")
+		return fmt.Errorf("struct type required")
 	}
 
 	var errs Errors
@@ -124,7 +124,7 @@ func (v *Validator) validateVar(field Field, rawTag string) error {
 func (v *Validator) validate(field Field, tag Tag) error {
 	var errs Errors
 	if tag.Enable {
-		valid, err := tag.validate(field, FuncOption{validator: v, Params: tag.Params, Optional: tag.Optional})
+		valid, err := tag.validateFn(field, FuncOption{validator: v, Params: tag.Params, Optional: tag.Optional})
 		if err != nil {
 			return fmt.Errorf("validateFn: %v in %s %s", err, field.FullName(), tag.String())
 		}

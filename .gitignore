@@ -5,6 +5,8 @@
 *.test
 vendor/
 /cover.out
+cpu.out
+mem.out
 
 ### IntelliJ IDEA
 .idea/
