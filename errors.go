@@ -3,6 +3,8 @@ package validator
 import (
 	"fmt"
 	"strings"
+
+	"github.com/utahta/go-validator/tag"
 )
 
 type (
@@ -12,10 +14,13 @@ type (
 		Field Field
 
 		// Tag is a validation tag.
-		Tag Tag
+		Tag tag.Tag
 
 		// CustomMessage is a custom error message. TODO:
 		CustomMessage string
+
+		// SuppressErrorFieldValue suppress a field string.
+		SuppressErrorFieldValue bool
 	}
 
 	Errors []Error
@@ -27,7 +32,10 @@ func ToErrors(err error) (Errors, bool) {
 }
 
 func (e Error) Error() string {
-	return fmt.Sprintf("%s: '%s' does validate as '%s'", e.Field.Name(), e.Field.ShortValue(), e.Tag)
+	if e.SuppressErrorFieldValue {
+		return fmt.Sprintf("%s: The value does validate as '%s'", e.Field.FullName(), e.Tag)
+	}
+	return fmt.Sprintf("%s: '%s' does validate as '%s'", e.Field.FullName(), e.Field.ShortString(), e.Tag)
 }
 
 func (es Errors) Error() string {

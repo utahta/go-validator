@@ -8,10 +8,11 @@ import (
 
 type (
 	Field struct {
-		name       string
-		val        reflect.Value
-		parent     *Field
-		cacheValue string
+		name     string
+		origin   reflect.Value
+		refValue reflect.Value
+		parent   *Field
+		cacheStr string
 	}
 )
 
@@ -20,9 +21,13 @@ const (
 )
 
 func (f Field) Name() string {
+	return f.name
+}
+
+func (f Field) FullName() string {
 	var s []string
-	if f.parent != nil && f.parent.Name() != "" {
-		s = append(s, f.parent.Name())
+	if f.parent != nil && f.parent.FullName() != "" {
+		s = append(s, f.parent.FullName())
 	}
 
 	if f.name != "" {
@@ -31,32 +36,48 @@ func (f Field) Name() string {
 	return strings.Join(s, fieldNameDelim)
 }
 
-func (f Field) ShortValue() string {
+func (f Field) Value() reflect.Value {
+	return f.refValue
+}
+
+func (f Field) Interface() interface{} {
+	return f.origin.Interface()
+}
+
+func (f Field) Parent() *Field {
+	return f.parent
+}
+
+func (f Field) ShortString() string {
 	const maxSize = 32
-	s := f.Value()
+	s := f.String()
 	if len(s) > maxSize {
 		return s[:maxSize] + "..."
 	}
 	return s
 }
 
-func (f Field) Value() string {
-	if f.cacheValue == "" {
-		f.cacheValue = f.value()
+func (f Field) String() string {
+	if f.cacheStr == "" {
+		f.cacheStr = f.string()
 	}
-	return f.cacheValue
+	return f.cacheStr
 }
 
-func (f Field) value() string {
-	switch f.val.Kind() {
+func (f Field) string() string {
+	val := f.Value()
+	switch val.Kind() {
 	case reflect.Bool,
 		reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64,
 		reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64, reflect.Uintptr,
 		reflect.Float32, reflect.Float64:
-		return fmt.Sprint(f.val)
+		return fmt.Sprint(val)
 
 	case reflect.String:
-		return f.val.String()
+		return val.String()
+
+	case reflect.Struct:
+		return val.Type().Name()
 
 	case reflect.Map:
 		return "<Map>"
@@ -65,13 +86,13 @@ func (f Field) value() string {
 		return "<Array>"
 
 	case reflect.Interface:
-		if !f.val.IsNil() {
+		if val.IsNil() {
 			return "<nil>"
 		}
 		return "<Interface>"
 
 	case reflect.Ptr:
-		if f.val.IsNil() {
+		if val.IsNil() {
 			return "<nil>"
 		}
 		return "<Ptr>"
