@@ -184,16 +184,16 @@ func Test_tagParse(t *testing.T) {
 
 func Test_tagCache(t *testing.T) {
 	const rawTag = "required,min(1),max(10)"
-	want, err := New().tagParse(rawTag)
+	v := New()
+	want, err := v.tagParse(rawTag)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	v, ok := cache.Load(rawTag)
+	got, ok := v.tagCache.Load(rawTag)
 	if !ok {
 		t.Fatal("want load true, got false")
 	}
-	got := v.([]Tag)
 
 	if len(want) != len(got) {
 		t.Fatalf("want len %v, got %v", len(want), len(got))

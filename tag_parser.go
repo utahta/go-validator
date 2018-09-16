@@ -3,16 +3,11 @@ package validator
 import (
 	"fmt"
 	"strings"
-	"sync"
-)
-
-var (
-	cache sync.Map
 )
 
 func (v *Validator) tagParse(rawTag string) ([]Tag, error) {
-	if v, ok := cache.Load(rawTag); ok {
-		return v.([]Tag), nil
+	if tags, ok := v.tagCache.Load(rawTag); ok {
+		return tags, nil
 	}
 
 	var (
@@ -105,7 +100,7 @@ loop:
 		}
 	}
 
-	cache.Store(rawTag, tags)
+	v.tagCache.Store(rawTag, tags)
 
 	return tags, nil
 }

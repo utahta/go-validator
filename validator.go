@@ -13,12 +13,15 @@ type (
 	Validator struct {
 		FuncMap                 FuncMap
 		SuppressErrorFieldValue bool //TODO
+
+		tagCache *tagCache
 	}
 )
 
 func New() *Validator {
 	return &Validator{
-		FuncMap: defaultFuncMap,
+		FuncMap:  defaultFuncMap,
+		tagCache: newTagCache(),
 	}
 }
 
