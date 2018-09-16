@@ -1,4 +1,4 @@
-package tag
+package validator
 
 import (
 	"fmt"
@@ -10,7 +10,7 @@ var (
 	cache sync.Map
 )
 
-func Parse(rawTag string) ([]Tag, error) {
+func tagParse(rawTag string) ([]Tag, error) {
 	if v, ok := cache.Load(rawTag); ok {
 		return v.([]Tag), nil
 	}
@@ -22,7 +22,7 @@ func Parse(rawTag string) ([]Tag, error) {
 		orParsing = false
 	)
 
-	s := newScanner(rawTag)
+	s := newTagScanner(rawTag)
 loop:
 	for {
 		token, lit := s.Scan()
@@ -121,7 +121,7 @@ func newTag(lit string, enable, dig bool) (Tag, error) {
 		name = lit
 	} else {
 		name = lit[:idx]
-		s := newScanner(lit[idx+1 : len(lit)-1])
+		s := newTagScanner(lit[idx+1 : len(lit)-1])
 	loop:
 		for {
 			token, lit := s.Scan()

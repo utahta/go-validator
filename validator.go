@@ -3,8 +3,6 @@ package validator
 import (
 	"fmt"
 	"reflect"
-
-	"github.com/utahta/go-validator/tag"
 )
 
 const (
@@ -101,7 +99,7 @@ func (v *Validator) validateVar(field Field, rawTag string) error {
 		return nil
 	}
 
-	tags, err := tag.Parse(rawTag)
+	tags, err := tagParse(rawTag)
 	if err != nil {
 		return err
 	}
@@ -123,7 +121,7 @@ func (v *Validator) validateVar(field Field, rawTag string) error {
 	return nil
 }
 
-func (v *Validator) validate(field Field, tag tag.Tag) error {
+func (v *Validator) validate(field Field, tag Tag) error {
 	validateFn, ok := v.FuncMap[tag.Name]
 	if !ok {
 		return fmt.Errorf("unknown tag: %v %v", field.FullName(), tag.String())

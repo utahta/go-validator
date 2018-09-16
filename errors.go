@@ -3,8 +3,6 @@ package validator
 import (
 	"fmt"
 	"strings"
-
-	"github.com/utahta/go-validator/tag"
 )
 
 type (
@@ -14,7 +12,7 @@ type (
 		Field Field
 
 		// Tag is a validation tag.
-		Tag tag.Tag
+		Tag Tag
 
 		// CustomMessage is a custom error message. TODO:
 		CustomMessage string

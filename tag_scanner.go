@@ -1,16 +1,16 @@
-package tag
+package validator
 
 type (
-	scanner struct {
+	tagScanner struct {
 		buf string
 		pos int
 	}
 
-	token int
+	tagToken int
 )
 
 const (
-	illegal token = iota
+	illegal tagToken = iota
 	eof
 	tagSeparator
 	orSeparator
@@ -19,11 +19,11 @@ const (
 	paramRParen
 )
 
-func newScanner(buf string) *scanner {
-	return &scanner{buf: buf}
+func newTagScanner(buf string) *tagScanner {
+	return &tagScanner{buf: buf}
 }
 
-func (s *scanner) Scan() (token, string) {
+func (s *tagScanner) Scan() (tagToken, string) {
 	var (
 		lit        string
 		depthParen int
@@ -64,12 +64,12 @@ func (s *scanner) Scan() (token, string) {
 	return illegal, ""
 }
 
-func (s *scanner) read() (ch byte) {
+func (s *tagScanner) read() (ch byte) {
 	ch = s.buf[s.pos]
 	s.pos++
 	return
 }
 
-func (s *scanner) eof() bool {
+func (s *tagScanner) eof() bool {
 	return len(s.buf) == s.pos
 }

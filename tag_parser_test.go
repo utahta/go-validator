@@ -1,8 +1,8 @@
-package tag
+package validator
 
 import "testing"
 
-func TestParse(t *testing.T) {
+func Test_tagParse(t *testing.T) {
 	testcases := []struct {
 		rawTag string
 		want   []Tag
@@ -150,7 +150,7 @@ func TestParse(t *testing.T) {
 
 	for _, tc := range testcases {
 		t.Run(tc.rawTag, func(t *testing.T) {
-			tags, err := Parse(tc.rawTag)
+			tags, err := tagParse(tc.rawTag)
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -182,9 +182,9 @@ func TestParse(t *testing.T) {
 	}
 }
 
-func Test_cache(t *testing.T) {
+func Test_tagCache(t *testing.T) {
 	const rawTag = "required,min(1),max(10)"
-	want, err := Parse(rawTag)
+	want, err := tagParse(rawTag)
 	if err != nil {
 		t.Fatal(err)
 	}
