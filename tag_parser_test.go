@@ -26,10 +26,10 @@ func Test_tagParse(t *testing.T) {
 			},
 		},
 		{
-			"len(1|3),list(AAA|BBB|CCC)",
+			"len(1|3),len(AAA|BBB|CCC)",
 			[]Tag{
 				{Name: "len", Params: []string{"1", "3"}, Enable: true, dig: true},
-				{Name: "list", Params: []string{"AAA", "BBB", "CCC"}, Enable: true, dig: true},
+				{Name: "len", Params: []string{"AAA", "BBB", "CCC"}, Enable: true, dig: true},
 			},
 		},
 		{
@@ -150,7 +150,7 @@ func Test_tagParse(t *testing.T) {
 
 	for _, tc := range testcases {
 		t.Run(tc.rawTag, func(t *testing.T) {
-			tags, err := tagParse(tc.rawTag)
+			tags, err := New().tagParse(tc.rawTag)
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -184,7 +184,7 @@ func Test_tagParse(t *testing.T) {
 
 func Test_tagCache(t *testing.T) {
 	const rawTag = "required,min(1),max(10)"
-	want, err := tagParse(rawTag)
+	want, err := New().tagParse(rawTag)
 	if err != nil {
 		t.Fatal(err)
 	}

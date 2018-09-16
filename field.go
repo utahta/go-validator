@@ -7,11 +7,27 @@ import (
 )
 
 type (
+	ParentField interface {
+		Name() string
+
+		FullName() string
+
+		Value() reflect.Value
+
+		Interface() interface{}
+
+		Parent() ParentField
+
+		ShortString() string
+
+		String() string
+	}
+
 	Field struct {
 		name     string
 		origin   reflect.Value
-		refValue reflect.Value
-		parent   *Field
+		current  reflect.Value
+		parent   ParentField
 		cacheStr string
 	}
 )
@@ -36,15 +52,15 @@ func (f Field) FullName() string {
 	return strings.Join(s, fieldNameDelim)
 }
 
-func (f Field) Value() reflect.Value {
-	return f.refValue
-}
-
 func (f Field) Interface() interface{} {
 	return f.origin.Interface()
 }
 
-func (f Field) Parent() *Field {
+func (f Field) Value() reflect.Value {
+	return f.current
+}
+
+func (f Field) Parent() ParentField {
 	return f.parent
 }
 

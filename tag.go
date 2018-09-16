@@ -22,6 +22,9 @@ type (
 
 		// dig is a flag. if true, dig the validation in map, slice and struct.
 		dig bool
+
+		// validate is a validator function.
+		validate Func
 	}
 )
 
