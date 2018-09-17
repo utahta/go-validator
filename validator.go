@@ -14,14 +14,16 @@ type (
 		FuncMap                 FuncMap
 		SuppressErrorFieldValue bool //TODO
 
-		tagCache *tagCache
+		tagCache    *tagCache
+		structCache *structCache
 	}
 )
 
 func New() *Validator {
 	return &Validator{
-		FuncMap:  defaultFuncMap,
-		tagCache: newTagCache(),
+		FuncMap:     defaultFuncMap,
+		tagCache:    newTagCache(),
+		structCache: newStructCache(),
 	}
 }
 
@@ -49,38 +51,49 @@ func (v *Validator) validateStruct(field Field) error {
 		return fmt.Errorf("struct type required")
 	}
 
+	valueType := val.Type()
+	fieldCaches, hasCache := v.structCache.Load(valueType)
+
 	var errs Errors
 	for i := 0; i < val.NumField(); i++ {
-		typeField := val.Type().Field(i)
-		if typeField.PkgPath != "" {
-			continue // private field
+		if !hasCache {
+			typeField := valueType.Field(i)
+			fieldCaches = append(fieldCaches, fieldCache{
+				isPrivate: typeField.PkgPath != "", // private field
+				tagValue:  typeField.Tag.Get(tagName),
+				name:      typeField.Name,
+			})
 		}
-
-		tagValue := typeField.Tag.Get(tagName)
-		if tagValue == "-" {
+		if fieldCaches[i].isPrivate || fieldCaches[i].tagValue == "-" {
 			continue
 		}
+
 		originField := val.Field(i)
 		valueField := v.extractVar(originField)
 
-		var e []error
-		e = append(e, v.validateVar(Field{name: typeField.Name, origin: originField, current: valueField, parent: field}, tagValue))
-
-		if tagValue == "" {
-			if valueField.Kind() == reflect.Struct || (valueField.Kind() == reflect.Ptr && valueField.Elem().Kind() == reflect.Struct) {
-				e = append(e, v.validateStruct(Field{name: typeField.Name, origin: originField, current: valueField, parent: field}))
+		if err := v.validateVar(Field{name: fieldCaches[i].name, origin: originField, current: valueField, parent: field}, fieldCaches[i].tagValue); err != nil {
+			if es, ok := err.(Errors); ok {
+				errs = append(errs, es...)
+			} else {
+				return err
 			}
 		}
 
-		for _, err := range e {
-			if err != nil {
-				if es, ok := err.(Errors); ok {
-					errs = append(errs, es...)
-				} else {
-					return err
+		if fieldCaches[i].tagValue == "" {
+			if valueField.Kind() == reflect.Struct || (valueField.Kind() == reflect.Ptr && valueField.Elem().Kind() == reflect.Struct) {
+				if err := v.validateStruct(Field{name: fieldCaches[i].name, origin: originField, current: valueField, parent: field}); err != nil {
+					if es, ok := err.(Errors); ok {
+						errs = append(errs, es...)
+					} else {
+						return err
+					}
 				}
 			}
 		}
+	}
+
+	if !hasCache {
+		v.structCache.Store(valueType, fieldCaches)
 	}
 
 	if len(errs) > 0 {

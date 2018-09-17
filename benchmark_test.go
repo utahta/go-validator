@@ -1,6 +1,8 @@
 package validator
 
-import "testing"
+import (
+	"testing"
+)
 
 func BenchmarkValidateVarSuccess(b *testing.B) {
 	v := New()
@@ -18,7 +20,7 @@ func BenchmarkValidateStructSuccess(b *testing.B) {
 
 	type Foo struct {
 		StringValue string `valid:"len(5|10)"`
-		IntValue    int    `valid:"min(5),max(10)"`
+		IntValue    int    `valid:"len(5|10)"`
 	}
 
 	validFoo := &Foo{StringValue: "Foobar", IntValue: 7}

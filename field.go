@@ -12,23 +12,16 @@ type (
 
 		FullName() string
 
-		Value() reflect.Value
-
 		Interface() interface{}
 
 		Parent() ParentField
-
-		ShortString() string
-
-		String() string
 	}
 
 	Field struct {
-		name     string
-		origin   reflect.Value
-		current  reflect.Value
-		parent   ParentField
-		cacheStr string
+		name    string
+		origin  reflect.Value
+		current reflect.Value
+		parent  ParentField
 	}
 )
 
@@ -74,13 +67,6 @@ func (f Field) ShortString() string {
 }
 
 func (f Field) String() string {
-	if f.cacheStr == "" {
-		f.cacheStr = f.string()
-	}
-	return f.cacheStr
-}
-
-func (f Field) string() string {
 	val := f.Value()
 	switch val.Kind() {
 	case reflect.Bool,
