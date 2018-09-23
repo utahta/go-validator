@@ -3,25 +3,19 @@ package validator
 import (
 	"fmt"
 	"reflect"
-	"strings"
 )
 
 type (
-	ParentField interface {
-		Name() string
-
-		FullName() string
-
-		Interface() interface{}
-
-		Parent() ParentField
+	ParentField struct {
+		origin reflect.Value
 	}
 
 	Field struct {
-		name    string
-		origin  reflect.Value
-		current reflect.Value
-		parent  ParentField
+		name     string
+		fullName string
+		origin   reflect.Value
+		current  reflect.Value
+		parent   ParentField
 	}
 )
 
@@ -29,20 +23,35 @@ const (
 	fieldNameDelim = "."
 )
 
+func newFieldWithParent(name string, origin, current reflect.Value, parent Field) Field {
+	var fullName string
+	if parent.fullName == "" {
+		fullName = name
+	} else if name == "" {
+		fullName = parent.fullName
+	} else {
+		if name[0] == '[' {
+			fullName = parent.fullName + name
+		} else {
+			fullName = parent.fullName + fieldNameDelim + name
+		}
+	}
+
+	return Field{
+		name:     name,
+		fullName: fullName,
+		origin:   origin,
+		current:  current,
+		parent:   ParentField{origin: parent.origin},
+	}
+}
+
 func (f Field) Name() string {
 	return f.name
 }
 
 func (f Field) FullName() string {
-	var s []string
-	if f.parent != nil && f.parent.FullName() != "" {
-		s = append(s, f.parent.FullName())
-	}
-
-	if f.name != "" {
-		s = append(s, f.name)
-	}
-	return strings.Join(s, fieldNameDelim)
+	return f.fullName
 }
 
 func (f Field) Interface() interface{} {
@@ -100,4 +109,11 @@ func (f Field) String() string {
 		return "<Ptr>"
 	}
 	return "<Unknown>"
+}
+
+func (f ParentField) Interface() interface{} {
+	if f.origin.IsValid() {
+		return f.origin.Interface()
+	}
+	return nil
 }

@@ -164,7 +164,7 @@ func TestValidator_ValidateStruct(t *testing.T) {
 				Ints: []int{1, 0, 2},
 				Nums: []string{"0", "a", "2"},
 			},
-			expectedMessage: "Strs.[1]: '' does validate as 'required';Strs.[1]: '' does validate as 'alpha';Nums.[1]: 'a' does validate as 'numeric'",
+			expectedMessage: "Strs[1]: '' does validate as 'required';Strs[1]: '' does validate as 'alpha';Nums[1]: 'a' does validate as 'numeric'",
 		},
 
 		// DigMapTest
@@ -190,7 +190,7 @@ func TestValidator_ValidateStruct(t *testing.T) {
 				Strm: map[string]string{"key1": "a", "key2": "", "key3": "c"},
 				Intm: map[int]int{0: 1, 1: 0, 2: 2},
 			},
-			expectedMessage: "Strm.[key2]: '' does validate as 'required';Strm.[key2]: '' does validate as 'alpha'",
+			expectedMessage: "Strm[key2]: '' does validate as 'required';Strm[key2]: '' does validate as 'alpha'",
 		},
 
 		// InterfaceTest
@@ -232,7 +232,7 @@ func TestValidator_ValidateStruct(t *testing.T) {
 					"key1": &Str{""},
 				},
 			},
-			expectedMessage: "IF: 'Str' does validate as 'required';IF.Value: '' does validate as 'required';IFs.[0]: 'Str' does validate as 'required';IFs.[0].Value: '' does validate as 'required';IFm.[key1]: 'Str' does validate as 'required';IFm.[key1].Value: '' does validate as 'required'",
+			expectedMessage: "IF: 'Str' does validate as 'required';IF.Value: '' does validate as 'required';IFs[0]: 'Str' does validate as 'required';IFs[0].Value: '' does validate as 'required';IFm[key1]: 'Str' does validate as 'required';IFm[key1].Value: '' does validate as 'required'",
 		},
 
 		// PtrTest
@@ -256,7 +256,7 @@ func TestValidator_ValidateStruct(t *testing.T) {
 					"key1": nil,
 				},
 			},
-			expectedMessage: "Ptr: '<nil>' does validate as 'required';Ptrs.[0]: '<nil>' does validate as 'required';Ptrm.[key1]: '<nil>' does validate as 'required'",
+			expectedMessage: "Ptr: '<nil>' does validate as 'required';Ptrs[0]: '<nil>' does validate as 'required';Ptrm[key1]: '<nil>' does validate as 'required'",
 		},
 		{
 			name: "invalid PtrTest_empty",
@@ -267,7 +267,7 @@ func TestValidator_ValidateStruct(t *testing.T) {
 					"key1": {""},
 				},
 			},
-			expectedMessage: "Ptr: 'Str' does validate as 'required';Ptr.Value: '' does validate as 'required';Ptrs.[0].Value: '' does validate as 'required';Ptrm.[key1].Value: '' does validate as 'required'",
+			expectedMessage: "Ptr: 'Str' does validate as 'required';Ptr.Value: '' does validate as 'required';Ptrs[0].Value: '' does validate as 'required';Ptrm[key1].Value: '' does validate as 'required'",
 		},
 	}
 

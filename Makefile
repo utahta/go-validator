@@ -5,6 +5,6 @@ test:
 bench:
 	go test -bench . -benchmem
 
-prof:
+pprof:
 	go test -bench . -benchmem -cpuprofile cpu.out -memprofile mem.out
 

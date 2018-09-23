@@ -71,7 +71,7 @@ func (v *Validator) validateStruct(field Field) error {
 		originField := val.Field(i)
 		valueField := v.extractVar(originField)
 
-		if err := v.validateVar(Field{name: fieldCaches[i].name, origin: originField, current: valueField, parent: field}, fieldCaches[i].tagValue); err != nil {
+		if err := v.validateVar(newFieldWithParent(fieldCaches[i].name, originField, valueField, field), fieldCaches[i].tagValue); err != nil {
 			if es, ok := err.(Errors); ok {
 				errs = append(errs, es...)
 			} else {
@@ -81,7 +81,7 @@ func (v *Validator) validateStruct(field Field) error {
 
 		if fieldCaches[i].tagValue == "" {
 			if valueField.Kind() == reflect.Struct || (valueField.Kind() == reflect.Ptr && valueField.Elem().Kind() == reflect.Struct) {
-				if err := v.validateStruct(Field{name: fieldCaches[i].name, origin: originField, current: valueField, parent: field}); err != nil {
+				if err := v.validateStruct(newFieldWithParent(fieldCaches[i].name, originField, valueField, field)); err != nil {
 					if es, ok := err.(Errors); ok {
 						errs = append(errs, es...)
 					} else {
@@ -156,9 +156,9 @@ func (v *Validator) validate(field Field, tag Tag) error {
 
 			var err error
 			if value.Kind() == reflect.Struct || (value.Kind() == reflect.Ptr && value.Elem().Kind() == reflect.Struct) {
-				err = v.validateStruct(Field{name: fmt.Sprintf("[%v]", k), origin: value, current: value, parent: field})
+				err = v.validateStruct(newFieldWithParent(fmt.Sprintf("[%v]", k), value, value, field))
 			} else if tag.IsDig() {
-				err = v.validate(Field{name: fmt.Sprintf("[%v]", k), origin: value, current: v.extractVar(value), parent: field}, tag)
+				err = v.validate(newFieldWithParent(fmt.Sprintf("[%v]", k), value, v.extractVar(value), field), tag)
 			}
 
 			if err != nil {
@@ -176,9 +176,9 @@ func (v *Validator) validate(field Field, tag Tag) error {
 
 			var err error
 			if value.Kind() == reflect.Struct || (value.Kind() == reflect.Ptr && value.Elem().Kind() == reflect.Struct) {
-				err = v.validateStruct(Field{name: fmt.Sprintf("[%d]", i), origin: value, current: value, parent: field})
+				err = v.validateStruct(newFieldWithParent(fmt.Sprintf("[%d]", i), value, value, field))
 			} else if tag.IsDig() {
-				err = v.validate(Field{name: fmt.Sprintf("[%d]", i), origin: value, current: v.extractVar(value), parent: field}, tag)
+				err = v.validate(newFieldWithParent(fmt.Sprintf("[%d]", i), value, v.extractVar(value), field), tag)
 			}
 
 			if err != nil {
@@ -198,9 +198,9 @@ func (v *Validator) validate(field Field, tag Tag) error {
 
 		var err error
 		if value.Kind() == reflect.Struct || (value.Kind() == reflect.Ptr && value.Elem().Kind() == reflect.Struct) {
-			err = v.validateStruct(Field{origin: field.origin, current: value, parent: field})
+			err = v.validateStruct(newFieldWithParent("", field.origin, value, field))
 		} else if tag.IsDig() {
-			err = v.validate(Field{origin: field.origin, current: value, parent: field}, tag)
+			err = v.validate(newFieldWithParent("", field.origin, value, field), tag)
 		}
 
 		if err != nil {
@@ -212,7 +212,7 @@ func (v *Validator) validate(field Field, tag Tag) error {
 		}
 
 	case reflect.Struct:
-		err := v.validateStruct(Field{origin: field.origin, current: val, parent: field})
+		err := v.validateStruct(newFieldWithParent("", field.origin, val, field))
 		if err != nil {
 			if es, ok := err.(Errors); ok {
 				errs = append(errs, es...)

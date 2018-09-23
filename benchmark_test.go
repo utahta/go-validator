@@ -1,8 +1,6 @@
 package validator
 
-import (
-	"testing"
-)
+import "testing"
 
 func BenchmarkValidateVarSuccess(b *testing.B) {
 	v := New()
