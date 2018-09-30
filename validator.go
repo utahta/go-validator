@@ -10,15 +10,20 @@ const (
 )
 
 type (
+	// Validator is a validator
 	Validator struct {
-		FuncMap                 FuncMap
-		SuppressErrorFieldValue bool //TODO
+		// FuncMap is a map of validate functions.
+		FuncMap FuncMap
+
+		// SuppressErrorFieldValue is a flag that suppress output of field value in error.
+		SuppressErrorFieldValue bool
 
 		tagCache    *tagCache
 		structCache *structCache
 	}
 )
 
+// New returns a Validator
 func New() *Validator {
 	return &Validator{
 		FuncMap:     defaultFuncMap,
@@ -27,12 +32,12 @@ func New() *Validator {
 	}
 }
 
-// SetFunc sets validator function.
+// SetFunc sets a validate function.
 func (v *Validator) SetFunc(rawTag string, fn Func) {
 	v.FuncMap[rawTag] = with(fn)
 }
 
-// ValidateStruct validates struct that use tags for fields.
+// ValidateStruct validates a struct that use tags for fields.
 func (v *Validator) ValidateStruct(s interface{}) error {
 	if s == nil {
 		return nil
@@ -102,6 +107,7 @@ func (v *Validator) validateStruct(field Field) error {
 	return nil
 }
 
+// ValidateVar validates a value.
 func (v *Validator) ValidateVar(s interface{}, rawTag string) error {
 	value := reflect.ValueOf(s)
 	return v.validateVar(Field{origin: value, current: v.extractVar(value)}, rawTag)
@@ -157,7 +163,7 @@ func (v *Validator) validate(field Field, tag Tag) error {
 			var err error
 			if value.Kind() == reflect.Struct || (value.Kind() == reflect.Ptr && value.Elem().Kind() == reflect.Struct) {
 				err = v.validateStruct(newFieldWithParent(fmt.Sprintf("[%v]", k), value, value, field))
-			} else if tag.IsDig() {
+			} else if tag.isDig {
 				err = v.validate(newFieldWithParent(fmt.Sprintf("[%v]", k), value, v.extractVar(value), field), tag)
 			}
 
@@ -177,7 +183,7 @@ func (v *Validator) validate(field Field, tag Tag) error {
 			var err error
 			if value.Kind() == reflect.Struct || (value.Kind() == reflect.Ptr && value.Elem().Kind() == reflect.Struct) {
 				err = v.validateStruct(newFieldWithParent(fmt.Sprintf("[%d]", i), value, value, field))
-			} else if tag.IsDig() {
+			} else if tag.isDig {
 				err = v.validate(newFieldWithParent(fmt.Sprintf("[%d]", i), value, v.extractVar(value), field), tag)
 			}
 
@@ -199,7 +205,7 @@ func (v *Validator) validate(field Field, tag Tag) error {
 		var err error
 		if value.Kind() == reflect.Struct || (value.Kind() == reflect.Ptr && value.Elem().Kind() == reflect.Struct) {
 			err = v.validateStruct(newFieldWithParent("", field.origin, value, field))
-		} else if tag.IsDig() {
+		} else if tag.isDig {
 			err = v.validate(newFieldWithParent("", field.origin, value, field), tag)
 		}
 

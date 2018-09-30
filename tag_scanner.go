@@ -15,8 +15,6 @@ const (
 	tagSeparator
 	orSeparator
 	digSeparator
-	paramLParen
-	paramRParen
 )
 
 func newTagScanner(buf string) *tagScanner {

@@ -6,10 +6,12 @@ import (
 )
 
 type (
+	// ParentField represents a parent of Field.
 	ParentField struct {
 		origin reflect.Value
 	}
 
+	// Field represents a value.
 	Field struct {
 		name     string
 		fullName string
@@ -42,22 +44,27 @@ func newFieldWithParent(name string, origin, current reflect.Value, parent Field
 	}
 }
 
+// Name is a field name. e.g Foo.Bar.Value
 func (f Field) Name() string {
 	return f.name
 }
 
+// Interface returns an interface{}
 func (f Field) Interface() interface{} {
 	return f.origin.Interface()
 }
 
+// Value returns a current field value.
 func (f Field) Value() reflect.Value {
 	return f.current
 }
 
+// Parent returns a parent field.
 func (f Field) Parent() ParentField {
 	return f.parent
 }
 
+// ShortString returns a string with 32 characters or more omitted.
 func (f Field) ShortString() string {
 	const maxSize = 32
 	s := f.String()
@@ -67,6 +74,7 @@ func (f Field) ShortString() string {
 	return s
 }
 
+// String returns a string.
 func (f Field) String() string {
 	val := f.current
 	switch val.Kind() {
@@ -103,6 +111,7 @@ func (f Field) String() string {
 	return "<Unknown>"
 }
 
+// Interface returns an interface{}
 func (f ParentField) Interface() interface{} {
 	if f.origin.IsValid() {
 		return f.origin.Interface()

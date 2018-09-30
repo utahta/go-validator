@@ -17,13 +17,15 @@ type (
 		// CustomMessage is a custom error message. TODO:
 		CustomMessage string
 
-		// SuppressErrorFieldValue suppress a field string.
+		// SuppressErrorFieldValue suppress output of field value.
 		SuppressErrorFieldValue bool
 	}
 
+	// Errors represents validation errors
 	Errors []Error
 )
 
+// ToErrors converts an error to the validation Errors.
 func ToErrors(err error) (Errors, bool) {
 	es, ok := err.(Errors)
 	return es, ok

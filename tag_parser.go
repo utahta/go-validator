@@ -25,7 +25,7 @@ loop:
 		if lit == optionalTagName {
 			for i := range tags {
 				if digParsing {
-					if tags[i].dig {
+					if tags[i].isDig {
 						tags[i].Optional = true
 					}
 				} else {
@@ -85,7 +85,7 @@ loop:
 			if orParsing {
 				tags[len(tags)-1].Params = append(tags[len(tags)-1].Params, lit)
 			} else {
-				tags = append(tags, Tag{Name: "or", Params: []string{lit}, Optional: optional, Enable: !digParsing, dig: true, validateFn: v.FuncMap["or"]})
+				tags = append(tags, Tag{Name: "or", Params: []string{lit}, Optional: optional, Enable: !digParsing, isDig: true, validateFn: v.FuncMap["or"]})
 			}
 			orParsing = true
 
@@ -102,7 +102,7 @@ loop:
 				}
 			}
 			for i := range tags {
-				tags[i].dig = false
+				tags[i].isDig = false
 			}
 			digParsing = true
 			orParsing = false
@@ -118,7 +118,7 @@ loop:
 	return tags, nil
 }
 
-// newTag returns Tag
+// newTag returns Tag.
 func (v *Validator) newTag(lit string, enable, optional bool) (Tag, error) {
 	var (
 		name   string
@@ -158,7 +158,7 @@ func (v *Validator) newTag(lit string, enable, optional bool) (Tag, error) {
 		Params:     params,
 		Optional:   optional,
 		Enable:     enable,
-		dig:        true,
+		isDig:      true,
 		validateFn: fn,
 	}, nil
 }
