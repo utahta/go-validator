@@ -31,9 +31,9 @@ func ToErrors(err error) (Errors, bool) {
 
 func (e Error) Error() string {
 	if e.SuppressErrorFieldValue {
-		return fmt.Sprintf("%s: The value does validate as '%s'", e.Field.FullName(), e.Tag)
+		return fmt.Sprintf("%s: The value does validate as '%s'", e.Field.Name(), e.Tag)
 	}
-	return fmt.Sprintf("%s: '%s' does validate as '%s'", e.Field.FullName(), e.Field.ShortString(), e.Tag)
+	return fmt.Sprintf("%s: '%s' does validate as '%s'", e.Field.Name(), e.Field.ShortString(), e.Tag)
 }
 
 func (es Errors) Error() string {

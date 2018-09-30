@@ -139,7 +139,7 @@ func (v *Validator) validate(field Field, tag Tag) error {
 	if tag.Enable {
 		valid, err := tag.validateFn(field, FuncOption{validator: v, Params: tag.Params, Optional: tag.Optional})
 		if err != nil {
-			return fmt.Errorf("validateFn: %v in %s %s", err, field.FullName(), tag.String())
+			return fmt.Errorf("validateFn: %v in %s %s", err, field.Name(), tag.String())
 		}
 		if !valid {
 			errs = append(errs, Error{Field: field, Tag: tag, SuppressErrorFieldValue: v.SuppressErrorFieldValue})
