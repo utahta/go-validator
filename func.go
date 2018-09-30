@@ -9,10 +9,10 @@ import (
 )
 
 type (
-	// Func is a validator function type.
+	// Func is a type of validator function.
 	Func func(Field, FuncOption) (bool, error)
 
-	// FuncMap is a validator function map type.
+	// FuncMap is a map of validator function type.
 	FuncMap map[string]Func
 
 	// FuncOption is a option.
@@ -72,7 +72,7 @@ func with(fn Func) Func {
 
 // isEmpty return true if value is zero and else false.
 func isEmpty(f Field) bool {
-	v := f.Value()
+	v := f.current
 	switch v.Kind() {
 	case reflect.String, reflect.Array:
 		return v.Len() == 0
@@ -132,7 +132,7 @@ func isURI(f Field, _ FuncOption) (bool, error) {
 }
 
 func isNumeric(f Field, _ FuncOption) (bool, error) {
-	switch f.Value().Kind() {
+	switch f.current.Kind() {
 	case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64,
 		reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64, reflect.Uintptr,
 		reflect.Float32, reflect.Float64:
@@ -142,7 +142,7 @@ func isNumeric(f Field, _ FuncOption) (bool, error) {
 }
 
 func isNumber(f Field, _ FuncOption) (bool, error) {
-	switch f.Value().Kind() {
+	switch f.current.Kind() {
 	case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64,
 		reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64, reflect.Uintptr,
 		reflect.Float32, reflect.Float64:
@@ -183,7 +183,7 @@ func minLength(f Field, opt FuncOption) (bool, error) {
 		return false, fmt.Errorf("invalid params len")
 	}
 
-	v := f.Value()
+	v := f.current
 	switch v.Kind() {
 	case reflect.String, reflect.Array, reflect.Map, reflect.Slice:
 		min, err := strconv.Atoi(minStr)
@@ -224,7 +224,7 @@ func maxLength(f Field, opt FuncOption) (bool, error) {
 		return false, fmt.Errorf("invalid params len")
 	}
 
-	v := f.Value()
+	v := f.current
 	switch v.Kind() {
 	case reflect.String, reflect.Array, reflect.Map, reflect.Slice:
 		max, err := strconv.Atoi(maxStr)
@@ -257,39 +257,78 @@ func maxLength(f Field, opt FuncOption) (bool, error) {
 	return false, nil
 }
 
-func length(f Field, opt FuncOption) (bool, error) {
-	var minStr, maxStr string
-	if len(opt.Params) == 1 {
-		minStr, maxStr = opt.Params[0], opt.Params[0]
-	} else if len(opt.Params) == 2 {
-		minStr, maxStr = opt.Params[0], opt.Params[1]
-	} else {
+func eqLength(f Field, opt FuncOption) (bool, error) {
+	if len(opt.Params) != 1 {
 		return false, fmt.Errorf("invalid params len")
 	}
+	str := opt.Params[0]
 
-	min, err := minLength(f, FuncOption{Params: []string{minStr}})
-	if err != nil {
-		return false, err
+	v := f.current
+	switch v.Kind() {
+	case reflect.String, reflect.Array, reflect.Map, reflect.Slice:
+		i, err := strconv.Atoi(str)
+		if err != nil {
+			return false, err
+		}
+		return v.Len() == i, nil
+
+	case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
+		i, err := strconv.ParseInt(str, 10, 64)
+		if err != nil {
+			return false, err
+		}
+		return v.Int() == i, nil
+
+	case reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64, reflect.Uintptr:
+		i, err := strconv.ParseUint(str, 10, 64)
+		if err != nil {
+			return false, err
+		}
+		return v.Uint() == i, nil
+
+	case reflect.Float32, reflect.Float64:
+		i, err := strconv.ParseFloat(str, 64)
+		if err != nil {
+			return false, err
+		}
+		return v.Float() == i, nil
 	}
-	max, err := maxLength(f, FuncOption{Params: []string{maxStr}})
-	if err != nil {
-		return false, err
+	return false, nil
+}
+
+func length(f Field, opt FuncOption) (bool, error) {
+	switch len(opt.Params) {
+	case 1:
+		eq, err := eqLength(f, FuncOption{Params: opt.Params})
+		if err != nil {
+			return false, err
+		}
+		return eq, nil
+
+	case 2:
+		min, err := minLength(f, FuncOption{Params: opt.Params[:1]})
+		if err != nil {
+			return false, err
+		}
+		max, err := maxLength(f, FuncOption{Params: opt.Params[1:]})
+		if err != nil {
+			return false, err
+		}
+		return min && max, nil
+
 	}
-	return min && max, nil
+	return false, fmt.Errorf("invalid params len")
 }
 
 func strMinLength(f Field, opt FuncOption) (bool, error) {
-	var minStr string
-	if len(opt.Params) == 1 {
-		minStr = opt.Params[0]
-	} else {
+	if len(opt.Params) != 1 {
 		return false, fmt.Errorf("invalid params len")
 	}
 
-	v := f.Value()
+	v := f.current
 	switch v.Kind() {
 	case reflect.String:
-		min, err := strconv.Atoi(minStr)
+		min, err := strconv.Atoi(opt.Params[0])
 		if err != nil {
 			return false, err
 		}
@@ -299,17 +338,14 @@ func strMinLength(f Field, opt FuncOption) (bool, error) {
 }
 
 func strMaxLength(f Field, opt FuncOption) (bool, error) {
-	var maxStr string
-	if len(opt.Params) == 1 {
-		maxStr = opt.Params[0]
-	} else {
+	if len(opt.Params) != 1 {
 		return false, fmt.Errorf("invalid params len")
 	}
 
-	v := f.Value()
+	v := f.current
 	switch v.Kind() {
 	case reflect.String:
-		max, err := strconv.Atoi(maxStr)
+		max, err := strconv.Atoi(opt.Params[0])
 		if err != nil {
 			return false, err
 		}
@@ -318,25 +354,45 @@ func strMaxLength(f Field, opt FuncOption) (bool, error) {
 	return false, nil
 }
 
-func strLength(f Field, opt FuncOption) (bool, error) {
-	var minStr, maxStr string
-	if len(opt.Params) == 1 {
-		minStr, maxStr = opt.Params[0], opt.Params[0]
-	} else if len(opt.Params) == 2 {
-		minStr, maxStr = opt.Params[0], opt.Params[1]
-	} else {
+func strEqLength(f Field, opt FuncOption) (bool, error) {
+	if len(opt.Params) != 1 {
 		return false, fmt.Errorf("invalid params len")
 	}
 
-	min, err := strMinLength(f, FuncOption{Params: []string{minStr}})
-	if err != nil {
-		return false, err
+	v := f.current
+	switch v.Kind() {
+	case reflect.String:
+		i, err := strconv.Atoi(opt.Params[0])
+		if err != nil {
+			return false, err
+		}
+		return utf8.RuneCountInString(v.String()) == i, nil
 	}
-	max, err := strMaxLength(f, FuncOption{Params: []string{maxStr}})
-	if err != nil {
-		return false, err
+	return false, nil
+}
+
+func strLength(f Field, opt FuncOption) (bool, error) {
+	switch len(opt.Params) {
+	case 1:
+		eq, err := strEqLength(f, FuncOption{Params: opt.Params})
+		if err != nil {
+			return false, err
+		}
+		return eq, nil
+
+	case 2:
+		min, err := strMinLength(f, FuncOption{Params: opt.Params[:1]})
+		if err != nil {
+			return false, err
+		}
+		max, err := strMaxLength(f, FuncOption{Params: opt.Params[1:]})
+		if err != nil {
+			return false, err
+		}
+		return min && max, nil
+
 	}
-	return min && max, nil
+	return false, fmt.Errorf("invalid params len")
 }
 
 func or(f Field, opt FuncOption) (bool, error) {
@@ -349,7 +405,7 @@ func or(f Field, opt FuncOption) (bool, error) {
 		if err == nil {
 			return true, nil
 		}
-		if _, ok := ToErrors(err); !ok {
+		if _, ok := err.(Errors); !ok {
 			return false, err
 		}
 	}

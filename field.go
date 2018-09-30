@@ -3,16 +3,19 @@ package validator
 import (
 	"fmt"
 	"reflect"
-	"strings"
 )
 
 type (
+	ParentField struct {
+		origin reflect.Value
+	}
+
 	Field struct {
 		name     string
+		fullName string
 		origin   reflect.Value
-		refValue reflect.Value
-		parent   *Field
-		cacheStr string
+		current  reflect.Value
+		parent   ParentField
 	}
 )
 
@@ -20,31 +23,38 @@ const (
 	fieldNameDelim = "."
 )
 
+func newFieldWithParent(name string, origin, current reflect.Value, parent Field) Field {
+	if name == "" {
+		name = parent.name
+	} else if parent.name != "" {
+		if name[0] == '[' {
+			name = parent.name + name
+		} else {
+			name = parent.name + fieldNameDelim + name
+		}
+	}
+
+	return Field{
+		name:    name,
+		origin:  origin,
+		current: current,
+		parent:  ParentField{origin: parent.origin},
+	}
+}
+
 func (f Field) Name() string {
 	return f.name
-}
-
-func (f Field) FullName() string {
-	var s []string
-	if f.parent != nil && f.parent.FullName() != "" {
-		s = append(s, f.parent.FullName())
-	}
-
-	if f.name != "" {
-		s = append(s, f.name)
-	}
-	return strings.Join(s, fieldNameDelim)
-}
-
-func (f Field) Value() reflect.Value {
-	return f.refValue
 }
 
 func (f Field) Interface() interface{} {
 	return f.origin.Interface()
 }
 
-func (f Field) Parent() *Field {
+func (f Field) Value() reflect.Value {
+	return f.current
+}
+
+func (f Field) Parent() ParentField {
 	return f.parent
 }
 
@@ -58,14 +68,7 @@ func (f Field) ShortString() string {
 }
 
 func (f Field) String() string {
-	if f.cacheStr == "" {
-		f.cacheStr = f.string()
-	}
-	return f.cacheStr
-}
-
-func (f Field) string() string {
-	val := f.Value()
+	val := f.current
 	switch val.Kind() {
 	case reflect.Bool,
 		reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64,
@@ -98,4 +101,11 @@ func (f Field) string() string {
 		return "<Ptr>"
 	}
 	return "<Unknown>"
+}
+
+func (f ParentField) Interface() interface{} {
+	if f.origin.IsValid() {
+		return f.origin.Interface()
+	}
+	return nil
 }

@@ -1,4 +1,4 @@
-package tag
+package validator
 
 import (
 	"fmt"
@@ -17,11 +17,14 @@ type (
 		// Optional is a flag. if true, empty value is always valid.
 		Optional bool
 
-		// Enable is a flag. if true, run the validation.
+		// Enable is a flag. if true, validate it.
 		Enable bool
 
-		// dig is a flag. if true, dig the validation in map, slice and struct.
+		// dig is a flag. if true, validate in map, slice, ptr and interface.
 		dig bool
+
+		// validateFn is a validator function.
+		validateFn Func
 	}
 )
 

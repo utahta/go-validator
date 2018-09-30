@@ -1,18 +1,13 @@
-package tag
+package validator
 
 import (
 	"fmt"
 	"strings"
-	"sync"
 )
 
-var (
-	cache sync.Map
-)
-
-func Parse(rawTag string) ([]Tag, error) {
-	if v, ok := cache.Load(rawTag); ok {
-		return v.([]Tag), nil
+func (v *Validator) tagParse(rawTag string) ([]Tag, error) {
+	if tags, ok := v.tagCache.Load(rawTag); ok {
+		return tags, nil
 	}
 
 	var (
@@ -22,7 +17,7 @@ func Parse(rawTag string) ([]Tag, error) {
 		orParsing = false
 	)
 
-	s := newScanner(rawTag)
+	s := newTagScanner(rawTag)
 loop:
 	for {
 		token, lit := s.Scan()
@@ -40,7 +35,7 @@ loop:
 			if orParsing {
 				tags[len(tags)-1].Params = append(tags[len(tags)-1].Params, lit)
 			} else {
-				tag, err := newTag(lit, enable, true)
+				tag, err := v.newTag(lit, enable, true)
 				if err != nil {
 					return nil, err
 				}
@@ -56,7 +51,7 @@ loop:
 			if orParsing {
 				tags[len(tags)-1].Params = append(tags[len(tags)-1].Params, lit)
 			} else {
-				tag, err := newTag(lit, enable, true)
+				tag, err := v.newTag(lit, enable, true)
 				if err != nil {
 					return nil, err
 				}
@@ -72,7 +67,7 @@ loop:
 			if orParsing {
 				tags[len(tags)-1].Params = append(tags[len(tags)-1].Params, lit)
 			} else {
-				tags = append(tags, Tag{Name: "or", Params: []string{lit}, Enable: enable, dig: true})
+				tags = append(tags, Tag{Name: "or", Params: []string{lit}, Enable: enable, dig: true, validateFn: v.FuncMap["or"]})
 			}
 			orParsing = true
 
@@ -84,7 +79,7 @@ loop:
 				if orParsing {
 					tags[len(tags)-1].Params = append(tags[len(tags)-1].Params, lit)
 				} else {
-					tag, err := newTag(lit, enable, false)
+					tag, err := v.newTag(lit, enable, false)
 					if err != nil {
 						return nil, err
 					}
@@ -105,12 +100,12 @@ loop:
 		}
 	}
 
-	cache.Store(rawTag, tags)
+	v.tagCache.Store(rawTag, tags)
 
 	return tags, nil
 }
 
-func newTag(lit string, enable, dig bool) (Tag, error) {
+func (v *Validator) newTag(lit string, enable, dig bool) (Tag, error) {
 	var (
 		name   string
 		params []string
@@ -121,7 +116,7 @@ func newTag(lit string, enable, dig bool) (Tag, error) {
 		name = lit
 	} else {
 		name = lit[:idx]
-		s := newScanner(lit[idx+1 : len(lit)-1])
+		s := newTagScanner(lit[idx+1 : len(lit)-1])
 	loop:
 		for {
 			token, lit := s.Scan()
@@ -139,10 +134,16 @@ func newTag(lit string, enable, dig bool) (Tag, error) {
 		}
 	}
 
+	fn, ok := v.FuncMap[name]
+	if !ok {
+		return Tag{}, fmt.Errorf("parse: tag %s function not found", name)
+	}
+
 	return Tag{
-		Name:   name,
-		Params: params,
-		Enable: enable,
-		dig:    dig,
+		Name:       name,
+		Params:     params,
+		Enable:     enable,
+		dig:        dig,
+		validateFn: fn,
 	}, nil
 }

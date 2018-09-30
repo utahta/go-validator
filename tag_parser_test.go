@@ -1,8 +1,8 @@
-package tag
+package validator
 
 import "testing"
 
-func TestParse(t *testing.T) {
+func Test_tagParse(t *testing.T) {
 	testcases := []struct {
 		rawTag string
 		want   []Tag
@@ -26,10 +26,10 @@ func TestParse(t *testing.T) {
 			},
 		},
 		{
-			"len(1|3),list(AAA|BBB|CCC)",
+			"len(1|3),len(AAA|BBB|CCC)",
 			[]Tag{
 				{Name: "len", Params: []string{"1", "3"}, Enable: true, dig: true},
-				{Name: "list", Params: []string{"AAA", "BBB", "CCC"}, Enable: true, dig: true},
+				{Name: "len", Params: []string{"AAA", "BBB", "CCC"}, Enable: true, dig: true},
 			},
 		},
 		{
@@ -150,7 +150,7 @@ func TestParse(t *testing.T) {
 
 	for _, tc := range testcases {
 		t.Run(tc.rawTag, func(t *testing.T) {
-			tags, err := Parse(tc.rawTag)
+			tags, err := New().tagParse(tc.rawTag)
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -182,18 +182,18 @@ func TestParse(t *testing.T) {
 	}
 }
 
-func Test_cache(t *testing.T) {
+func Test_tagCache(t *testing.T) {
 	const rawTag = "required,min(1),max(10)"
-	want, err := Parse(rawTag)
+	v := New()
+	want, err := v.tagParse(rawTag)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	v, ok := cache.Load(rawTag)
+	got, ok := v.tagCache.Load(rawTag)
 	if !ok {
 		t.Fatal("want load true, got false")
 	}
-	got := v.([]Tag)
 
 	if len(want) != len(got) {
 		t.Fatalf("want len %v, got %v", len(want), len(got))
