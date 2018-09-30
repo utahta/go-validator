@@ -9,10 +9,10 @@ import (
 )
 
 type (
-	// Func is a validator function type.
+	// Func is a type of validator function.
 	Func func(Field, FuncOption) (bool, error)
 
-	// FuncMap is a validator function map type.
+	// FuncMap is a map of validator function type.
 	FuncMap map[string]Func
 
 	// FuncOption is a option.
@@ -72,7 +72,7 @@ func with(fn Func) Func {
 
 // isEmpty return true if value is zero and else false.
 func isEmpty(f Field) bool {
-	v := f.Value()
+	v := f.current
 	switch v.Kind() {
 	case reflect.String, reflect.Array:
 		return v.Len() == 0
@@ -132,7 +132,7 @@ func isURI(f Field, _ FuncOption) (bool, error) {
 }
 
 func isNumeric(f Field, _ FuncOption) (bool, error) {
-	switch f.Value().Kind() {
+	switch f.current.Kind() {
 	case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64,
 		reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64, reflect.Uintptr,
 		reflect.Float32, reflect.Float64:
@@ -142,7 +142,7 @@ func isNumeric(f Field, _ FuncOption) (bool, error) {
 }
 
 func isNumber(f Field, _ FuncOption) (bool, error) {
-	switch f.Value().Kind() {
+	switch f.current.Kind() {
 	case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64,
 		reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64, reflect.Uintptr,
 		reflect.Float32, reflect.Float64:
@@ -183,7 +183,7 @@ func minLength(f Field, opt FuncOption) (bool, error) {
 		return false, fmt.Errorf("invalid params len")
 	}
 
-	v := f.Value()
+	v := f.current
 	switch v.Kind() {
 	case reflect.String, reflect.Array, reflect.Map, reflect.Slice:
 		min, err := strconv.Atoi(minStr)
@@ -224,7 +224,7 @@ func maxLength(f Field, opt FuncOption) (bool, error) {
 		return false, fmt.Errorf("invalid params len")
 	}
 
-	v := f.Value()
+	v := f.current
 	switch v.Kind() {
 	case reflect.String, reflect.Array, reflect.Map, reflect.Slice:
 		max, err := strconv.Atoi(maxStr)
@@ -263,7 +263,7 @@ func eqLength(f Field, opt FuncOption) (bool, error) {
 	}
 	str := opt.Params[0]
 
-	v := f.Value()
+	v := f.current
 	switch v.Kind() {
 	case reflect.String, reflect.Array, reflect.Map, reflect.Slice:
 		i, err := strconv.Atoi(str)
@@ -325,7 +325,7 @@ func strMinLength(f Field, opt FuncOption) (bool, error) {
 		return false, fmt.Errorf("invalid params len")
 	}
 
-	v := f.Value()
+	v := f.current
 	switch v.Kind() {
 	case reflect.String:
 		min, err := strconv.Atoi(opt.Params[0])
@@ -342,7 +342,7 @@ func strMaxLength(f Field, opt FuncOption) (bool, error) {
 		return false, fmt.Errorf("invalid params len")
 	}
 
-	v := f.Value()
+	v := f.current
 	switch v.Kind() {
 	case reflect.String:
 		max, err := strconv.Atoi(opt.Params[0])
@@ -359,7 +359,7 @@ func strEqLength(f Field, opt FuncOption) (bool, error) {
 		return false, fmt.Errorf("invalid params len")
 	}
 
-	v := f.Value()
+	v := f.current
 	switch v.Kind() {
 	case reflect.String:
 		i, err := strconv.Atoi(opt.Params[0])

@@ -76,7 +76,7 @@ func (f Field) ShortString() string {
 }
 
 func (f Field) String() string {
-	val := f.Value()
+	val := f.current
 	switch val.Kind() {
 	case reflect.Bool,
 		reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64,

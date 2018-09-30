@@ -42,7 +42,7 @@ func (v *Validator) ValidateStruct(s interface{}) error {
 }
 
 func (v *Validator) validateStruct(field Field) error {
-	val := field.Value()
+	val := field.current
 	if val.Kind() == reflect.Interface || val.Kind() == reflect.Ptr {
 		val = val.Elem()
 	}
@@ -148,7 +148,7 @@ func (v *Validator) validate(field Field, tag Tag) error {
 
 	tag.Enable = true // for dig
 
-	var val = field.Value()
+	var val = field.current
 	switch val.Kind() {
 	case reflect.Map:
 		for _, k := range val.MapKeys() {
