@@ -47,6 +47,8 @@ func Test_tagParse(t *testing.T) {
 				{Name: "len", Params: []string{"1", "3"}, Enable: true, dig: true},
 			},
 		},
+
+		// Dig
 		{
 			"required;",
 			[]Tag{
@@ -86,8 +88,16 @@ func Test_tagParse(t *testing.T) {
 				{Name: "len", Params: []string{"3"}, Enable: false, dig: true},
 			},
 		},
+
+		// Optional
 		{
 			"optional,required",
+			[]Tag{
+				{Name: "required", Enable: true, dig: true, Optional: true},
+			},
+		},
+		{
+			"required,optional",
 			[]Tag{
 				{Name: "required", Enable: true, dig: true, Optional: true},
 			},
@@ -99,16 +109,52 @@ func Test_tagParse(t *testing.T) {
 				{Name: "required", Enable: true, dig: true, Optional: true},
 			},
 		},
+
+		// Optional, Dig
+		{
+			"optional,max(3); required,len(3)",
+			[]Tag{
+				{Name: "max", Params: []string{"3"}, Enable: true, dig: false, Optional: true},
+				{Name: "required", Enable: false, dig: true, Optional: false},
+				{Name: "len", Params: []string{"3"}, Enable: false, dig: true, Optional: false},
+			},
+		},
+		{
+			"max(3),optional; required,len(3)",
+			[]Tag{
+				{Name: "max", Params: []string{"3"}, Enable: true, dig: false, Optional: true},
+				{Name: "required", Enable: false, dig: true, Optional: false},
+				{Name: "len", Params: []string{"3"}, Enable: false, dig: true, Optional: false},
+			},
+		},
+		{
+			"max(3); optional,required,len(3)",
+			[]Tag{
+				{Name: "max", Params: []string{"3"}, Enable: true, dig: false, Optional: false},
+				{Name: "required", Enable: false, dig: true, Optional: true},
+				{Name: "len", Params: []string{"3"}, Enable: false, dig: true, Optional: true},
+			},
+		},
+		{
+			"max(3); required,len(3),optional",
+			[]Tag{
+				{Name: "max", Params: []string{"3"}, Enable: true, dig: false, Optional: false},
+				{Name: "required", Enable: false, dig: true, Optional: true},
+				{Name: "len", Params: []string{"3"}, Enable: false, dig: true, Optional: true},
+			},
+		},
+		{
+			"optional; required",
+			[]Tag{
+				{Name: "required", Enable: false, dig: true, Optional: false},
+			},
+		},
+
+		// OR
 		{
 			"alpha|numeric",
 			[]Tag{
 				{Name: "or", Params: []string{"alpha", "numeric"}, Enable: true, dig: true},
-			},
-		},
-		{
-			"alpha|numeric ;",
-			[]Tag{
-				{Name: "or", Params: []string{"alpha", "numeric"}, Enable: true, dig: false},
 			},
 		},
 		{
@@ -117,6 +163,8 @@ func Test_tagParse(t *testing.T) {
 				{Name: "or", Params: []string{"alpha", "numeric", "len(1|10)"}, Enable: true, dig: true},
 			},
 		},
+
+		// OR, AND
 		{
 			"alpha|numeric,len(1|10)",
 			[]Tag{
@@ -137,6 +185,14 @@ func Test_tagParse(t *testing.T) {
 			[]Tag{
 				{Name: "or", Params: []string{"alpha", "numeric"}, Enable: true, dig: true},
 				{Name: "or", Params: []string{"min(1)", "max(10)"}, Enable: true, dig: true},
+			},
+		},
+
+		// OR, Dig
+		{
+			"alpha|numeric ;",
+			[]Tag{
+				{Name: "or", Params: []string{"alpha", "numeric"}, Enable: true, dig: false},
 			},
 		},
 		{
@@ -172,10 +228,13 @@ func Test_tagParse(t *testing.T) {
 					}
 				}
 				if tc.want[i].Enable != tags[i].Enable {
-					t.Errorf("want valid %v, got %v", tc.want[i].Enable, tags[i].Enable)
+					t.Errorf("want enable %v, got %v", tc.want[i].Enable, tags[i].Enable)
 				}
 				if tc.want[i].dig != tags[i].dig {
 					t.Errorf("want dig %v, got %v", tc.want[i].dig, tags[i].dig)
+				}
+				if tc.want[i].Optional != tags[i].Optional {
+					t.Errorf("want optional %v, got %v", tc.want[i].Optional, tags[i].Optional)
 				}
 			}
 		})
@@ -216,6 +275,9 @@ func Test_tagCache(t *testing.T) {
 		}
 		if want[i].dig != got[i].dig {
 			t.Errorf("want dig %v, got %v", want[i].dig, got[i].dig)
+		}
+		if want[i].Optional != got[i].Optional {
+			t.Errorf("want optional %v, got %v", want[i].Optional, got[i].Optional)
 		}
 	}
 }

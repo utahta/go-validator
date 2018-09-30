@@ -11,23 +11,35 @@ func (v *Validator) tagParse(rawTag string) ([]Tag, error) {
 	}
 
 	var (
-		tags      []Tag
-		enable    = true
-		optional  = false
-		orParsing = false
+		tags       []Tag
+		optional   = false
+		orParsing  = false
+		digParsing = false
 	)
+	const optionalTagName = "optional"
 
 	s := newTagScanner(rawTag)
 loop:
 	for {
 		token, lit := s.Scan()
-		if lit == "optional" {
+		if lit == optionalTagName {
+			for i := range tags {
+				if digParsing {
+					if tags[i].dig {
+						tags[i].Optional = true
+					}
+				} else {
+					tags[i].Optional = true
+				}
+			}
 			optional = true
-			continue
 		}
 
 		switch token {
 		case eof:
+			if lit == optionalTagName {
+				continue
+			}
 			if lit == "" {
 				break loop
 			}
@@ -35,7 +47,7 @@ loop:
 			if orParsing {
 				tags[len(tags)-1].Params = append(tags[len(tags)-1].Params, lit)
 			} else {
-				tag, err := v.newTag(lit, enable, true)
+				tag, err := v.newTag(lit, !digParsing, optional)
 				if err != nil {
 					return nil, err
 				}
@@ -44,6 +56,9 @@ loop:
 			break loop
 
 		case tagSeparator:
+			if lit == optionalTagName {
+				continue
+			}
 			if lit == "" {
 				return nil, fmt.Errorf("parse: invalid literal in tag separator")
 			}
@@ -51,7 +66,7 @@ loop:
 			if orParsing {
 				tags[len(tags)-1].Params = append(tags[len(tags)-1].Params, lit)
 			} else {
-				tag, err := v.newTag(lit, enable, true)
+				tag, err := v.newTag(lit, !digParsing, optional)
 				if err != nil {
 					return nil, err
 				}
@@ -60,6 +75,9 @@ loop:
 			orParsing = false
 
 		case orSeparator:
+			if lit == optionalTagName {
+				continue
+			}
 			if lit == "" {
 				return nil, fmt.Errorf("parse: invalid literal in or separator")
 			}
@@ -67,36 +85,31 @@ loop:
 			if orParsing {
 				tags[len(tags)-1].Params = append(tags[len(tags)-1].Params, lit)
 			} else {
-				tags = append(tags, Tag{Name: "or", Params: []string{lit}, Enable: enable, dig: true, validateFn: v.FuncMap["or"]})
+				tags = append(tags, Tag{Name: "or", Params: []string{lit}, Optional: optional, Enable: !digParsing, dig: true, validateFn: v.FuncMap["or"]})
 			}
 			orParsing = true
 
 		case digSeparator:
-			for i := range tags {
-				tags[i].dig = false
-			}
-			if lit != "" {
+			if lit != "" && lit != optionalTagName {
 				if orParsing {
 					tags[len(tags)-1].Params = append(tags[len(tags)-1].Params, lit)
 				} else {
-					tag, err := v.newTag(lit, enable, false)
+					tag, err := v.newTag(lit, true, optional)
 					if err != nil {
 						return nil, err
 					}
 					tags = append(tags, tag)
 				}
 			}
-			enable = false
+			for i := range tags {
+				tags[i].dig = false
+			}
+			digParsing = true
 			orParsing = false
+			optional = false
 
 		case illegal:
 			return nil, fmt.Errorf("parse: illegal token")
-		}
-	}
-
-	if optional {
-		for i := range tags {
-			tags[i].Optional = optional
 		}
 	}
 
@@ -105,7 +118,8 @@ loop:
 	return tags, nil
 }
 
-func (v *Validator) newTag(lit string, enable, dig bool) (Tag, error) {
+// newTag returns Tag
+func (v *Validator) newTag(lit string, enable, optional bool) (Tag, error) {
 	var (
 		name   string
 		params []string
@@ -142,8 +156,9 @@ func (v *Validator) newTag(lit string, enable, dig bool) (Tag, error) {
 	return Tag{
 		Name:       name,
 		Params:     params,
+		Optional:   optional,
 		Enable:     enable,
-		dig:        dig,
+		dig:        true,
 		validateFn: fn,
 	}, nil
 }
