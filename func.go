@@ -29,6 +29,7 @@ type (
 
 var defaultFuncMap = FuncMap{
 	"required":        with(hasValue),
+	"req":             with(hasValue),
 	"alpha":           with(isAlpha),
 	"alphanum":        with(isAlphaNum),
 	"alphaunicode":    with(isAlphaUnicode),
@@ -37,27 +38,45 @@ var defaultFuncMap = FuncMap{
 	"number":          with(isNumber),
 	"hexadecimal":     with(isHexadecimal),
 	"hexcolor":        with(isHexcolor),
+	"rgb":             with(isRGB),
+	"rgba":            with(isRGBA),
+	"hsl":             with(isHSL),
+	"hsla":            with(isHSLA),
 	"email":           with(isEmail),
 	"base64":          with(isBase64),
+	"base64url":       with(isBase64URL),
+	"isbn10":          with(isISBN10),
+	"isbn13":          with(isISBN13),
+	"isbn":            with(isISBN13),
 	"url":             with(isURL),
 	"uri":             with(isURI),
 	"uuid":            with(isUUID),
 	"uuid3":           with(isUUID3),
 	"uuid4":           with(isUUID4),
 	"uuid5":           with(isUUID5),
+	"ascii":           with(isASCII),
+	"printableascii":  with(isPrintableASCII),
+	"multibyte":       with(isMultibyte),
+	"datauri":         with(isDataURI),
+	"latitude":        with(isLatitude),
+	"longitude":       with(isLongitude),
+	"ssn":             with(isSSN),
+	"semver":          with(isSemver),
+	"katakana":        with(isKatakana),
+	"hiragana":        with(isHiragana),
 
-	// has params
+	// has parameters
 	"len":        with(length),
 	"length":     with(length),
 	"range":      with(length),
 	"min":        with(minLength),
 	"max":        with(maxLength),
-	"runelen":    with(strLength),
-	"runelength": with(strLength),
 	"strlen":     with(strLength),
 	"strlength":  with(strLength),
 	"strmin":     with(strMinLength),
 	"strmax":     with(strMaxLength),
+	"runelen":    with(strLength),
+	"runelength": with(strLength),
 	"or":         with(or),
 }
 
@@ -121,6 +140,18 @@ func isBase64(f Field, _ FuncOption) (bool, error) {
 	return base64Regex.MatchString(f.String()), nil
 }
 
+func isBase64URL(f Field, _ FuncOption) (bool, error) {
+	return base64URLRegex.MatchString(f.String()), nil
+}
+
+func isISBN10(f Field, _ FuncOption) (bool, error) {
+	return isbn10Regex.MatchString(f.String()), nil
+}
+
+func isISBN13(f Field, _ FuncOption) (bool, error) {
+	return isbn13Regex.MatchString(f.String()), nil
+}
+
 func isURL(f Field, _ FuncOption) (bool, error) {
 	u, err := url.ParseRequestURI(f.String())
 	return err == nil && len(u.Scheme) > 0, nil
@@ -159,6 +190,22 @@ func isHexcolor(f Field, _ FuncOption) (bool, error) {
 	return hexcolorRegex.MatchString(f.String()), nil
 }
 
+func isRGB(f Field, _ FuncOption) (bool, error) {
+	return rgbRegex.MatchString(f.String()), nil
+}
+
+func isRGBA(f Field, _ FuncOption) (bool, error) {
+	return rgbaRegex.MatchString(f.String()), nil
+}
+
+func isHSL(f Field, _ FuncOption) (bool, error) {
+	return hslRegex.MatchString(f.String()), nil
+}
+
+func isHSLA(f Field, _ FuncOption) (bool, error) {
+	return hslaRegex.MatchString(f.String()), nil
+}
+
 func isUUID(f Field, _ FuncOption) (bool, error) {
 	return uuidRegex.MatchString(f.String()), nil
 }
@@ -173,6 +220,46 @@ func isUUID4(f Field, _ FuncOption) (bool, error) {
 
 func isUUID5(f Field, _ FuncOption) (bool, error) {
 	return uuid5Regex.MatchString(f.String()), nil
+}
+
+func isASCII(f Field, _ FuncOption) (bool, error) {
+	return asciiRegex.MatchString(f.String()), nil
+}
+
+func isPrintableASCII(f Field, _ FuncOption) (bool, error) {
+	return printableASCIIRegex.MatchString(f.String()), nil
+}
+
+func isMultibyte(f Field, _ FuncOption) (bool, error) {
+	return multibyteRegex.MatchString(f.String()), nil
+}
+
+func isDataURI(f Field, _ FuncOption) (bool, error) {
+	return dataURIRegex.MatchString(f.String()), nil
+}
+
+func isLatitude(f Field, _ FuncOption) (bool, error) {
+	return latitudeRegex.MatchString(f.String()), nil
+}
+
+func isLongitude(f Field, _ FuncOption) (bool, error) {
+	return longitudeRegex.MatchString(f.String()), nil
+}
+
+func isSSN(f Field, _ FuncOption) (bool, error) {
+	return ssnRegex.MatchString(f.String()), nil
+}
+
+func isSemver(f Field, _ FuncOption) (bool, error) {
+	return semverRegex.MatchString(f.String()), nil
+}
+
+func isKatakana(f Field, _ FuncOption) (bool, error) {
+	return katakanaRegex.MatchString(f.String()), nil
+}
+
+func isHiragana(f Field, _ FuncOption) (bool, error) {
+	return hiraganaRegex.MatchString(f.String()), nil
 }
 
 func minLength(f Field, opt FuncOption) (bool, error) {
