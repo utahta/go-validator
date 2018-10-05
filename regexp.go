@@ -34,6 +34,8 @@ const (
 	semverRegexString              = "^v?(?:0|[1-9]\\d*)\\.(?:0|[1-9]\\d*)\\.(?:0|[1-9]\\d*)(-(0|[1-9]\\d*|\\d*[a-zA-Z-][0-9a-zA-Z-]*)(\\.(0|[1-9]\\d*|\\d*[a-zA-Z-][0-9a-zA-Z-]*))*)?(\\+[0-9a-zA-Z-]+(\\.[0-9a-zA-Z-]+)*)?$"
 	katakanaRegexString            = "^[\\p{Katakana}]*$"
 	hiraganaRegexString            = "^[\\p{Hiragana}]*$"
+	fullWidthRegexString           = "[^\u0020-\u007E\uFF61-\uFF9F\uFFA0-\uFFDC\uFFE8-\uFFEE0-9a-zA-Z]"
+	halfWidthRegexString           = "[\u0020-\u007E\uFF61-\uFF9F\uFFA0-\uFFDC\uFFE8-\uFFEE0-9a-zA-Z]"
 )
 
 var (
@@ -68,4 +70,6 @@ var (
 	semverRegex              = regexp.MustCompile(semverRegexString)
 	katakanaRegex            = regexp.MustCompile(katakanaRegexString)
 	hiraganaRegex            = regexp.MustCompile(hiraganaRegexString)
+	fullWidthRegex           = regexp.MustCompile(fullWidthRegexString)
+	halfWidthRegex           = regexp.MustCompile(halfWidthRegexString)
 )

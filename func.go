@@ -64,6 +64,8 @@ var defaultFuncMap = FuncMap{
 	"semver":          with(isSemver),
 	"katakana":        with(isKatakana),
 	"hiragana":        with(isHiragana),
+	"fullwidth":       with(isFullWidth),
+	"halfwidth":       with(isHalfWidth),
 
 	// has parameters
 	"len":        with(length),
@@ -260,6 +262,14 @@ func isKatakana(f Field, _ FuncOption) (bool, error) {
 
 func isHiragana(f Field, _ FuncOption) (bool, error) {
 	return hiraganaRegex.MatchString(f.String()), nil
+}
+
+func isFullWidth(f Field, _ FuncOption) (bool, error) {
+	return fullWidthRegex.MatchString(f.String()), nil
+}
+
+func isHalfWidth(f Field, _ FuncOption) (bool, error) {
+	return halfWidthRegex.MatchString(f.String()), nil
 }
 
 func minLength(f Field, opt FuncOption) (bool, error) {
