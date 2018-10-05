@@ -26,24 +26,53 @@ type (
 		Int   Int
 	}
 
-	OptionalTest struct {
+	ArrayStringTest struct {
+		Values []string `valid:"len(3); req,alpha"`
+	}
+
+	RequiredArrayStringTest struct {
+		Values []string `valid:"required ;"`
+	}
+
+	ArrayRequiredStringTest struct {
+		Values []string `valid:"; required"`
+	}
+
+	MapStringTest struct {
+		Values map[string]string `valid:"len(3); req,alpha"`
+	}
+
+	RequiredMapStringTest struct {
+		Values map[string]string `valid:"required ;"`
+	}
+
+	MapRequiredStringTest struct {
+		Values map[string]string `valid:"; required"`
+	}
+
+	OptionalStringTest struct {
 		Value string `valid:"optional,alpha"`
+	}
+
+	OptionalArrayStringTest struct {
+		Values []string `valid:"optional; alpha"`
+	}
+
+	OptionalArrayOptionalStringTest struct {
+		Values []string `valid:"optional; optional,alpha"`
+	}
+
+	OptionalMapStringTest struct {
+		Values map[string]string `valid:"optional; alpha"`
+	}
+
+	OptionalMapOptionalStringTest struct {
+		Values map[string]string `valid:"optional; optional,alpha"`
 	}
 
 	SimpleStructTest struct {
 		Str      Str      `valid:"required ;"`
 		StrNoTag StrNoTag `valid:"required"`
-	}
-
-	DigArrayTest struct {
-		Strs []string `valid:"len(3) ; required,alpha"`
-		Ints []int    `valid:"required ;"`
-		Nums []string `valid:"; numeric"`
-	}
-
-	DigMapTest struct {
-		Strm map[string]string `valid:"len(3) ; required,alpha"`
-		Intm map[int]int       `valid:"required ;"`
 	}
 
 	InterfaceTest struct {
@@ -57,12 +86,6 @@ type (
 		Ptrs []*Str          `valid:"required"`
 		Ptrm map[string]*Str `valid:"required"`
 	}
-
-	ArrayTest struct {
-	}
-
-	MapTest struct {
-	}
 )
 
 // for interface test
@@ -72,10 +95,10 @@ func (s Str) String() string {
 
 func TestValidator_ValidateStruct(t *testing.T) {
 	testcases := []struct {
-		name            string
-		s               interface{}
-		expectedNoErr   bool
-		expectedMessage string
+		name        string
+		s           interface{}
+		wantNoErr   bool
+		wantMessage string
 	}{
 		// SimpleTest
 		{
@@ -85,7 +108,7 @@ func TestValidator_ValidateStruct(t *testing.T) {
 				Str:   Str{Value: "str_value"},
 				Int:   Int{Value: 1},
 			},
-			expectedNoErr: true,
+			wantNoErr: true,
 		},
 		{
 			name: "invalid SimpleTest.Value_Str_Int",
@@ -94,30 +117,268 @@ func TestValidator_ValidateStruct(t *testing.T) {
 				Str:   Str{Value: ""},
 				Int:   Int{Value: 0},
 			},
-			expectedMessage: "Value: '' does validate as 'required';Str.Value: '' does validate as 'required';Int.Value: '0' does validate as 'required'",
+			wantMessage: "Value: '' does validate as 'required';Str.Value: '' does validate as 'required';Int.Value: '0' does validate as 'required'",
+		},
+
+		// ArrayStringTest
+		{
+			name: "valid ArrayStringTest",
+			s: ArrayStringTest{
+				Values: []string{"a", "b", "c"},
+			},
+			wantNoErr: true,
+		},
+		{
+			name: "invalid ArrayStringTest length",
+			s: ArrayStringTest{
+				Values: []string{"a", "b"},
+			},
+			wantMessage: "Values: '<Array>' does validate as 'len(3)'",
+		},
+		{
+			name: "invalid ArrayStringTest.Values[0]",
+			s: ArrayStringTest{
+				Values: []string{"", "b", "c"},
+			},
+			wantMessage: "Values[0]: '' does validate as 'req';Values[0]: '' does validate as 'alpha'",
+		},
+
+		// RequiredArrayStringTest
+		{
+			name: "valid RequiredArrayStringTest",
+			s: RequiredArrayStringTest{
+				Values: []string{""},
+			},
+			wantNoErr: true,
+		},
+		{
+			name: "invalid RequiredArrayStringTest empty",
+			s: RequiredArrayStringTest{
+				Values: []string{},
+			},
+			wantMessage: "Values: '<Array>' does validate as 'required'",
+		},
+		{
+			name: "invalid RequiredArrayStringTest nil",
+			s: RequiredArrayStringTest{
+				Values: nil,
+			},
+			wantMessage: "Values: '<Array>' does validate as 'required'",
+		},
+
+		// ArrayRequiredStringTest
+		{
+			name: "valid ArrayRequiredStringTest",
+			s: ArrayRequiredStringTest{
+				Values: []string{},
+			},
+			wantNoErr: true,
+		},
+		{
+			name: "valid ArrayRequiredStringTest",
+			s: ArrayRequiredStringTest{
+				Values: nil,
+			},
+			wantNoErr: true,
+		},
+		{
+			name: "invalid ArrayRequiredStringTest",
+			s: ArrayRequiredStringTest{
+				Values: []string{""},
+			},
+			wantMessage: "Values[0]: '' does validate as 'required'",
+		},
+
+		// MapStringTest
+		{
+			name: "valid MapStringTest",
+			s: MapStringTest{
+				Values: map[string]string{"key1": "a", "key2": "b", "key3": "c"},
+			},
+			wantNoErr: true,
+		},
+		{
+			name: "invalid MapStringTest length",
+			s: MapStringTest{
+				Values: map[string]string{"key1": "a", "key2": "b"},
+			},
+			wantMessage: "Values: '<Map>' does validate as 'len(3)'",
+		},
+		{
+			name: "invalid MapStringTest.Values[0]",
+			s: MapStringTest{
+				Values: map[string]string{"key1": "", "key2": "b", "key3": "c"},
+			},
+			wantMessage: "Values[key1]: '' does validate as 'req';Values[key1]: '' does validate as 'alpha'",
+		},
+
+		// RequiredMapStringTest
+		{
+			name: "valid RequiredMapStringTest",
+			s: RequiredMapStringTest{
+				Values: map[string]string{"key1": ""},
+			},
+			wantNoErr: true,
+		},
+		{
+			name: "invalid RequiredMapStringTest empty",
+			s: RequiredMapStringTest{
+				Values: map[string]string{},
+			},
+			wantMessage: "Values: '<Map>' does validate as 'required'",
+		},
+		{
+			name: "invalid RequiredMapStringTest nil",
+			s: RequiredMapStringTest{
+				Values: nil,
+			},
+			wantMessage: "Values: '<Map>' does validate as 'required'",
+		},
+
+		// MapRequiredStringTest
+		{
+			name: "valid MapRequiredStringTest",
+			s: MapRequiredStringTest{
+				Values: map[string]string{},
+			},
+			wantNoErr: true,
+		},
+		{
+			name: "valid MapRequiredStringTest",
+			s: MapRequiredStringTest{
+				Values: nil,
+			},
+			wantNoErr: true,
+		},
+		{
+			name: "invalid MapRequiredStringTest",
+			s: MapRequiredStringTest{
+				Values: map[string]string{"key1": ""},
+			},
+			wantMessage: "Values[key1]: '' does validate as 'required'",
 		},
 
 		// OptionalTest
 		{
-			name: "valid OptionalTest",
-			s: OptionalTest{
+			name: "valid OptionalStringTest",
+			s: OptionalStringTest{
 				Value: "abc",
 			},
-			expectedNoErr: true,
+			wantNoErr: true,
 		},
 		{
-			name: "valid OptionalTest empty",
-			s: OptionalTest{
+			name: "valid OptionalStringTest empty",
+			s: OptionalStringTest{
 				Value: "",
 			},
-			expectedNoErr: true,
+			wantNoErr: true,
 		},
 		{
-			name: "invalid OptionalTest",
-			s: OptionalTest{
+			name: "invalid OptionalStringTest",
+			s: OptionalStringTest{
 				Value: "123",
 			},
-			expectedMessage: "Value: '123' does validate as 'alpha'",
+			wantMessage: "Value: '123' does validate as 'alpha'",
+		},
+
+		// OptionalArrayStringTest
+		{
+			name: "valid OptionalArrayStringTest",
+			s: OptionalArrayStringTest{
+				Values: []string{},
+			},
+			wantNoErr: true,
+		},
+		{
+			name: "valid OptionalArrayStringTest",
+			s: OptionalArrayStringTest{
+				Values: []string{"abc"},
+			},
+			wantNoErr: true,
+		},
+		{
+			name: "invalid OptionalArrayStringTest.Values[0]",
+			s: OptionalArrayStringTest{
+				Values: []string{""},
+			},
+			wantMessage: "Values[0]: '' does validate as 'alpha'",
+		},
+
+		// OptionalArrayOptionalStringTest
+		{
+			name: "valid OptionalArrayOptionalStringTest",
+			s: OptionalArrayOptionalStringTest{
+				Values: []string{},
+			},
+			wantNoErr: true,
+		},
+		{
+			name: "valid OptionalArrayOptionalStringTest",
+			s: OptionalArrayOptionalStringTest{
+				Values: []string{""},
+			},
+			wantNoErr: true,
+		},
+		{
+			name: "invalid OptionalArrayOptionalStringTest.Values[0]",
+			s: OptionalArrayOptionalStringTest{
+				Values: []string{"123"},
+			},
+			wantMessage: "Values[0]: '123' does validate as 'alpha'",
+		},
+
+		// OptionalMapStringTest
+		{
+			name: "valid OptionalMapStringTest",
+			s: OptionalMapStringTest{
+				Values: map[string]string{},
+			},
+			wantNoErr: true,
+		},
+		{
+			name: "valid OptionalMapStringTest",
+			s: OptionalMapStringTest{
+				Values: map[string]string{
+					"key1": "abc",
+				},
+			},
+			wantNoErr: true,
+		},
+		{
+			name: "invalid OptionalMapStringTest.Values[key1]",
+			s: OptionalMapStringTest{
+				Values: map[string]string{
+					"key1": "",
+				},
+			},
+			wantMessage: "Values[key1]: '' does validate as 'alpha'",
+		},
+
+		// OptionalMapOptionalStringTest
+		{
+			name: "valid OptionalMapOptionalStringTest",
+			s: OptionalMapOptionalStringTest{
+				Values: map[string]string{},
+			},
+			wantNoErr: true,
+		},
+		{
+			name: "valid OptionalMapOptionalStringTest",
+			s: OptionalMapOptionalStringTest{
+				Values: map[string]string{
+					"key1": "",
+				},
+			},
+			wantNoErr: true,
+		},
+		{
+			name: "invalid OptionalMapOptionalStringTest",
+			s: OptionalMapOptionalStringTest{
+				Values: map[string]string{
+					"key1": "123",
+				},
+			},
+			wantMessage: "Values[key1]: '123' does validate as 'alpha'",
 		},
 
 		// SimpleStructTest
@@ -127,7 +388,7 @@ func TestValidator_ValidateStruct(t *testing.T) {
 				Str:      Str{Value: "str"},
 				StrNoTag: StrNoTag{Value: "str"},
 			},
-			expectedNoErr: true,
+			wantNoErr: true,
 		},
 		{
 			name: "invalid SimpleStructTest",
@@ -135,62 +396,7 @@ func TestValidator_ValidateStruct(t *testing.T) {
 				Str:      Str{},
 				StrNoTag: StrNoTag{Value: ""},
 			},
-			expectedMessage: "Str: 'Str' does validate as 'required';Str.Value: '' does validate as 'required';StrNoTag: 'StrNoTag' does validate as 'required'",
-		},
-
-		// DigArrayTest
-		{
-			name: "valid DigArrayTest",
-			s: DigArrayTest{
-				Strs: []string{"a", "b", "c"},
-				Ints: []int{0},
-				Nums: []string{"0"},
-			},
-			expectedNoErr: true,
-		},
-		{
-			name: "invalid DigArrayTest.Strs_Ints_Nums",
-			s: DigArrayTest{
-				Strs: []string{},
-				Ints: []int{},
-				Nums: []string{},
-			},
-			expectedMessage: "Strs: '<Array>' does validate as 'len(3)';Ints: '<Array>' does validate as 'required'",
-		},
-		{
-			name: "invalid DigArrayTest.Strs.[1]_Nums[1]",
-			s: DigArrayTest{
-				Strs: []string{"a", "", "c"},
-				Ints: []int{1, 0, 2},
-				Nums: []string{"0", "a", "2"},
-			},
-			expectedMessage: "Strs[1]: '' does validate as 'required';Strs[1]: '' does validate as 'alpha';Nums[1]: 'a' does validate as 'numeric'",
-		},
-
-		// DigMapTest
-		{
-			name: "valid DigMapTest",
-			s: DigMapTest{
-				Strm: map[string]string{"key1": "a", "key2": "b", "key3": "c"},
-				Intm: map[int]int{0: 0},
-			},
-			expectedNoErr: true,
-		},
-		{
-			name: "invalid DigMapTest.Strm_Intm",
-			s: DigMapTest{
-				Strm: map[string]string{},
-				Intm: map[int]int{},
-			},
-			expectedMessage: "Strm: '<Map>' does validate as 'len(3)';Intm: '<Map>' does validate as 'required'",
-		},
-		{
-			name: "invalid DigMapTest.Strm.[1]",
-			s: DigMapTest{
-				Strm: map[string]string{"key1": "a", "key2": "", "key3": "c"},
-				Intm: map[int]int{0: 1, 1: 0, 2: 2},
-			},
-			expectedMessage: "Strm[key2]: '' does validate as 'required';Strm[key2]: '' does validate as 'alpha'",
+			wantMessage: "Str: 'Str' does validate as 'required';Str.Value: '' does validate as 'required';StrNoTag: 'StrNoTag' does validate as 'required'",
 		},
 
 		// InterfaceTest
@@ -203,7 +409,7 @@ func TestValidator_ValidateStruct(t *testing.T) {
 					"key1": Str{"a"},
 				},
 			},
-			expectedNoErr: true,
+			wantNoErr: true,
 		},
 		{
 			name: "invalid InterfaceTest_nil",
@@ -212,7 +418,7 @@ func TestValidator_ValidateStruct(t *testing.T) {
 				IFs: nil,
 				IFm: nil,
 			},
-			expectedMessage: "IF: '<nil>' does validate as 'required';IFs: '<Array>' does validate as 'required';IFm: '<Map>' does validate as 'required'",
+			wantMessage: "IF: '<nil>' does validate as 'required';IFs: '<Array>' does validate as 'required';IFm: '<Map>' does validate as 'required'",
 		},
 		{
 			name: "invalid InterfaceTest_empty",
@@ -221,7 +427,7 @@ func TestValidator_ValidateStruct(t *testing.T) {
 				IFs: []fmt.Stringer{},
 				IFm: map[string]fmt.Stringer{},
 			},
-			expectedMessage: "IF: 'Str' does validate as 'required';IF.Value: '' does validate as 'required';IFs: '<Array>' does validate as 'required';IFm: '<Map>' does validate as 'required'",
+			wantMessage: "IF: 'Str' does validate as 'required';IF.Value: '' does validate as 'required';IFs: '<Array>' does validate as 'required';IFm: '<Map>' does validate as 'required'",
 		},
 		{
 			name: "invalid InterfaceTest_ptr_empty",
@@ -232,7 +438,7 @@ func TestValidator_ValidateStruct(t *testing.T) {
 					"key1": &Str{""},
 				},
 			},
-			expectedMessage: "IF: 'Str' does validate as 'required';IF.Value: '' does validate as 'required';IFs[0]: 'Str' does validate as 'required';IFs[0].Value: '' does validate as 'required';IFm[key1]: 'Str' does validate as 'required';IFm[key1].Value: '' does validate as 'required'",
+			wantMessage: "IF: 'Str' does validate as 'required';IF.Value: '' does validate as 'required';IFs[0]: 'Str' does validate as 'required';IFs[0].Value: '' does validate as 'required';IFm[key1]: 'Str' does validate as 'required';IFm[key1].Value: '' does validate as 'required'",
 		},
 
 		// PtrTest
@@ -245,7 +451,7 @@ func TestValidator_ValidateStruct(t *testing.T) {
 					"key1": {"a"},
 				},
 			},
-			expectedNoErr: true,
+			wantNoErr: true,
 		},
 		{
 			name: "invalid PtrTest_nil",
@@ -256,7 +462,7 @@ func TestValidator_ValidateStruct(t *testing.T) {
 					"key1": nil,
 				},
 			},
-			expectedMessage: "Ptr: '<nil>' does validate as 'required';Ptrs[0]: '<nil>' does validate as 'required';Ptrm[key1]: '<nil>' does validate as 'required'",
+			wantMessage: "Ptr: '<nil>' does validate as 'required';Ptrs[0]: '<nil>' does validate as 'required';Ptrm[key1]: '<nil>' does validate as 'required'",
 		},
 		{
 			name: "invalid PtrTest_empty",
@@ -267,7 +473,7 @@ func TestValidator_ValidateStruct(t *testing.T) {
 					"key1": {""},
 				},
 			},
-			expectedMessage: "Ptr: 'Str' does validate as 'required';Ptr.Value: '' does validate as 'required';Ptrs[0].Value: '' does validate as 'required';Ptrm[key1].Value: '' does validate as 'required'",
+			wantMessage: "Ptr: 'Str' does validate as 'required';Ptr.Value: '' does validate as 'required';Ptrs[0].Value: '' does validate as 'required';Ptrm[key1].Value: '' does validate as 'required'",
 		},
 	}
 
@@ -276,7 +482,7 @@ func TestValidator_ValidateStruct(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			err := v.ValidateStruct(tc.s)
 
-			if tc.expectedNoErr {
+			if tc.wantNoErr {
 				if err != nil {
 					t.Error(err)
 				}
@@ -292,8 +498,8 @@ func TestValidator_ValidateStruct(t *testing.T) {
 				t.Fatal("expected `true`, but got `false`")
 			}
 
-			if tc.expectedMessage != errs.Error() {
-				t.Fatalf("expected `%v`\nbut got `%v`", tc.expectedMessage, errs.Error())
+			if tc.wantMessage != errs.Error() {
+				t.Fatalf("expected `%v`\nbut got `%v`", tc.wantMessage, errs.Error())
 			}
 		})
 	}

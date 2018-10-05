@@ -15,6 +15,9 @@ type (
 		// FuncMap is a map of validate functions.
 		FuncMap FuncMap
 
+		// Adapters is a validate function adapters.
+		Adapters []Adapter
+
 		// SuppressErrorFieldValue is a flag that suppress output of field value in error.
 		SuppressErrorFieldValue bool
 
@@ -25,8 +28,14 @@ type (
 
 // New returns a Validator
 func New() *Validator {
+	funcMap := FuncMap{}
+	for k, fn := range defaultFuncMap {
+		funcMap[k] = apply(fn, defaultAdapters...)
+	}
+
 	return &Validator{
-		FuncMap:     defaultFuncMap,
+		FuncMap:     funcMap,
+		Adapters:    defaultAdapters,
 		tagCache:    newTagCache(),
 		structCache: newStructCache(),
 	}
@@ -34,7 +43,15 @@ func New() *Validator {
 
 // SetFunc sets a validate function.
 func (v *Validator) SetFunc(rawTag string, fn Func) {
-	v.FuncMap[rawTag] = with(fn)
+	v.FuncMap[rawTag] = apply(fn, v.Adapters...)
+}
+
+// SetAdapter sets a validate function adapter.
+func (v *Validator) SetAdapter(adapter Adapter) {
+	v.Adapters = append(v.Adapters, adapter)
+	for k, fn := range v.FuncMap {
+		v.FuncMap[k] = apply(fn, adapter)
+	}
 }
 
 // ValidateStruct validates a struct that use tags for fields.
