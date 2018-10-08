@@ -47,7 +47,9 @@ func (s *tagScanner) Scan() (tagToken, string) {
 			}
 
 		case ';':
-			return digSeparator, lit
+			if depthParen == 0 {
+				return digSeparator, lit
+			}
 
 		case '(':
 			depthParen++

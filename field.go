@@ -13,11 +13,10 @@ type (
 
 	// Field represents a value.
 	Field struct {
-		name     string
-		fullName string
-		origin   reflect.Value
-		current  reflect.Value
-		parent   ParentField
+		name    string
+		origin  reflect.Value
+		current reflect.Value
+		parent  ParentField
 	}
 )
 
@@ -44,7 +43,7 @@ func newFieldWithParent(name string, origin, current reflect.Value, parent Field
 	}
 }
 
-// Name is a field name. e.g Foo.Bar.Value
+// Name is a field name. e.g. Foo.Bar.Value
 func (f Field) Name() string {
 	return f.name
 }

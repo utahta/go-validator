@@ -9,10 +9,10 @@ import (
 )
 
 type (
-	// Func is a type of validator function.
+	// Func is a type of validate function.
 	Func func(Field, FuncOption) (bool, error)
 
-	// FuncMap is a map of validator function type.
+	// FuncMap is a map of validate function type.
 	FuncMap map[string]Func
 
 	// FuncOption is a option.
@@ -25,69 +25,87 @@ type (
 		// Optional is a optional flag. if true, empty value is always valid.
 		Optional bool
 	}
+
+	// Adapter is a validate function adapter.
+	Adapter func(Func) Func
 )
 
-var defaultFuncMap = FuncMap{
-	"required":        with(hasValue),
-	"req":             with(hasValue),
-	"alpha":           with(isAlpha),
-	"alphanum":        with(isAlphaNum),
-	"alphaunicode":    with(isAlphaUnicode),
-	"alphanumunicode": with(isAlphaNumUnicode),
-	"numeric":         with(isNumeric),
-	"number":          with(isNumber),
-	"hexadecimal":     with(isHexadecimal),
-	"hexcolor":        with(isHexcolor),
-	"rgb":             with(isRGB),
-	"rgba":            with(isRGBA),
-	"hsl":             with(isHSL),
-	"hsla":            with(isHSLA),
-	"email":           with(isEmail),
-	"base64":          with(isBase64),
-	"base64url":       with(isBase64URL),
-	"isbn10":          with(isISBN10),
-	"isbn13":          with(isISBN13),
-	"isbn":            with(isISBN13),
-	"url":             with(isURL),
-	"uri":             with(isURI),
-	"uuid":            with(isUUID),
-	"uuid3":           with(isUUID3),
-	"uuid4":           with(isUUID4),
-	"uuid5":           with(isUUID5),
-	"ascii":           with(isASCII),
-	"printableascii":  with(isPrintableASCII),
-	"multibyte":       with(isMultibyte),
-	"datauri":         with(isDataURI),
-	"latitude":        with(isLatitude),
-	"longitude":       with(isLongitude),
-	"ssn":             with(isSSN),
-	"semver":          with(isSemver),
-	"katakana":        with(isKatakana),
-	"hiragana":        with(isHiragana),
-	"fullwidth":       with(isFullWidth),
-	"halfwidth":       with(isHalfWidth),
+var (
+	defaultFuncMap = FuncMap{
+		"required":        hasValue,
+		"req":             hasValue,
+		"alpha":           isAlpha,
+		"alphanum":        isAlphaNum,
+		"alphaunicode":    isAlphaUnicode,
+		"alphanumunicode": isAlphaNumUnicode,
+		"numeric":         isNumeric,
+		"number":          isNumber,
+		"hexadecimal":     isHexadecimal,
+		"hexcolor":        isHexcolor,
+		"rgb":             isRGB,
+		"rgba":            isRGBA,
+		"hsl":             isHSL,
+		"hsla":            isHSLA,
+		"email":           isEmail,
+		"base64":          isBase64,
+		"base64url":       isBase64URL,
+		"isbn10":          isISBN10,
+		"isbn13":          isISBN13,
+		"isbn":            isISBN13,
+		"url":             isURL,
+		"uri":             isURI,
+		"uuid":            isUUID,
+		"uuid3":           isUUID3,
+		"uuid4":           isUUID4,
+		"uuid5":           isUUID5,
+		"ascii":           isASCII,
+		"printableascii":  isPrintableASCII,
+		"multibyte":       isMultibyte,
+		"datauri":         isDataURI,
+		"latitude":        isLatitude,
+		"longitude":       isLongitude,
+		"ssn":             isSSN,
+		"semver":          isSemver,
+		"katakana":        isKatakana,
+		"hiragana":        isHiragana,
+		"fullwidth":       isFullWidth,
+		"halfwidth":       isHalfWidth,
 
-	// has parameters
-	"len":        with(length),
-	"length":     with(length),
-	"range":      with(length),
-	"min":        with(minLength),
-	"max":        with(maxLength),
-	"strlen":     with(strLength),
-	"strlength":  with(strLength),
-	"strmin":     with(strMinLength),
-	"strmax":     with(strMaxLength),
-	"runelen":    with(strLength),
-	"runelength": with(strLength),
-	"or":         with(or),
+		// has parameters
+		"len":        length,
+		"length":     length,
+		"range":      length,
+		"min":        minLength,
+		"max":        maxLength,
+		"strlen":     strLength,
+		"strlength":  strLength,
+		"strmin":     strMinLength,
+		"strmax":     strMaxLength,
+		"runelen":    strLength,
+		"runelength": strLength,
+		"or":         or,
+	}
+
+	defaultAdapters = []Adapter{
+		withOptional(),
+	}
+)
+
+func apply(fn Func, adapters ...Adapter) Func {
+	for _, adapter := range adapters {
+		fn = adapter(fn)
+	}
+	return fn
 }
 
-func with(fn Func) Func {
-	return func(f Field, opt FuncOption) (bool, error) {
-		if opt.Optional && isEmpty(f) {
-			return true, nil
+func withOptional() Adapter {
+	return func(fn Func) Func {
+		return func(f Field, opt FuncOption) (bool, error) {
+			if opt.Optional && isEmpty(f) {
+				return true, nil
+			}
+			return fn(f, opt)
 		}
-		return fn(f, opt)
 	}
 }
 
