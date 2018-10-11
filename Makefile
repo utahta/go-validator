@@ -2,6 +2,9 @@
 test:
 	go test -race ./...
 
+coverage:
+	go test -v -race -coverprofile=coverage.txt -covermode=atomic
+
 bench:
 	go test -bench . -benchmem
 

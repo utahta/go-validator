@@ -8,7 +8,7 @@ jobs:
     steps:
       - checkout
       - run:
-          name: Run tests
+          name: Run test
           command: make test
 
   "go-1.11":
@@ -18,8 +18,10 @@ jobs:
     steps:
       - checkout
       - run:
-          name: Run tests
-          command: make test
+          name: Run test and coverage
+          command: |
+            make coverage
+            bash <(curl -s https://codecov.io/bash)
 
 workflows:
   version: 2

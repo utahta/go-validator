@@ -4,9 +4,9 @@
 ### Go
 *.test
 vendor/
-/cover.out
 cpu.out
 mem.out
+coverage.txt
 
 ### IntelliJ IDEA
 .idea/
