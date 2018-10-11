@@ -60,8 +60,6 @@ func (s *tagScanner) Scan() (tagToken, string) {
 
 		lit += string(ch)
 	}
-
-	return illegal, ""
 }
 
 func (s *tagScanner) read() (ch byte) {
