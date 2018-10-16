@@ -163,6 +163,12 @@ func Test_tagParse(t *testing.T) {
 				{Name: "or", Params: []string{"alpha", "numeric", "len(1|10)"}, Enable: true, isDig: true},
 			},
 		},
+		{
+			"optional|alpha|numeric",
+			[]Tag{
+				{Name: "or", Params: []string{"alpha", "numeric"}, Enable: true, isDig: true, Optional: true},
+			},
+		},
 
 		// OR, AND
 		{
@@ -238,6 +244,37 @@ func Test_tagParse(t *testing.T) {
 				}
 			}
 		})
+	}
+}
+
+func Test_tagParseInvalid(t *testing.T) {
+	testcases := []struct {
+		rawTag    string
+		wantError string
+	}{
+		{
+			rawTag:    "req,,",
+			wantError: "parse: invalid literal in tag separator",
+		},
+		{
+			rawTag:    "req||",
+			wantError: "parse: invalid literal in or separator",
+		},
+		{
+			rawTag:    "len(1,2)",
+			wantError: "parse: failed to new tag",
+		},
+		{
+			rawTag:    "unknown",
+			wantError: "parse: tag unknown function not found",
+		},
+	}
+
+	for _, tc := range testcases {
+		_, err := New().tagParse(tc.rawTag)
+		if err.Error() != tc.wantError {
+			t.Errorf("want `%v`, got `%v`", tc.wantError, err.Error())
+		}
 	}
 }
 
