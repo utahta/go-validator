@@ -169,6 +169,12 @@ func Test_tagParse(t *testing.T) {
 				{Name: "or", Params: []string{"alpha", "numeric"}, Enable: true, isDig: true, Optional: true},
 			},
 		},
+		{
+			"or(req|numeric)",
+			[]Tag{
+				{Name: "or", Params: []string{"req", "numeric"}, Enable: true, isDig: true},
+			},
+		},
 
 		// OR, AND
 		{
