@@ -217,6 +217,7 @@ func (v *Validator) validate(field Field, tag Tag) error {
 		if val.IsNil() {
 			break
 		}
+		//TODO: to investigate unreachable or not.
 		value := val.Elem()
 
 		var err error

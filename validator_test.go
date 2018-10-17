@@ -21,9 +21,14 @@ type (
 	}
 
 	SimpleTest struct {
-		Value string `valid:"required"`
-		Str   Str
-		Int   Int
+		Value  string `valid:"required"`
+		Str    Str
+		Int    Int
+		Ignore string `valid:"-"`
+	}
+
+	InvalidTag struct {
+		Value string `valid:"unknown"`
 	}
 
 	ArrayStringTest struct {
@@ -75,16 +80,38 @@ type (
 		StrNoTag StrNoTag `valid:"required"`
 	}
 
-	InterfaceTest struct {
+	TypeInterfaceTest struct {
 		IF  fmt.Stringer            `valid:"required"`
 		IFs []fmt.Stringer          `valid:"required"`
 		IFm map[string]fmt.Stringer `valid:"required"`
+	}
+
+	InterfaceTest struct {
+		IF  interface{}            `valid:"required"`
+		IFs []interface{}          `valid:"required"`
+		IFm map[string]interface{} `valid:"required"`
 	}
 
 	PtrTest struct {
 		Ptr  *Str            `valid:"required"`
 		Ptrs []*Str          `valid:"required"`
 		Ptrm map[string]*Str `valid:"required"`
+	}
+
+	InvalidTagSimpleTest struct {
+		Value string `valid:"unknown"`
+	}
+
+	InvalidTagStructTest struct {
+		S InvalidTag
+	}
+
+	InvalidTagStructArrayTest struct {
+		S []InvalidTag `valid:"required"`
+	}
+
+	InvalidTagStructMapTest struct {
+		S map[string]InvalidTag `valid:"required"`
 	}
 )
 
@@ -399,14 +426,56 @@ func TestValidator_ValidateStruct(t *testing.T) {
 			wantMessage: "Str: 'Str' does validate as 'required';Str.Value: '' does validate as 'required';StrNoTag: 'StrNoTag' does validate as 'required'",
 		},
 
-		// InterfaceTest
+		// TypeInterfaceTest
 		{
-			name: "valid InterfaceTest",
-			s: InterfaceTest{
+			name: "valid TypeInterfaceTest",
+			s: TypeInterfaceTest{
 				IF:  Str{"a"},
 				IFs: []fmt.Stringer{Str{"a"}},
 				IFm: map[string]fmt.Stringer{
 					"key1": Str{"a"},
+				},
+			},
+			wantNoErr: true,
+		},
+		{
+			name: "invalid TypeInterfaceTest_nil",
+			s: TypeInterfaceTest{
+				IF:  nil,
+				IFs: nil,
+				IFm: nil,
+			},
+			wantMessage: "IF: '<nil>' does validate as 'required';IFs: '<Array>' does validate as 'required';IFm: '<Map>' does validate as 'required'",
+		},
+		{
+			name: "invalid TypeInterfaceTest_empty",
+			s: TypeInterfaceTest{
+				IF:  Str{""},
+				IFs: []fmt.Stringer{},
+				IFm: map[string]fmt.Stringer{},
+			},
+			wantMessage: "IF: 'Str' does validate as 'required';IF.Value: '' does validate as 'required';IFs: '<Array>' does validate as 'required';IFm: '<Map>' does validate as 'required'",
+		},
+		{
+			name: "invalid TypeInterfaceTest_ptr_empty",
+			s: TypeInterfaceTest{
+				IF:  &Str{""},
+				IFs: []fmt.Stringer{&Str{""}},
+				IFm: map[string]fmt.Stringer{
+					"key1": &Str{""},
+				},
+			},
+			wantMessage: "IF: 'Str' does validate as 'required';IF.Value: '' does validate as 'required';IFs[0]: 'Str' does validate as 'required';IFs[0].Value: '' does validate as 'required';IFm[key1]: 'Str' does validate as 'required';IFm[key1].Value: '' does validate as 'required'",
+		},
+
+		// InterfaceTest
+		{
+			name: "valid InterfaceTest",
+			s: InterfaceTest{
+				IF:  "a",
+				IFs: []interface{}{"a"},
+				IFm: map[string]interface{}{
+					"key1": "a",
 				},
 			},
 			wantNoErr: true,
@@ -423,22 +492,22 @@ func TestValidator_ValidateStruct(t *testing.T) {
 		{
 			name: "invalid InterfaceTest_empty",
 			s: InterfaceTest{
-				IF:  Str{""},
-				IFs: []fmt.Stringer{},
-				IFm: map[string]fmt.Stringer{},
+				IF:  "",
+				IFs: []interface{}{},
+				IFm: map[string]interface{}{},
 			},
-			wantMessage: "IF: 'Str' does validate as 'required';IF.Value: '' does validate as 'required';IFs: '<Array>' does validate as 'required';IFm: '<Map>' does validate as 'required'",
+			wantMessage: "IF: '' does validate as 'required';IFs: '<Array>' does validate as 'required';IFm: '<Map>' does validate as 'required'",
 		},
 		{
-			name: "invalid InterfaceTest_ptr_empty",
+			name: "invalid InterfaceTest_array_map_empty",
 			s: InterfaceTest{
-				IF:  &Str{""},
-				IFs: []fmt.Stringer{&Str{""}},
-				IFm: map[string]fmt.Stringer{
-					"key1": &Str{""},
+				IF:  "",
+				IFs: []interface{}{""},
+				IFm: map[string]interface{}{
+					"key1": "",
 				},
 			},
-			wantMessage: "IF: 'Str' does validate as 'required';IF.Value: '' does validate as 'required';IFs[0]: 'Str' does validate as 'required';IFs[0].Value: '' does validate as 'required';IFm[key1]: 'Str' does validate as 'required';IFm[key1].Value: '' does validate as 'required'",
+			wantMessage: "IF: '' does validate as 'required';IFs[0]: '' does validate as 'required';IFm[key1]: '' does validate as 'required'",
 		},
 
 		// PtrTest
@@ -490,17 +559,154 @@ func TestValidator_ValidateStruct(t *testing.T) {
 			}
 
 			if err == nil {
-				t.Fatal("expected `error`, but got `nil`")
+				t.Fatal("err want `error`, but got `nil`")
 			}
 
 			errs, ok := validator.ToErrors(err)
 			if !ok {
-				t.Fatal("expected `true`, but got `false`")
+				t.Fatal("ToErrors want `true`, but got `false`")
 			}
 
 			if tc.wantMessage != errs.Error() {
-				t.Fatalf("expected `%v`\nbut got `%v`", tc.wantMessage, errs.Error())
+				t.Fatalf("Message want `%v`\nbut got `%v`", tc.wantMessage, errs.Error())
 			}
 		})
+	}
+
+	testcases2 := []struct {
+		name        string
+		s           interface{}
+		wantMessage string
+	}{
+		{
+			name:        "InvalidTagSimpleTest",
+			s:           InvalidTagSimpleTest{},
+			wantMessage: "parse: tag unknown function not found",
+		},
+		{
+			name: "InvalidTagStructTest",
+			s: InvalidTagStructTest{
+				S: InvalidTag{},
+			},
+			wantMessage: "parse: tag unknown function not found",
+		},
+		{
+			name: "InvalidTagStructArrayTest",
+			s: InvalidTagStructArrayTest{
+				S: []InvalidTag{{}},
+			},
+			wantMessage: "parse: tag unknown function not found",
+		},
+		{
+			name: "InvalidTagStructMapTest",
+			s: InvalidTagStructMapTest{
+				S: map[string]InvalidTag{
+					"key1": {},
+				},
+			},
+			wantMessage: "parse: tag unknown function not found",
+		},
+	}
+
+	for _, tc := range testcases2 {
+		t.Run(tc.name, func(t *testing.T) {
+			err := v.ValidateStruct(tc.s)
+			if err == nil {
+				t.Fatal("err want, but got nil")
+			}
+
+			if err.Error() != tc.wantMessage {
+				t.Fatalf("Message want %v, but got %v", tc.wantMessage, err)
+			}
+		})
+	}
+}
+
+func TestValidator_ValidateVar(t *testing.T) {
+	v := validator.New()
+
+	t.Run("InvalidTagStructTest", func(t *testing.T) {
+		err := v.ValidateVar(InvalidTagStructTest{}, "req")
+		if err == nil {
+			t.Fatal("err want, but got nil")
+		}
+
+		wantMessage := "parse: tag unknown function not found"
+		if err.Error() != wantMessage {
+			t.Fatalf("Message want %v, but got %v", wantMessage, err)
+		}
+	})
+}
+
+func TestValidator_ValidateStruct2(t *testing.T) {
+	testcases := []struct {
+		s          interface{}
+		wantErr    bool
+		wantErrStr string
+	}{
+		{
+			s:          nil,
+			wantErr:    false,
+			wantErrStr: "",
+		},
+		{
+			s:          "test",
+			wantErr:    true,
+			wantErrStr: "struct type required",
+		},
+	}
+
+	v := validator.New()
+	for _, tc := range testcases {
+		err := v.ValidateStruct(tc.s)
+		if tc.wantErr {
+			if tc.wantErrStr != err.Error() {
+				t.Errorf("want %v, got %v", tc.wantErrStr, err)
+			}
+		} else if err != nil {
+			t.Errorf("want nil, got %v", err)
+		}
+	}
+}
+
+func TestValidator_SetFunc(t *testing.T) {
+	v := validator.New()
+
+	v.SetFunc("test", func(_ validator.Field, _ validator.FuncOption) (bool, error) {
+		return false, fmt.Errorf("set func test")
+	})
+
+	wantError := "validateFn: set func test in  test"
+	if err := v.ValidateVar("", "test"); err.Error() != wantError {
+		t.Errorf("want %v, got %v", wantError, err)
+	}
+}
+
+func TestValidator_SetAdapter(t *testing.T) {
+	v := validator.New()
+
+	var str string
+	v.SetAdapter(func(fn validator.Func) validator.Func {
+		return func(f validator.Field, o validator.FuncOption) (bool, error) {
+			str += "1"
+			return fn(f, o)
+		}
+	})
+	v.SetAdapter(func(fn validator.Func) validator.Func {
+		return func(f validator.Field, o validator.FuncOption) (bool, error) {
+			str += "2"
+			return fn(f, o)
+		}
+	})
+	v.SetAdapter(func(fn validator.Func) validator.Func {
+		return func(f validator.Field, o validator.FuncOption) (bool, error) {
+			str += "3"
+			return fn(f, o)
+		}
+	})
+
+	v.ValidateVar("test", "req")
+	if str != "321" {
+		t.Errorf("want 321, got %v", str)
 	}
 }
