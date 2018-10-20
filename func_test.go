@@ -35,6 +35,7 @@ func Test_required(t *testing.T) {
 		{"valid map", v.ValidateVar(map[int]int{1: 1}, tag), false},
 		{"valid ptr", v.ValidateVar(&Str{Value: "str"}, tag), false},
 		{"valid struct", v.ValidateVar(Str{Value: "str"}, tag), false},
+		{"valid bool", v.ValidateVar(true, tag), false},
 
 		{"invalid string", v.ValidateVar("", tag), true},
 		{"invalid int", v.ValidateVar(0, tag), true},
@@ -54,6 +55,7 @@ func Test_required(t *testing.T) {
 		{"invalid map", v.ValidateVar(map[int]int{}, tag), true},
 		{"invalid ptr", v.ValidateVar((*Str)(nil), tag), true},
 		{"invalid struct", v.ValidateVar(Str{}, tag), true},
+		{"valid bool", v.ValidateVar(false, tag), true},
 	}
 
 	for _, tc := range testcases {
@@ -231,6 +233,7 @@ func Test_numeric(t *testing.T) {
 	}{
 		{"valid", v.ValidateVar("12345", tag), false},
 		{"valid", v.ValidateVar("12345.678", tag), false},
+		{"valid", v.ValidateVar(12345, tag), false},
 
 		{"invalid empty", v.ValidateVar("", tag), true},
 		{"invalid alpha", v.ValidateVar("abc", tag), true},
@@ -267,6 +270,7 @@ func Test_number(t *testing.T) {
 		hasErr bool
 	}{
 		{"valid", v.ValidateVar("12345", tag), false},
+		{"valid", v.ValidateVar(12345, tag), false},
 
 		{"invalid empty", v.ValidateVar("", tag), true},
 		{"invalid float", v.ValidateVar("12345.678", tag), true},
@@ -1406,6 +1410,10 @@ func Test_length_minmax(t *testing.T) {
 		{"valid string max", v.ValidateVar("aaa", tag), false},
 		{"valid int min", v.ValidateVar(2, tag), false},
 		{"valid int max", v.ValidateVar(3, tag), false},
+		{"valid uint min", v.ValidateVar(uint(2), tag), false},
+		{"valid uint max", v.ValidateVar(uint(3), tag), false},
+		{"valid float min", v.ValidateVar(float32(2.0), tag), false},
+		{"valid float max", v.ValidateVar(float32(3.0), tag), false},
 		{"valid slice min", v.ValidateVar([]int{2, 2}, tag), false},
 		{"valid slice max", v.ValidateVar([]int{2, 2, 2}, tag), false},
 		{"valid map min", v.ValidateVar(map[int]int{1: 2, 2: 2}, tag), false},
@@ -1415,10 +1423,15 @@ func Test_length_minmax(t *testing.T) {
 		{"invalid string max", v.ValidateVar("aaaa", tag), true},
 		{"invalid int min", v.ValidateVar(1, tag), true},
 		{"invalid int max", v.ValidateVar(4, tag), true},
+		{"invalid uint min", v.ValidateVar(uint(1), tag), true},
+		{"invalid uint max", v.ValidateVar(uint(4), tag), true},
+		{"invalid float min", v.ValidateVar(float32(1.0), tag), true},
+		{"invalid float max", v.ValidateVar(float32(4.0), tag), true},
 		{"invalid slice min", v.ValidateVar([]int{2}, tag), true},
 		{"invalid slice max", v.ValidateVar([]int{2, 2, 2, 2}, tag), true},
 		{"invalid map min", v.ValidateVar(map[int]int{1: 2}, tag), true},
 		{"invalid map max", v.ValidateVar(map[int]int{1: 2, 2: 2, 3: 2, 4: 2}, tag), true},
+		{"invalid bool", v.ValidateVar(true, tag), true},
 	}
 
 	for _, tc := range testcases {
@@ -1434,6 +1447,14 @@ func Test_length_minmax(t *testing.T) {
 			}
 		})
 	}
+
+	t.Run("invalid param len", func(t *testing.T) {
+		wantError := "validateFn: invalid params len in  len(2|3|4)"
+		err := v.ValidateVar(2, "len(2|3|4)")
+		if err.Error() != wantError {
+			t.Errorf("want `%v`, got `%v`", wantError, err)
+		}
+	})
 }
 
 func Test_length_equal(t *testing.T) {
@@ -1449,13 +1470,18 @@ func Test_length_equal(t *testing.T) {
 	}{
 		{"valid string", v.ValidateVar("aa", tag), false},
 		{"valid int", v.ValidateVar(2, tag), false},
+		{"valid uint", v.ValidateVar(uint(2), tag), false},
+		{"valid float", v.ValidateVar(float32(2.0), tag), false},
 		{"valid slice", v.ValidateVar([]int{2, 2}, tag), false},
 		{"valid map", v.ValidateVar(map[int]int{1: 2, 2: 2}, tag), false},
 
 		{"invalid string", v.ValidateVar("a", tag), true},
 		{"invalid int", v.ValidateVar(1, tag), true},
+		{"invalid uint", v.ValidateVar(uint(1), tag), true},
+		{"invalid float", v.ValidateVar(float32(1.0), tag), true},
 		{"invalid slice", v.ValidateVar([]int{2}, tag), true},
 		{"invalid map", v.ValidateVar(map[int]int{1: 2}, tag), true},
+		{"invalid bool", v.ValidateVar(true, tag), true},
 	}
 
 	for _, tc := range testcases {
@@ -1489,6 +1515,7 @@ func Test_strlength_minmax(t *testing.T) {
 
 		{"invalid string min", v.ValidateVar("あ", tag), true},
 		{"invalid string max", v.ValidateVar("ああああ", tag), true},
+		{"invalid int", v.ValidateVar(3, tag), true},
 	}
 
 	for _, tc := range testcases {
@@ -1504,6 +1531,14 @@ func Test_strlength_minmax(t *testing.T) {
 			}
 		})
 	}
+
+	t.Run("invalid param len", func(t *testing.T) {
+		wantError := "validateFn: invalid params len in  strlen(2|3|4)"
+		err := v.ValidateVar("あああ", "strlen(2|3|4)")
+		if err.Error() != wantError {
+			t.Errorf("want `%v`, got `%v`", wantError, err)
+		}
+	})
 }
 
 func Test_strlength_equal(t *testing.T) {
@@ -1520,6 +1555,7 @@ func Test_strlength_equal(t *testing.T) {
 		{"valid string", v.ValidateVar("ああ", tag), false},
 
 		{"invalid string", v.ValidateVar("あ", tag), true},
+		{"invalid int", v.ValidateVar(2, tag), true},
 	}
 
 	for _, tc := range testcases {
@@ -1572,6 +1608,14 @@ func Test_minlength(t *testing.T) {
 			}
 		})
 	}
+
+	t.Run("invalid param len", func(t *testing.T) {
+		wantError := "validateFn: invalid params len in  min(2|3)"
+		err := v.ValidateVar("aa", "min(2|3)")
+		if err.Error() != wantError {
+			t.Errorf("want `%v`, got `%v`", wantError, err)
+		}
+	})
 }
 
 func Test_maxlength(t *testing.T) {
@@ -1609,6 +1653,14 @@ func Test_maxlength(t *testing.T) {
 			}
 		})
 	}
+
+	t.Run("invalid param len", func(t *testing.T) {
+		wantError := "validateFn: invalid params len in  max(2|3)"
+		err := v.ValidateVar("aa", "max(2|3)")
+		if err.Error() != wantError {
+			t.Errorf("want `%v`, got `%v`", wantError, err)
+		}
+	})
 }
 
 func Test_strminlength(t *testing.T) {
@@ -1643,6 +1695,14 @@ func Test_strminlength(t *testing.T) {
 			}
 		})
 	}
+
+	t.Run("invalid param len", func(t *testing.T) {
+		wantError := "validateFn: invalid params len in  strmin(2|3)"
+		err := v.ValidateVar("aa", "strmin(2|3)")
+		if err.Error() != wantError {
+			t.Errorf("want `%v`, got `%v`", wantError, err)
+		}
+	})
 }
 
 func Test_strmaxlength(t *testing.T) {
@@ -1677,6 +1737,14 @@ func Test_strmaxlength(t *testing.T) {
 			}
 		})
 	}
+
+	t.Run("invalid param len", func(t *testing.T) {
+		wantError := "validateFn: invalid params len in  strmax(2|3)"
+		err := v.ValidateVar("aa", "strmax(2|3)")
+		if err.Error() != wantError {
+			t.Errorf("want `%v`, got `%v`", wantError, err)
+		}
+	})
 }
 
 func Test_or(t *testing.T) {
@@ -1711,4 +1779,12 @@ func Test_or(t *testing.T) {
 			}
 		})
 	}
+
+	t.Run("invalid tag", func(t *testing.T) {
+		wantError := "validateFn: parse: tag unknown function not found in  or(unknown|numeric)"
+		err := v.ValidateVar("===", "or(unknown|numeric)")
+		if err.Error() != wantError {
+			t.Errorf("want `%v`, got `%v`", wantError, err)
+		}
+	})
 }

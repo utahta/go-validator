@@ -11,3 +11,6 @@ bench:
 pprof:
 	go test -bench . -benchmem -cpuprofile cpu.out -memprofile mem.out
 
+changelog:
+	git-chglog -o CHANGELOG.md
+
