@@ -14,6 +14,7 @@ options:
         - test
         - docs
         - chore
+
   commit_groups:
     title_maps:
       feat: Features
@@ -23,12 +24,14 @@ options:
       test: Tests
       docs: Documentation
       chore: Chore
+
   header:
     pattern: "^(\\w*)(?:\\(([\\w\\$\\.\\-\\*\\s]*)\\))?\\:\\s(.*)$"
     pattern_maps:
       - Type
       - Scope
       - Subject
+
   notes:
     keywords:
       - BREAKING CHANGE

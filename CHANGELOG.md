@@ -2,9 +2,14 @@
 ## [Unreleased]
 
 ### Chore
+- Add codecov.yml
 - Add git-chglog
 
 ### Tests
+- Add tests for Validator
+- Add tests for validate functions
+- Add tests for parser and cacher
+- Add tests for Field struct
 - Add tests for Error struct
 
 
