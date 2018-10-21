@@ -686,24 +686,26 @@ func TestValidator_SetAdapter(t *testing.T) {
 	v := validator.New()
 
 	var str string
-	v.SetAdapter(func(fn validator.Func) validator.Func {
-		return func(f validator.Field, o validator.FuncOption) (bool, error) {
-			str += "1"
-			return fn(f, o)
-		}
-	})
-	v.SetAdapter(func(fn validator.Func) validator.Func {
-		return func(f validator.Field, o validator.FuncOption) (bool, error) {
-			str += "2"
-			return fn(f, o)
-		}
-	})
-	v.SetAdapter(func(fn validator.Func) validator.Func {
-		return func(f validator.Field, o validator.FuncOption) (bool, error) {
-			str += "3"
-			return fn(f, o)
-		}
-	})
+	v.SetAdapters(
+		func(fn validator.Func) validator.Func {
+			return func(f validator.Field, o validator.FuncOption) (bool, error) {
+				str += "1"
+				return fn(f, o)
+			}
+		},
+		func(fn validator.Func) validator.Func {
+			return func(f validator.Field, o validator.FuncOption) (bool, error) {
+				str += "2"
+				return fn(f, o)
+			}
+		},
+		func(fn validator.Func) validator.Func {
+			return func(f validator.Field, o validator.FuncOption) (bool, error) {
+				str += "3"
+				return fn(f, o)
+			}
+		},
+	)
 
 	v.ValidateVar("test", "req")
 	if str != "321" {
