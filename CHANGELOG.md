@@ -1,5 +1,23 @@
 # Changelog
 
+<a name="list"></a>
+## [list] - 2018-10-22
+
+<a name="0.0.3"></a>
+## [0.0.3] - 2018-10-22
+### Chore
+- Update .chglog/config.yml
+
+### Code Refactoring
+- Remove unreachable code
+
+### Features
+- Pass context to each validate function
+
+### Pull Requests
+- Merge pull request [#2](https://github.com/utahta/go-validator/issues/2) from utahta/context
+
+
 <a name="0.0.2"></a>
 ## [0.0.2] - 2018-10-21
 ### Chore
@@ -27,5 +45,7 @@ Removed SetAdapter function from Validator.
 <a name="0.0.1"></a>
 ## 0.0.1 - 2018-10-08
 
-[Unreleased]: https://github.com/utahta/go-validator/compare/0.0.2...HEAD
+[Unreleased]: https://github.com/utahta/go-validator/compare/list...HEAD
+[list]: https://github.com/utahta/go-validator/compare/0.0.3...list
+[0.0.3]: https://github.com/utahta/go-validator/compare/0.0.2...0.0.3
 [0.0.2]: https://github.com/utahta/go-validator/compare/0.0.1...0.0.2
