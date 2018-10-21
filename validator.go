@@ -46,11 +46,11 @@ func (v *Validator) SetFunc(rawTag string, fn Func) {
 	v.FuncMap[rawTag] = apply(fn, v.Adapters...)
 }
 
-// SetAdapter sets a validate function adapter.
-func (v *Validator) SetAdapter(adapter Adapter) {
-	v.Adapters = append(v.Adapters, adapter)
+// SetAdapters sets a validate function adapters.
+func (v *Validator) SetAdapters(adapter ...Adapter) {
+	v.Adapters = append(v.Adapters, adapter...)
 	for k, fn := range v.FuncMap {
-		v.FuncMap[k] = apply(fn, adapter)
+		v.FuncMap[k] = apply(fn, adapter...)
 	}
 }
 
