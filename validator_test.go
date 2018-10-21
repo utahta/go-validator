@@ -1,6 +1,7 @@
 package validator_test
 
 import (
+	"context"
 	"fmt"
 	"testing"
 
@@ -672,7 +673,7 @@ func TestValidator_ValidateStruct2(t *testing.T) {
 func TestValidator_SetFunc(t *testing.T) {
 	v := validator.New()
 
-	v.SetFunc("test", func(_ validator.Field, _ validator.FuncOption) (bool, error) {
+	v.SetFunc("test", func(_ context.Context, _ validator.Field, _ validator.FuncOption) (bool, error) {
 		return false, fmt.Errorf("set func test")
 	})
 
@@ -688,21 +689,21 @@ func TestValidator_SetAdapter(t *testing.T) {
 	var str string
 	v.SetAdapters(
 		func(fn validator.Func) validator.Func {
-			return func(f validator.Field, o validator.FuncOption) (bool, error) {
+			return func(ctx context.Context, f validator.Field, o validator.FuncOption) (bool, error) {
 				str += "1"
-				return fn(f, o)
+				return fn(ctx, f, o)
 			}
 		},
 		func(fn validator.Func) validator.Func {
-			return func(f validator.Field, o validator.FuncOption) (bool, error) {
+			return func(ctx context.Context, f validator.Field, o validator.FuncOption) (bool, error) {
 				str += "2"
-				return fn(f, o)
+				return fn(ctx, f, o)
 			}
 		},
 		func(fn validator.Func) validator.Func {
-			return func(f validator.Field, o validator.FuncOption) (bool, error) {
+			return func(ctx context.Context, f validator.Field, o validator.FuncOption) (bool, error) {
 				str += "3"
-				return fn(f, o)
+				return fn(ctx, f, o)
 			}
 		},
 	)

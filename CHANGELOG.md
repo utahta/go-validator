@@ -1,6 +1,4 @@
-<a name="unreleased"></a>
-## [Unreleased]
-
+# Changelog
 
 <a name="0.0.2"></a>
 ## [0.0.2] - 2018-10-21
