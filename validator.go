@@ -217,23 +217,7 @@ func (v *Validator) validate(field Field, tag Tag) error {
 		if val.IsNil() {
 			break
 		}
-		//TODO: to investigate unreachable or not.
-		value := val.Elem()
-
-		var err error
-		if value.Kind() == reflect.Struct || (value.Kind() == reflect.Ptr && value.Elem().Kind() == reflect.Struct) {
-			err = v.validateStruct(newFieldWithParent("", field.origin, value, field))
-		} else if tag.isDig {
-			err = v.validate(newFieldWithParent("", field.origin, value, field), tag)
-		}
-
-		if err != nil {
-			if es, ok := err.(Errors); ok {
-				errs = append(errs, es...)
-			} else {
-				return err
-			}
-		}
+		// unreachable
 
 	case reflect.Struct:
 		err := v.validateStruct(newFieldWithParent("", field.origin, val, field))
