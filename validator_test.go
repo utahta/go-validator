@@ -121,7 +121,7 @@ func (s Str) String() string {
 	return s.Value
 }
 
-func TestValidator_ValidateStruct(t *testing.T) {
+func TestValidateStruct(t *testing.T) {
 	testcases := []struct {
 		name        string
 		s           interface{}
@@ -547,10 +547,9 @@ func TestValidator_ValidateStruct(t *testing.T) {
 		},
 	}
 
-	v := validator.New()
 	for _, tc := range testcases {
 		t.Run(tc.name, func(t *testing.T) {
-			err := v.ValidateStruct(tc.s)
+			err := validator.ValidateStruct(tc.s)
 
 			if tc.wantNoErr {
 				if err != nil {
@@ -611,7 +610,7 @@ func TestValidator_ValidateStruct(t *testing.T) {
 
 	for _, tc := range testcases2 {
 		t.Run(tc.name, func(t *testing.T) {
-			err := v.ValidateStruct(tc.s)
+			err := validator.ValidateStruct(tc.s)
 			if err == nil {
 				t.Fatal("err want, but got nil")
 			}
@@ -623,23 +622,7 @@ func TestValidator_ValidateStruct(t *testing.T) {
 	}
 }
 
-func TestValidator_ValidateVar(t *testing.T) {
-	v := validator.New()
-
-	t.Run("InvalidTagStructTest", func(t *testing.T) {
-		err := v.ValidateVar(InvalidTagStructTest{}, "req")
-		if err == nil {
-			t.Fatal("err want, but got nil")
-		}
-
-		wantMessage := "parse: tag unknown function not found"
-		if err.Error() != wantMessage {
-			t.Fatalf("Message want %v, but got %v", wantMessage, err)
-		}
-	})
-}
-
-func TestValidator_ValidateStruct2(t *testing.T) {
+func TestValidateStruct2(t *testing.T) {
 	testcases := []struct {
 		s          interface{}
 		wantErr    bool
@@ -657,9 +640,8 @@ func TestValidator_ValidateStruct2(t *testing.T) {
 		},
 	}
 
-	v := validator.New()
 	for _, tc := range testcases {
-		err := v.ValidateStruct(tc.s)
+		err := validator.ValidateStruct(tc.s)
 		if tc.wantErr {
 			if tc.wantErrStr != err.Error() {
 				t.Errorf("want %v, got %v", tc.wantErrStr, err)
@@ -667,6 +649,39 @@ func TestValidator_ValidateStruct2(t *testing.T) {
 		} else if err != nil {
 			t.Errorf("want nil, got %v", err)
 		}
+	}
+}
+
+func TestValidateStructContext(t *testing.T) {
+	s := SimpleStructTest{
+		Str:      Str{Value: "test"},
+		StrNoTag: StrNoTag{Value: "test"},
+	}
+
+	err := validator.ValidateStructContext(context.Background(), s)
+	if err != nil {
+		t.Errorf("want err nil, but got %v", err)
+	}
+}
+
+func TestValidateVar(t *testing.T) {
+	t.Run("InvalidTagStructTest", func(t *testing.T) {
+		err := validator.ValidateVar(InvalidTagStructTest{}, "req")
+		if err == nil {
+			t.Fatal("err want, but got nil")
+		}
+
+		wantMessage := "parse: tag unknown function not found"
+		if err.Error() != wantMessage {
+			t.Fatalf("Message want %v, but got %v", wantMessage, err)
+		}
+	})
+}
+
+func TestValidateVarContext(t *testing.T) {
+	err := validator.ValidateVarContext(context.Background(), "test", "req")
+	if err != nil {
+		t.Errorf("want err nil, but got %v", err)
 	}
 }
 

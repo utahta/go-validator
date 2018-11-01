@@ -28,7 +28,7 @@ func (s *tagScanner) Scan() (tagToken, string) {
 	)
 	for {
 		if s.eof() {
-			return eof, lit
+			break
 		}
 
 		ch := s.read()
@@ -60,6 +60,8 @@ func (s *tagScanner) Scan() (tagToken, string) {
 
 		lit += string(ch)
 	}
+
+	return eof, lit
 }
 
 func (s *tagScanner) read() (ch byte) {
