@@ -4,10 +4,16 @@ import (
 	"context"
 	"fmt"
 	"reflect"
+	"sync"
 )
 
 const (
 	tagName = "valid"
+)
+
+var (
+	defaultValidator     *Validator
+	defaultValidatorOnce sync.Once
 )
 
 type (
@@ -263,4 +269,34 @@ func (v *Validator) extractVar(in reflect.Value) reflect.Value {
 			return val
 		}
 	}
+}
+
+// DefaultValidator returns default validator.
+func DefaultValidator() *Validator {
+	defaultValidatorOnce.Do(func() {
+		defaultValidator = New()
+	})
+	return defaultValidator
+}
+
+// ValidateStruct validates a struct that use tags for fields using default validator.
+func ValidateStruct(s interface{}) error {
+	return DefaultValidator().ValidateStruct(s)
+}
+
+// ValidateStructContext validates a struct that use tags for fields using default validator.
+// Pass context to each validate function.
+func ValidateStructContext(ctx context.Context, s interface{}) error {
+	return DefaultValidator().ValidateStructContext(ctx, s)
+}
+
+// ValidateVar validates a value using default validator.
+func ValidateVar(s interface{}, rawTag string) error {
+	return DefaultValidator().ValidateVar(s, rawTag)
+}
+
+// ValidateVarContext validates a value using default validator.
+// Pass context to each validate function.
+func ValidateVarContext(ctx context.Context, s interface{}, rawTag string) error {
+	return DefaultValidator().ValidateVarContext(ctx, s, rawTag)
 }
