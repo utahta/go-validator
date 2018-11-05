@@ -1,5 +1,14 @@
 # Changelog
 
+<a name="0.0.4"></a>
+## [0.0.4] - 2018-11-04
+### Features
+- Export default validate functions
+
+### Pull Requests
+- Merge pull request [#3](https://github.com/utahta/go-validator/issues/3) from utahta/export-validate-func
+
+
 <a name="0.0.3"></a>
 ## [0.0.3] - 2018-10-22
 ### Chore
@@ -41,5 +50,6 @@ Removed SetAdapter function from Validator.
 
 <a name="0.0.1"></a>
 ## 0.0.1 - 2018-10-08
+[0.0.4]: https://github.com/utahta/go-validator/compare/0.0.3...0.0.4
 [0.0.3]: https://github.com/utahta/go-validator/compare/0.0.2...0.0.3
 [0.0.2]: https://github.com/utahta/go-validator/compare/0.0.1...0.0.2
