@@ -14,6 +14,9 @@ type (
 		// Tag is a validation tag.
 		Tag Tag
 
+		// Err is a internal error.
+		Err error
+
 		// CustomMessage is a custom error message. TODO:
 		CustomMessage string
 
@@ -32,6 +35,10 @@ func ToErrors(err error) (Errors, bool) {
 }
 
 func (e Error) Error() string {
+	if e.Err != nil {
+		return fmt.Sprintf("%s: an error occurred in '%s': %v", e.Field.Name(), e.Tag, e.Err)
+	}
+
 	if e.SuppressErrorFieldValue {
 		return fmt.Sprintf("%s: The value does validate as '%s'", e.Field.Name(), e.Tag)
 	}

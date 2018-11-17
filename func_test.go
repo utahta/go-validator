@@ -1449,7 +1449,7 @@ func Test_length_minmax(t *testing.T) {
 	}
 
 	t.Run("invalid param len", func(t *testing.T) {
-		wantError := "validateFn: invalid params len in  len(2|3|4)"
+		wantError := ": an error occurred in 'len(2|3|4)': invalid params len"
 		err := v.ValidateVar(2, "len(2|3|4)")
 		if err.Error() != wantError {
 			t.Errorf("want `%v`, got `%v`", wantError, err)
@@ -1533,7 +1533,7 @@ func Test_strlength_minmax(t *testing.T) {
 	}
 
 	t.Run("invalid param len", func(t *testing.T) {
-		wantError := "validateFn: invalid params len in  strlen(2|3|4)"
+		wantError := ": an error occurred in 'strlen(2|3|4)': invalid params len"
 		err := v.ValidateVar("あああ", "strlen(2|3|4)")
 		if err.Error() != wantError {
 			t.Errorf("want `%v`, got `%v`", wantError, err)
@@ -1610,7 +1610,7 @@ func Test_minlength(t *testing.T) {
 	}
 
 	t.Run("invalid param len", func(t *testing.T) {
-		wantError := "validateFn: invalid params len in  min(2|3)"
+		wantError := ": an error occurred in 'min(2|3)': invalid params len"
 		err := v.ValidateVar("aa", "min(2|3)")
 		if err.Error() != wantError {
 			t.Errorf("want `%v`, got `%v`", wantError, err)
@@ -1655,7 +1655,7 @@ func Test_maxlength(t *testing.T) {
 	}
 
 	t.Run("invalid param len", func(t *testing.T) {
-		wantError := "validateFn: invalid params len in  max(2|3)"
+		wantError := ": an error occurred in 'max(2|3)': invalid params len"
 		err := v.ValidateVar("aa", "max(2|3)")
 		if err.Error() != wantError {
 			t.Errorf("want `%v`, got `%v`", wantError, err)
@@ -1697,10 +1697,10 @@ func Test_strminlength(t *testing.T) {
 	}
 
 	t.Run("invalid param len", func(t *testing.T) {
-		wantError := "validateFn: invalid params len in  strmin(2|3)"
+		wantError := ": an error occurred in 'strmin(2|3)': invalid params len"
 		err := v.ValidateVar("aa", "strmin(2|3)")
 		if err.Error() != wantError {
-			t.Errorf("want `%v`, got `%v`", wantError, err)
+			t.Errorf("want %q, got %q", wantError, err)
 		}
 	})
 }
@@ -1739,10 +1739,10 @@ func Test_strmaxlength(t *testing.T) {
 	}
 
 	t.Run("invalid param len", func(t *testing.T) {
-		wantError := "validateFn: invalid params len in  strmax(2|3)"
+		wantError := ": an error occurred in 'strmax(2|3)': invalid params len"
 		err := v.ValidateVar("aa", "strmax(2|3)")
 		if err.Error() != wantError {
-			t.Errorf("want `%v`, got `%v`", wantError, err)
+			t.Errorf("want %q, got %q", wantError, err)
 		}
 	})
 }
@@ -1781,7 +1781,7 @@ func Test_or(t *testing.T) {
 	}
 
 	t.Run("invalid tag", func(t *testing.T) {
-		wantError := "validateFn: parse: tag unknown function not found in  or(unknown|numeric)"
+		wantError := ": an error occurred in 'or(unknown|numeric)': parse: tag unknown function not found"
 		err := v.ValidateVar("===", "or(unknown|numeric)")
 		if err.Error() != wantError {
 			t.Errorf("want `%v`, got `%v`", wantError, err)

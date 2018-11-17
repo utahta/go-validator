@@ -180,11 +180,8 @@ func (v *Validator) validate(ctx context.Context, field Field, tag Tag) error {
 	var errs Errors
 	if tag.Enable {
 		valid, err := tag.validateFn(ctx, field, FuncOption{Params: tag.Params, Optional: tag.Optional, v: v})
-		if err != nil {
-			return fmt.Errorf("validateFn: %v in %s %s", err, field.Name(), tag.String())
-		}
-		if !valid {
-			errs = append(errs, Error{Field: field, Tag: tag, SuppressErrorFieldValue: v.SuppressErrorFieldValue})
+		if !valid || err != nil {
+			errs = append(errs, Error{Field: field, Tag: tag, Err: err, SuppressErrorFieldValue: v.SuppressErrorFieldValue})
 		}
 	}
 

@@ -689,12 +689,12 @@ func TestValidator_SetFunc(t *testing.T) {
 	v := validator.New()
 
 	v.SetFunc("test", func(_ context.Context, _ validator.Field, _ validator.FuncOption) (bool, error) {
-		return false, fmt.Errorf("set func test")
+		return false, fmt.Errorf("set func failure")
 	})
 
-	wantError := "validateFn: set func test in  test"
+	wantError := ": an error occurred in 'test': set func failure"
 	if err := v.ValidateVar("", "test"); err.Error() != wantError {
-		t.Errorf("want %v, got %v", wantError, err)
+		t.Errorf("want %q, got %q", wantError, err)
 	}
 }
 
