@@ -5,34 +5,26 @@ import (
 	"strings"
 )
 
-func (v *Validator) tagParse(rawTag string) ([]Tag, error) {
+func (v *Validator) tagParse(rawTag string) (*tagChunk, error) {
 	if tags, ok := v.tagCache.Load(rawTag); ok {
 		return tags, nil
 	}
 
 	var (
-		tags       []Tag
-		optional   = false
-		orParsing  = false
-		digParsing = false
+		rootTagChunk tagChunk
+		chunk        *tagChunk
+		orParsing    = false
 	)
 	const optionalTagName = "optional"
+
+	chunk = &rootTagChunk
 
 	s := newTagScanner(rawTag)
 loop:
 	for {
 		token, lit := s.Scan()
 		if lit == optionalTagName {
-			for i := range tags {
-				if digParsing {
-					if tags[i].isDig {
-						tags[i].Optional = true
-					}
-				} else {
-					tags[i].Optional = true
-				}
-			}
-			optional = true
+			chunk.Optional = true
 		}
 
 		switch token {
@@ -45,13 +37,13 @@ loop:
 			}
 
 			if orParsing {
-				tags[len(tags)-1].Params = append(tags[len(tags)-1].Params, lit)
+				chunk.Tags[len(chunk.Tags)-1].Params = append(chunk.Tags[len(chunk.Tags)-1].Params, lit)
 			} else {
-				tag, err := v.newTag(lit, !digParsing, optional)
+				tag, err := v.newTag(lit)
 				if err != nil {
 					return nil, err
 				}
-				tags = append(tags, tag)
+				chunk.Tags = append(chunk.Tags, tag)
 			}
 			break loop
 
@@ -64,13 +56,13 @@ loop:
 			}
 
 			if orParsing {
-				tags[len(tags)-1].Params = append(tags[len(tags)-1].Params, lit)
+				chunk.Tags[len(chunk.Tags)-1].Params = append(chunk.Tags[len(chunk.Tags)-1].Params, lit)
 			} else {
-				tag, err := v.newTag(lit, !digParsing, optional)
+				tag, err := v.newTag(lit)
 				if err != nil {
 					return nil, err
 				}
-				tags = append(tags, tag)
+				chunk.Tags = append(chunk.Tags, tag)
 			}
 			orParsing = false
 
@@ -83,43 +75,45 @@ loop:
 			}
 
 			if orParsing {
-				tags[len(tags)-1].Params = append(tags[len(tags)-1].Params, lit)
+				chunk.Tags[len(chunk.Tags)-1].Params = append(chunk.Tags[len(chunk.Tags)-1].Params, lit)
 			} else {
-				tags = append(tags, Tag{Name: "or", Params: []string{lit}, Optional: optional, Enable: !digParsing, isDig: true, validateFn: v.FuncMap["or"]})
+				chunk.Tags = append(chunk.Tags, Tag{Name: "or", Params: []string{lit}, validateFn: v.FuncMap["or"]})
 			}
 			orParsing = true
 
-		case digSeparator:
+		case nextSeparator:
 			if lit != "" && lit != optionalTagName {
 				if orParsing {
-					tags[len(tags)-1].Params = append(tags[len(tags)-1].Params, lit)
+					chunk.Tags[len(chunk.Tags)-1].Params = append(chunk.Tags[len(chunk.Tags)-1].Params, lit)
 				} else {
-					tag, err := v.newTag(lit, true, optional)
+					tag, err := v.newTag(lit)
 					if err != nil {
 						return nil, err
 					}
-					tags = append(tags, tag)
+					chunk.Tags = append(chunk.Tags, tag)
 				}
 			}
-			for i := range tags {
-				tags[i].isDig = false
-			}
-			digParsing = true
 			orParsing = false
-			optional = false
+			chunk.Next = &tagChunk{}
+			chunk = chunk.Next
 
 		case illegal:
 			return nil, fmt.Errorf("parse: illegal token")
 		}
 	}
 
-	v.tagCache.Store(rawTag, tags)
+	if rootTagChunk.Next == nil {
+		rootTagChunk.Next = &tagChunk{
+			Tags: rootTagChunk.Tags[:],
+		}
+	}
+	v.tagCache.Store(rawTag, &rootTagChunk)
 
-	return tags, nil
+	return &rootTagChunk, nil
 }
 
 // newTag returns Tag.
-func (v *Validator) newTag(lit string, enable, optional bool) (Tag, error) {
+func (v *Validator) newTag(lit string) (Tag, error) {
 	var (
 		name   string
 		params []string
@@ -156,9 +150,6 @@ func (v *Validator) newTag(lit string, enable, optional bool) (Tag, error) {
 	return Tag{
 		Name:       name,
 		Params:     params,
-		Optional:   optional,
-		Enable:     enable,
-		isDig:      true,
 		validateFn: fn,
 	}, nil
 }

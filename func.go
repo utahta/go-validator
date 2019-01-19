@@ -21,9 +21,6 @@ type (
 		// Params has any parameters.
 		Params []string
 
-		// Optional is a optional flag. if true, empty value is always valid.
-		Optional bool
-
 		v *Validator
 	}
 
@@ -87,9 +84,7 @@ var (
 		"or":         or,
 	}
 
-	defaultAdapters = []Adapter{
-		withOptional(),
-	}
+	defaultAdapters []Adapter
 )
 
 func apply(fn Func, adapters ...Adapter) Func {
@@ -97,17 +92,6 @@ func apply(fn Func, adapters ...Adapter) Func {
 		fn = adapter(fn)
 	}
 	return fn
-}
-
-func withOptional() Adapter {
-	return func(fn Func) Func {
-		return func(ctx context.Context, f Field, opt FuncOption) (bool, error) {
-			if opt.Optional && isEmpty(f) {
-				return true, nil
-			}
-			return fn(ctx, f, opt)
-		}
-	}
 }
 
 // isEmpty return true if value is zero and else false.

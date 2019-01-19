@@ -543,7 +543,7 @@ func TestValidateStruct(t *testing.T) {
 					"key1": {""},
 				},
 			},
-			wantMessage: "Ptr: 'Str' does validate as 'required';Ptr.Value: '' does validate as 'required';Ptrs[0].Value: '' does validate as 'required';Ptrm[key1].Value: '' does validate as 'required'",
+			wantMessage: "Ptr: 'Str' does validate as 'required';Ptr.Value: '' does validate as 'required';Ptrs[0]: 'Str' does validate as 'required';Ptrs[0].Value: '' does validate as 'required';Ptrm[key1]: 'Str' does validate as 'required';Ptrm[key1].Value: '' does validate as 'required'",
 		},
 	}
 
@@ -558,18 +558,7 @@ func TestValidateStruct(t *testing.T) {
 				return
 			}
 
-			if err == nil {
-				t.Fatal("err want `error`, but got `nil`")
-			}
-
-			errs, ok := validator.ToErrors(err)
-			if !ok {
-				t.Fatal("ToErrors want `true`, but got `false`")
-			}
-
-			if tc.wantMessage != errs.Error() {
-				t.Fatalf("Message want `%v`\nbut got `%v`", tc.wantMessage, errs.Error())
-			}
+			assertValidationError(t, tc.wantMessage, err)
 		})
 	}
 
@@ -661,6 +650,66 @@ func TestValidateStructContext(t *testing.T) {
 	err := validator.ValidateStructContext(context.Background(), s)
 	if err != nil {
 		t.Errorf("want err nil, but got %v", err)
+	}
+}
+
+func TestValidateStruct_Optional(t *testing.T) {
+	type (
+		Foo struct {
+			Name string `valid:"numeric"`
+		}
+		OptionalFoo struct {
+			Foo Foo `valid:"optional"`
+		}
+	)
+
+	testcases := []struct {
+		name        string
+		s           OptionalFoo
+		wantMessage string
+		wantNoError bool
+	}{
+		{
+			name:        "Valid",
+			s:           OptionalFoo{},
+			wantNoError: true,
+		},
+		{
+			name: "Invalid OptionalFoo.Foo.Name",
+			s: OptionalFoo{
+				Foo: Foo{Name: "aaa"},
+			},
+			wantMessage: "Foo.Name: 'aaa' does validate as 'numeric'",
+		},
+	}
+
+	for _, tc := range testcases {
+		t.Run(tc.name, func(t *testing.T) {
+			err := validator.ValidateStruct(tc.s)
+
+			if tc.wantNoError {
+				if err != nil {
+					t.Error(err)
+				}
+				return
+			}
+			assertValidationError(t, tc.wantMessage, err)
+		})
+	}
+}
+
+func assertValidationError(t *testing.T, expectMessage string, err error) {
+	if err == nil {
+		t.Fatal("err want `error`, but got `nil`")
+	}
+
+	errs, ok := validator.ToErrors(err)
+	if !ok {
+		t.Fatal("ToErrors want `true`, but got `false`")
+	}
+
+	if expectMessage != errs.Error() {
+		t.Fatalf("Message want `%v`\nbut got `%v`", expectMessage, errs.Error())
 	}
 }
 

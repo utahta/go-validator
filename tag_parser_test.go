@@ -5,248 +5,412 @@ import "testing"
 func Test_tagParse(t *testing.T) {
 	testcases := []struct {
 		rawTag string
-		want   []Tag
+		want   tagChunk
 	}{
 		{
-			"required",
-			[]Tag{
-				{Name: "required", Enable: true, isDig: true},
+			rawTag: "required",
+			want: tagChunk{
+				Tags: []Tag{{Name: "required"}},
+				Next: &tagChunk{
+					Tags: []Tag{{Name: "required"}},
+				},
 			},
 		},
 		{
-			"len(3)",
-			[]Tag{
-				{Name: "len", Params: []string{"3"}, Enable: true, isDig: true},
+			rawTag: "len(3)",
+			want: tagChunk{
+				Tags: []Tag{{Name: "len", Params: []string{"3"}}},
+				Next: &tagChunk{
+					Tags: []Tag{{Name: "len", Params: []string{"3"}}},
+				},
 			},
 		},
 		{
-			"len(1|3)",
-			[]Tag{
-				{Name: "len", Params: []string{"1", "3"}, Enable: true, isDig: true},
+			rawTag: "len(1|3)",
+			want: tagChunk{
+				Tags: []Tag{{Name: "len", Params: []string{"1", "3"}}},
+				Next: &tagChunk{
+					Tags: []Tag{{Name: "len", Params: []string{"1", "3"}}},
+				},
 			},
 		},
 		{
-			"len(1|3),len(AAA|BBB|CCC)",
-			[]Tag{
-				{Name: "len", Params: []string{"1", "3"}, Enable: true, isDig: true},
-				{Name: "len", Params: []string{"AAA", "BBB", "CCC"}, Enable: true, isDig: true},
+			rawTag: "len(1|3),len(AAA|BBB|CCC)",
+			want: tagChunk{
+				Tags: []Tag{
+					{Name: "len", Params: []string{"1", "3"}},
+					{Name: "len", Params: []string{"AAA", "BBB", "CCC"}},
+				},
+				Next: &tagChunk{
+					Tags: []Tag{
+						{Name: "len", Params: []string{"1", "3"}},
+						{Name: "len", Params: []string{"AAA", "BBB", "CCC"}},
+					},
+				},
 			},
 		},
 		{
-			"required, len(3)",
-			[]Tag{
-				{Name: "required", Enable: true, isDig: true},
-				{Name: "len", Params: []string{"3"}, Enable: true, isDig: true},
+			rawTag: "required, len(3)",
+			want: tagChunk{
+				Tags: []Tag{
+					{Name: "required"},
+					{Name: "len", Params: []string{"3"}},
+				},
+				Next: &tagChunk{
+					Tags: []Tag{
+						{Name: "required"},
+						{Name: "len", Params: []string{"3"}},
+					},
+				},
 			},
 		},
 		{
-			"required, len(3), len(1|3)",
-			[]Tag{
-				{Name: "required", Enable: true, isDig: true},
-				{Name: "len", Params: []string{"3"}, Enable: true, isDig: true},
-				{Name: "len", Params: []string{"1", "3"}, Enable: true, isDig: true},
+			rawTag: "required, len(3), len(1|3)",
+			want: tagChunk{
+				Tags: []Tag{
+					{Name: "required"},
+					{Name: "len", Params: []string{"3"}},
+					{Name: "len", Params: []string{"1", "3"}},
+				},
+				Next: &tagChunk{
+					Tags: []Tag{
+						{Name: "required"},
+						{Name: "len", Params: []string{"3"}},
+						{Name: "len", Params: []string{"1", "3"}},
+					},
+				},
 			},
 		},
 
-		// Dig
+		// next separator
 		{
-			"required;",
-			[]Tag{
-				{Name: "required", Enable: true, isDig: false},
+			rawTag: "required;",
+			want: tagChunk{
+				Tags: []Tag{{Name: "required"}},
+				Next: &tagChunk{},
 			},
 		},
 		{
-			"required ; ",
-			[]Tag{
-				{Name: "required", Enable: true, isDig: false},
+			rawTag: "required ; ",
+			want: tagChunk{
+				Tags: []Tag{{Name: "required"}},
+				Next: &tagChunk{},
 			},
 		},
 		{
-			"required; required",
-			[]Tag{
-				{Name: "required", Enable: true, isDig: false},
-				{Name: "required", Enable: false, isDig: true},
+			rawTag: "required; required",
+			want: tagChunk{
+				Tags: []Tag{{Name: "required"}},
+				Next: &tagChunk{
+					Tags: []Tag{{Name: "required"}},
+				},
 			},
 		},
 		{
-			"required ; len(3)",
-			[]Tag{
-				{Name: "required", Enable: true, isDig: false},
-				{Name: "len", Params: []string{"3"}, Enable: false, isDig: true},
+			rawTag: "required ; len(3)",
+			want: tagChunk{
+				Tags: []Tag{{Name: "required"}},
+				Next: &tagChunk{
+					Tags: []Tag{{Name: "len", Params: []string{"3"}}},
+				},
 			},
 		},
 		{
-			"len(3); required",
-			[]Tag{
-				{Name: "len", Params: []string{"3"}, Enable: true, isDig: false},
-				{Name: "required", Enable: false, isDig: true},
+			rawTag: "len(3); required",
+			want: tagChunk{
+				Tags: []Tag{{Name: "len", Params: []string{"3"}}},
+				Next: &tagChunk{
+					Tags: []Tag{{Name: "required"}},
+				},
 			},
 		},
 		{
-			"; len(3)",
-			[]Tag{
-				{Name: "len", Params: []string{"3"}, Enable: false, isDig: true},
+			rawTag: "; len(3)",
+			want: tagChunk{
+				Tags: []Tag{},
+				Next: &tagChunk{
+					Tags: []Tag{{Name: "len", Params: []string{"3"}}},
+				},
 			},
 		},
 
 		// Optional
 		{
-			"optional,required",
-			[]Tag{
-				{Name: "required", Enable: true, isDig: true, Optional: true},
+			rawTag: "optional",
+			want: tagChunk{
+				Tags:     []Tag{},
+				Optional: true,
+				Next: &tagChunk{
+					Tags: []Tag{},
+				},
 			},
 		},
 		{
-			"required,optional",
-			[]Tag{
-				{Name: "required", Enable: true, isDig: true, Optional: true},
+			rawTag: "optional,required",
+			want: tagChunk{
+				Tags:     []Tag{{Name: "required"}},
+				Optional: true,
+				Next: &tagChunk{
+					Tags: []Tag{{Name: "required"}},
+				},
 			},
 		},
 		{
-			"len(3),optional,required",
-			[]Tag{
-				{Name: "len", Params: []string{"3"}, Enable: true, isDig: true, Optional: true},
-				{Name: "required", Enable: true, isDig: true, Optional: true},
+			rawTag: "required,optional",
+			want: tagChunk{
+				Tags:     []Tag{{Name: "required"}},
+				Optional: true,
+				Next: &tagChunk{
+					Tags: []Tag{{Name: "required"}},
+				},
+			},
+		},
+		{
+			rawTag: "len(3),optional,required",
+			want: tagChunk{
+				Tags: []Tag{
+					{Name: "len", Params: []string{"3"}},
+					{Name: "required"},
+				},
+				Optional: true,
+				Next: &tagChunk{
+					Tags: []Tag{
+						{Name: "len", Params: []string{"3"}},
+						{Name: "required"},
+					},
+				},
 			},
 		},
 
-		// Optional, Dig
+		// Optional, next separator
 		{
-			"optional,max(3); required,len(3)",
-			[]Tag{
-				{Name: "max", Params: []string{"3"}, Enable: true, isDig: false, Optional: true},
-				{Name: "required", Enable: false, isDig: true, Optional: false},
-				{Name: "len", Params: []string{"3"}, Enable: false, isDig: true, Optional: false},
+			rawTag: "optional,max(3); required,len(3)",
+			want: tagChunk{
+				Tags: []Tag{
+					{Name: "max", Params: []string{"3"}},
+				},
+				Optional: true,
+				Next: &tagChunk{
+					Tags: []Tag{
+						{Name: "required"},
+						{Name: "len", Params: []string{"3"}},
+					},
+				},
 			},
 		},
 		{
-			"max(3),optional; required,len(3)",
-			[]Tag{
-				{Name: "max", Params: []string{"3"}, Enable: true, isDig: false, Optional: true},
-				{Name: "required", Enable: false, isDig: true, Optional: false},
-				{Name: "len", Params: []string{"3"}, Enable: false, isDig: true, Optional: false},
+			rawTag: "max(3),optional; required,len(3)",
+			want: tagChunk{
+				Tags: []Tag{
+					{Name: "max", Params: []string{"3"}},
+				},
+				Optional: true,
+				Next: &tagChunk{
+					Tags: []Tag{
+						{Name: "required"},
+						{Name: "len", Params: []string{"3"}},
+					},
+				},
 			},
 		},
 		{
-			"max(3); optional,required,len(3)",
-			[]Tag{
-				{Name: "max", Params: []string{"3"}, Enable: true, isDig: false, Optional: false},
-				{Name: "required", Enable: false, isDig: true, Optional: true},
-				{Name: "len", Params: []string{"3"}, Enable: false, isDig: true, Optional: true},
+			rawTag: "max(3); optional,required,len(3)",
+			want: tagChunk{
+				Tags: []Tag{
+					{Name: "max", Params: []string{"3"}},
+				},
+				Next: &tagChunk{
+					Tags: []Tag{
+						{Name: "required"},
+						{Name: "len", Params: []string{"3"}},
+					},
+					Optional: true,
+				},
 			},
 		},
 		{
-			"max(3); required,len(3),optional",
-			[]Tag{
-				{Name: "max", Params: []string{"3"}, Enable: true, isDig: false, Optional: false},
-				{Name: "required", Enable: false, isDig: true, Optional: true},
-				{Name: "len", Params: []string{"3"}, Enable: false, isDig: true, Optional: true},
+			rawTag: "max(3); required,len(3),optional",
+			want: tagChunk{
+				Tags: []Tag{
+					{Name: "max", Params: []string{"3"}},
+				},
+				Next: &tagChunk{
+					Tags: []Tag{
+						{Name: "required"},
+						{Name: "len", Params: []string{"3"}},
+					},
+					Optional: true,
+				},
 			},
 		},
 		{
-			"optional; required",
-			[]Tag{
-				{Name: "required", Enable: false, isDig: true, Optional: false},
+			rawTag: "optional; required",
+			want: tagChunk{
+				Tags:     []Tag{},
+				Optional: true,
+				Next: &tagChunk{
+					Tags: []Tag{{Name: "required"}},
+				},
 			},
 		},
 
 		// OR
 		{
-			"alpha|numeric",
-			[]Tag{
-				{Name: "or", Params: []string{"alpha", "numeric"}, Enable: true, isDig: true},
+			rawTag: "alpha|numeric",
+			want: tagChunk{
+				Tags: []Tag{{Name: "or", Params: []string{"alpha", "numeric"}}},
+				Next: &tagChunk{
+					Tags: []Tag{{Name: "or", Params: []string{"alpha", "numeric"}}},
+				},
 			},
 		},
 		{
-			"alpha|numeric|len(1|10)",
-			[]Tag{
-				{Name: "or", Params: []string{"alpha", "numeric", "len(1|10)"}, Enable: true, isDig: true},
+			rawTag: "alpha|numeric|len(1|10)",
+			want: tagChunk{
+				Tags: []Tag{{Name: "or", Params: []string{"alpha", "numeric", "len(1|10)"}}},
+				Next: &tagChunk{
+					Tags: []Tag{{Name: "or", Params: []string{"alpha", "numeric", "len(1|10)"}}},
+				},
 			},
 		},
 		{
-			"optional|alpha|numeric",
-			[]Tag{
-				{Name: "or", Params: []string{"alpha", "numeric"}, Enable: true, isDig: true, Optional: true},
+			rawTag: "optional|alpha|numeric",
+			want: tagChunk{
+				Tags:     []Tag{{Name: "or", Params: []string{"alpha", "numeric"}}},
+				Optional: true,
+				Next: &tagChunk{
+					Tags: []Tag{{Name: "or", Params: []string{"alpha", "numeric"}}},
+				},
 			},
 		},
 		{
-			"or(req|numeric)",
-			[]Tag{
-				{Name: "or", Params: []string{"req", "numeric"}, Enable: true, isDig: true},
+			rawTag: "or(req|numeric)",
+			want: tagChunk{
+				Tags: []Tag{{Name: "or", Params: []string{"req", "numeric"}}},
+				Next: &tagChunk{
+					Tags: []Tag{{Name: "or", Params: []string{"req", "numeric"}}},
+				},
 			},
 		},
 
 		// OR, AND
 		{
-			"alpha|numeric,len(1|10)",
-			[]Tag{
-				{Name: "or", Params: []string{"alpha", "numeric"}, Enable: true, isDig: true},
-				{Name: "len", Params: []string{"1", "10"}, Enable: true, isDig: true},
+			rawTag: "alpha|numeric,len(1|10)",
+			want: tagChunk{
+				Tags: []Tag{
+					{Name: "or", Params: []string{"alpha", "numeric"}},
+					{Name: "len", Params: []string{"1", "10"}},
+				},
+				Next: &tagChunk{
+					Tags: []Tag{
+						{Name: "or", Params: []string{"alpha", "numeric"}},
+						{Name: "len", Params: []string{"1", "10"}},
+					},
+				},
 			},
 		},
 		{
-			"alpha|numeric,min(1),max(10)",
-			[]Tag{
-				{Name: "or", Params: []string{"alpha", "numeric"}, Enable: true, isDig: true},
-				{Name: "min", Params: []string{"1"}, Enable: true, isDig: true},
-				{Name: "max", Params: []string{"10"}, Enable: true, isDig: true},
+			rawTag: "alpha|numeric,min(1),max(10)",
+			want: tagChunk{
+				Tags: []Tag{
+					{Name: "or", Params: []string{"alpha", "numeric"}},
+					{Name: "min", Params: []string{"1"}},
+					{Name: "max", Params: []string{"10"}},
+				},
+				Next: &tagChunk{
+					Tags: []Tag{
+						{Name: "or", Params: []string{"alpha", "numeric"}},
+						{Name: "min", Params: []string{"1"}},
+						{Name: "max", Params: []string{"10"}},
+					},
+				},
 			},
 		},
 		{
-			"alpha|numeric,min(1)|max(10)",
-			[]Tag{
-				{Name: "or", Params: []string{"alpha", "numeric"}, Enable: true, isDig: true},
-				{Name: "or", Params: []string{"min(1)", "max(10)"}, Enable: true, isDig: true},
+			rawTag: "alpha|numeric,min(1)|max(10)",
+			want: tagChunk{
+				Tags: []Tag{
+					{Name: "or", Params: []string{"alpha", "numeric"}},
+					{Name: "or", Params: []string{"min(1)", "max(10)"}},
+				},
+				Next: &tagChunk{
+					Tags: []Tag{
+						{Name: "or", Params: []string{"alpha", "numeric"}},
+						{Name: "or", Params: []string{"min(1)", "max(10)"}},
+					},
+				},
 			},
 		},
 
-		// OR, Dig
+		// OR, next separator
 		{
-			"alpha|numeric ;",
-			[]Tag{
-				{Name: "or", Params: []string{"alpha", "numeric"}, Enable: true, isDig: false},
+			rawTag: "alpha|numeric ;",
+			want: tagChunk{
+				Tags: []Tag{
+					{Name: "or", Params: []string{"alpha", "numeric"}},
+				},
+				Next: &tagChunk{},
 			},
 		},
 		{
-			"alpha|numeric ; min(1)|max(10)",
-			[]Tag{
-				{Name: "or", Params: []string{"alpha", "numeric"}, Enable: true, isDig: false},
-				{Name: "or", Params: []string{"min(1)", "max(10)"}, Enable: false, isDig: true},
+			rawTag: "alpha|numeric ; min(1)|max(10)",
+			want: tagChunk{
+				Tags: []Tag{{Name: "or", Params: []string{"alpha", "numeric"}}},
+				Next: &tagChunk{
+					Tags: []Tag{{Name: "or", Params: []string{"min(1)", "max(10)"}}},
+				},
 			},
 		},
 	}
 
 	for _, tc := range testcases {
 		t.Run(tc.rawTag, func(t *testing.T) {
-			tags, err := New().tagParse(tc.rawTag)
+			chunk, err := New().tagParse(tc.rawTag)
 			if err != nil {
 				t.Fatal(err)
 			}
 
-			if len(tc.want) != len(tags) {
-				t.Fatalf("want length %v, got %v", len(tc.want), len(tags))
+			if len(tc.want.Tags) != len(chunk.Tags) {
+				t.Fatalf("want tag len %v, but got %v", len(tc.want.Tags), len(chunk.Tags))
 			}
+			if tc.want.Optional != chunk.Optional {
+				t.Fatalf("want optional %v, but got %v", tc.want.Optional, chunk.Optional)
+			}
+			for i, wantTag := range tc.want.Tags {
+				if wantTag.Name != chunk.Tags[i].Name {
+					t.Errorf("want tag name %v, but got %v", wantTag.Name, chunk.Tags[i].Name)
+				}
 
-			for i := range tc.want {
-				if tc.want[i].Name != tags[i].Name {
-					t.Errorf("want name %v, got %v", tc.want[i].Name, tags[i].Name)
+				if len(wantTag.Params) != len(chunk.Tags[i].Params) {
+					t.Errorf("want tag params len %v, but got %v", len(wantTag.Params), len(chunk.Tags[i].Params))
 				}
-				if len(tc.want[i].Params) != len(tags[i].Params) {
-					t.Fatalf("want params length %v, got %v", len(tc.want[i].Params), len(tags[i].Params))
-				}
-				for j := range tc.want[i].Params {
-					if tc.want[i].Params[j] != tags[i].Params[j] {
-						t.Errorf("want params %v, got %v", tc.want[i].Params[j], tags[i].Params[j])
+
+				for j := range wantTag.Params {
+					if wantTag.Params[j] != chunk.Tags[i].Params[j] {
+						t.Errorf("want tag params[%d] %v, but got %v", j, wantTag.Params[j], chunk.Tags[i].Params[j])
 					}
 				}
-				if tc.want[i].Enable != tags[i].Enable {
-					t.Errorf("want enable %v, got %v", tc.want[i].Enable, tags[i].Enable)
+			}
+
+			if len(tc.want.Next.Tags) != len(chunk.Next.Tags) {
+				t.Fatalf("want next tag len %v, but got %v", len(tc.want.Next.Tags), len(chunk.Next.Tags))
+			}
+			if tc.want.Next.Optional != chunk.Next.Optional {
+				t.Fatalf("want next optional %v, but got %v", tc.want.Next.Optional, chunk.Next.Optional)
+			}
+			for i, nextTag := range tc.want.Next.Tags {
+				if nextTag.Name != chunk.Next.Tags[i].Name {
+					t.Errorf("want tag name %v, but got %v", nextTag.Name, chunk.Next.Tags[i].Name)
 				}
-				if tc.want[i].isDig != tags[i].isDig {
-					t.Errorf("want isDig %v, got %v", tc.want[i].isDig, tags[i].isDig)
+
+				if len(nextTag.Params) != len(chunk.Next.Tags[i].Params) {
+					t.Errorf("want tag params len %v, but got %v", len(nextTag.Params), len(chunk.Next.Tags[i].Params))
 				}
-				if tc.want[i].Optional != tags[i].Optional {
-					t.Errorf("want optional %v, got %v", tc.want[i].Optional, tags[i].Optional)
+
+				for j := range nextTag.Params {
+					if nextTag.Params[j] != chunk.Next.Tags[i].Params[j] {
+						t.Errorf("want tag params[%d] %v, but got %v", j, nextTag.Params[j], chunk.Next.Tags[i].Params[j])
+					}
 				}
 			}
 		})
@@ -297,30 +461,47 @@ func Test_tagCache(t *testing.T) {
 		t.Fatal("want load true, got false")
 	}
 
-	if len(want) != len(got) {
-		t.Fatalf("want len %v, got %v", len(want), len(got))
+	if len(want.Tags) != len(got.Tags) {
+		t.Fatalf("want tag len %v, but got %v", len(want.Tags), len(got.Tags))
 	}
+	if want.Optional != got.Optional {
+		t.Fatalf("want optional %v, but got %v", want.Optional, got.Optional)
+	}
+	for i, wantTag := range want.Tags {
+		if wantTag.Name != got.Tags[i].Name {
+			t.Errorf("want tag name %v, but got %v", wantTag.Name, got.Tags[i].Name)
+		}
 
-	for i := range want {
-		if want[i].Name != got[i].Name {
-			t.Errorf("want name %v, got %v", want[i].Name, got[i].Name)
+		if len(wantTag.Params) != len(got.Tags[i].Params) {
+			t.Errorf("want tag params len %v, but got %v", len(wantTag.Params), len(got.Tags[i].Params))
 		}
-		if len(want[i].Params) != len(got[i].Params) {
-			t.Fatalf("want params length %v, got %v", len(want[i].Params), len(got[i].Params))
-		}
-		for j := range want[i].Params {
-			if want[i].Params[j] != got[i].Params[j] {
-				t.Errorf("want params %v, got %v", want[i].Params[j], got[i].Params[j])
+
+		for j := range wantTag.Params {
+			if wantTag.Params[j] != got.Tags[i].Params[j] {
+				t.Errorf("want tag params[%d] %v, but got %v", j, wantTag.Params[j], got.Tags[i].Params[j])
 			}
 		}
-		if want[i].Enable != got[i].Enable {
-			t.Errorf("want valid %v, got %v", want[i].Enable, got[i].Enable)
+	}
+
+	if len(want.Next.Tags) != len(got.Next.Tags) {
+		t.Fatalf("want next tag len %v, but got %v", len(want.Next.Tags), len(got.Next.Tags))
+	}
+	if want.Next.Optional != got.Next.Optional {
+		t.Fatalf("want next optional %v, but got %v", want.Next.Optional, got.Next.Optional)
+	}
+	for i, nextTag := range want.Next.Tags {
+		if nextTag.Name != got.Next.Tags[i].Name {
+			t.Errorf("want tag name %v, but got %v", nextTag.Name, got.Next.Tags[i].Name)
 		}
-		if want[i].isDig != got[i].isDig {
-			t.Errorf("want isDig %v, got %v", want[i].isDig, got[i].isDig)
+
+		if len(nextTag.Params) != len(got.Next.Tags[i].Params) {
+			t.Errorf("want tag params len %v, but got %v", len(nextTag.Params), len(got.Next.Tags[i].Params))
 		}
-		if want[i].Optional != got[i].Optional {
-			t.Errorf("want optional %v, got %v", want[i].Optional, got[i].Optional)
+
+		for j := range nextTag.Params {
+			if nextTag.Params[j] != got.Next.Tags[i].Params[j] {
+				t.Errorf("want tag params[%d] %v, but got %v", j, nextTag.Params[j], got.Next.Tags[i].Params[j])
+			}
 		}
 	}
 }
