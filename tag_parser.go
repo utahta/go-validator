@@ -96,9 +96,6 @@ loop:
 			orParsing = false
 			chunk.Next = &tagChunk{}
 			chunk = chunk.Next
-
-		case illegal:
-			return nil, fmt.Errorf("parse: illegal token")
 		}
 	}
 

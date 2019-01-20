@@ -9,6 +9,11 @@ import (
 func Test_required(t *testing.T) {
 	t.Parallel()
 
+	type (
+		Cat struct {
+			Name string `valid:"required"`
+		}
+	)
 	const tag = "required"
 	v := validator.New()
 
@@ -33,8 +38,8 @@ func Test_required(t *testing.T) {
 		{"valid slice", v.ValidateVar([]int{1}, tag), false},
 		{"valid array", v.ValidateVar([1]int{1}, tag), false},
 		{"valid map", v.ValidateVar(map[int]int{1: 1}, tag), false},
-		{"valid ptr", v.ValidateVar(&Str{Value: "str"}, tag), false},
-		{"valid struct", v.ValidateVar(Str{Value: "str"}, tag), false},
+		{"valid ptr", v.ValidateVar(&Cat{Name: "str"}, tag), false},
+		{"valid struct", v.ValidateVar(Cat{Name: "str"}, tag), false},
 		{"valid bool", v.ValidateVar(true, tag), false},
 
 		{"invalid string", v.ValidateVar("", tag), true},
@@ -53,8 +58,8 @@ func Test_required(t *testing.T) {
 		{"invalid slice", v.ValidateVar([]int{}, tag), true},
 		{"invalid array", v.ValidateVar([1]int{}, tag), true},
 		{"invalid map", v.ValidateVar(map[int]int{}, tag), true},
-		{"invalid ptr", v.ValidateVar((*Str)(nil), tag), true},
-		{"invalid struct", v.ValidateVar(Str{}, tag), true},
+		{"invalid ptr", v.ValidateVar((*Cat)(nil), tag), true},
+		{"invalid struct", v.ValidateVar(Cat{}, tag), true},
 		{"valid bool", v.ValidateVar(false, tag), true},
 	}
 
