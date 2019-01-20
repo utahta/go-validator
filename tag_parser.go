@@ -101,7 +101,8 @@ loop:
 
 	if rootTagChunk.Next == nil {
 		rootTagChunk.Next = &tagChunk{
-			Tags: rootTagChunk.Tags[:],
+			Tags:     rootTagChunk.Tags[:],
+			Optional: rootTagChunk.Optional,
 		}
 	}
 	v.tagCache.Store(rawTag, &rootTagChunk)

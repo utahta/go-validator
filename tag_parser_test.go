@@ -141,7 +141,8 @@ func Test_tagParse(t *testing.T) {
 				Tags:     []Tag{},
 				Optional: true,
 				Next: &tagChunk{
-					Tags: []Tag{},
+					Tags:     []Tag{},
+					Optional: true,
 				},
 			},
 		},
@@ -151,7 +152,8 @@ func Test_tagParse(t *testing.T) {
 				Tags:     []Tag{{Name: "required"}},
 				Optional: true,
 				Next: &tagChunk{
-					Tags: []Tag{{Name: "required"}},
+					Tags:     []Tag{{Name: "required"}},
+					Optional: true,
 				},
 			},
 		},
@@ -161,7 +163,8 @@ func Test_tagParse(t *testing.T) {
 				Tags:     []Tag{{Name: "required"}},
 				Optional: true,
 				Next: &tagChunk{
-					Tags: []Tag{{Name: "required"}},
+					Tags:     []Tag{{Name: "required"}},
+					Optional: true,
 				},
 			},
 		},
@@ -178,6 +181,7 @@ func Test_tagParse(t *testing.T) {
 						{Name: "len", Params: []string{"3"}},
 						{Name: "required"},
 					},
+					Optional: true,
 				},
 			},
 		},
@@ -279,7 +283,8 @@ func Test_tagParse(t *testing.T) {
 				Tags:     []Tag{{Name: "or", Params: []string{"alpha", "numeric"}}},
 				Optional: true,
 				Next: &tagChunk{
-					Tags: []Tag{{Name: "or", Params: []string{"alpha", "numeric"}}},
+					Tags:     []Tag{{Name: "or", Params: []string{"alpha", "numeric"}}},
+					Optional: true,
 				},
 			},
 		},

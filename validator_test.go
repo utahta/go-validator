@@ -160,6 +160,10 @@ func TestValidateStruct_Array(t *testing.T) {
 			S []Cat `valid:"optional ; optional"`
 		}
 
+		OptionalArrayOptionalCatTest2 struct {
+			S []Cat `valid:"optional"`
+		}
+
 		ArrayInterfaceTest struct {
 			S []interface{} `valid:"required"`
 		}
@@ -343,6 +347,36 @@ func TestValidateStruct_Array(t *testing.T) {
 			wantMessage: "S[0].Name: '123' does validate as 'alpha'",
 		},
 
+		// OptionalArrayOptionalCatTest2
+		{
+			name: "Valid OptionalArrayOptionalCatTest2 empty",
+			s: OptionalArrayOptionalCatTest2{
+				S: []Cat{},
+			},
+			wantNoErr: true,
+		},
+		{
+			name: "Valid OptionalArrayOptionalCatTest2 nil",
+			s: OptionalArrayOptionalCatTest2{
+				S: nil,
+			},
+			wantNoErr: true,
+		},
+		{
+			name: "Valid OptionalArrayOptionalCatTest2",
+			s: OptionalArrayOptionalCatTest2{
+				S: []Cat{{}},
+			},
+			wantNoErr: true,
+		},
+		{
+			name: "Invalid OptionalArrayOptionalCatTest2.S[0]",
+			s: OptionalArrayOptionalCatTest2{
+				S: []Cat{{Name: "123", Age: 5}},
+			},
+			wantMessage: "S[0].Name: '123' does validate as 'alpha'",
+		},
+
 		// ArrayInterfaceTest
 		{
 			name: "Valid ArrayInterfaceTest",
@@ -431,6 +465,10 @@ func TestValidateStruct_Map(t *testing.T) {
 
 		OptionalMapOptionalCatTest struct {
 			M map[string]Cat `valid:"optional ; optional"`
+		}
+
+		OptionalMapOptionalCatTest2 struct {
+			M map[string]Cat `valid:"optional"`
 		}
 
 		MapInterfaceTest struct {
@@ -621,6 +659,40 @@ func TestValidateStruct_Map(t *testing.T) {
 		{
 			name: "Invalid OptionalMapOptionalCatTest.M[key1]",
 			s: OptionalMapOptionalCatTest{
+				M: map[string]Cat{
+					"key1": {Name: "123", Age: 5},
+				},
+			},
+			wantMessage: "M[key1].Name: '123' does validate as 'alpha'",
+		},
+
+		// OptionalMapOptionalCatTest2
+		{
+			name: "Valid OptionalMapOptionalCatTest2 empty",
+			s: OptionalMapOptionalCatTest2{
+				M: map[string]Cat{},
+			},
+			wantNoErr: true,
+		},
+		{
+			name: "Valid OptionalMapOptionalCatTest2 nil",
+			s: OptionalMapOptionalCatTest2{
+				M: nil,
+			},
+			wantNoErr: true,
+		},
+		{
+			name: "Valid OptionalMapOptionalCatTest2",
+			s: OptionalMapOptionalCatTest2{
+				M: map[string]Cat{
+					"key1": {},
+				},
+			},
+			wantNoErr: true,
+		},
+		{
+			name: "Invalid OptionalMapOptionalCatTest2.M[key1]",
+			s: OptionalMapOptionalCatTest2{
 				M: map[string]Cat{
 					"key1": {Name: "123", Age: 5},
 				},
