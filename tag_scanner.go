@@ -14,7 +14,7 @@ const (
 	eof
 	tagSeparator
 	orSeparator
-	digSeparator
+	nextSeparator
 )
 
 func newTagScanner(buf string) *tagScanner {
@@ -48,7 +48,7 @@ func (s *tagScanner) Scan() (tagToken, string) {
 
 		case ';':
 			if depthParen == 0 {
-				return digSeparator, lit
+				return nextSeparator, lit
 			}
 
 		case '(':

@@ -12,7 +12,7 @@ func TestTagCache_StoreParallel(t *testing.T) {
 		wg.Add(1)
 		go func() {
 			defer wg.Done()
-			tc.Store("test", []Tag{})
+			tc.Store("test", &tagChunk{})
 		}()
 	}
 	wg.Wait()

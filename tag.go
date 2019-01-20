@@ -14,17 +14,18 @@ type (
 		// Params is a tag parameter.
 		Params []string
 
+		// validateFn is a validate function.
+		validateFn Func
+	}
+
+	tagChunk struct {
+		// Tags is a list of tag.
+		Tags []Tag
+
 		// Optional is a flag. if true, empty value is always valid.
 		Optional bool
 
-		// Enable is a flag. if true, validate value.
-		Enable bool
-
-		// isDig is a flag. if true, validate value in map, slice, ptr and interface.
-		isDig bool
-
-		// validateFn is a validate function.
-		validateFn Func
+		Next *tagChunk
 	}
 )
 

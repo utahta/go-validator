@@ -113,18 +113,6 @@ func (v *Validator) validateStruct(ctx context.Context, field Field) error {
 				return err
 			}
 		}
-
-		if fieldCaches[i].tagValue == "" {
-			if valueField.Kind() == reflect.Struct || (valueField.Kind() == reflect.Ptr && valueField.Elem().Kind() == reflect.Struct) {
-				if err := v.validateStruct(ctx, newFieldWithParent(fieldCaches[i].name, originField, valueField, field)); err != nil {
-					if es, ok := err.(Errors); ok {
-						errs = append(errs, es...)
-					} else {
-						return err
-					}
-				}
-			}
-		}
 	}
 
 	if !hasCache {
@@ -150,23 +138,21 @@ func (v *Validator) ValidateVarContext(ctx context.Context, s interface{}, rawTa
 }
 
 func (v *Validator) validateVar(ctx context.Context, field Field, rawTag string) error {
-	if rawTag == "-" || rawTag == "" {
+	if rawTag == "-" {
 		return nil
 	}
 
-	tags, err := v.tagParse(rawTag)
+	chunk, err := v.tagParse(rawTag)
 	if err != nil {
 		return err
 	}
 
 	var errs Errors
-	for _, t := range tags {
-		if err := v.validate(ctx, field, t); err != nil {
-			if es, ok := err.(Errors); ok {
-				errs = append(errs, es...)
-			} else {
-				return err
-			}
+	if err := v.validate(ctx, field, chunk); err != nil {
+		if es, ok := err.(Errors); ok {
+			errs = append(errs, es...)
+		} else {
+			return err
 		}
 	}
 
@@ -176,16 +162,18 @@ func (v *Validator) validateVar(ctx context.Context, field Field, rawTag string)
 	return nil
 }
 
-func (v *Validator) validate(ctx context.Context, field Field, tag Tag) error {
+func (v *Validator) validate(ctx context.Context, field Field, chunk *tagChunk) error {
+	if chunk.Optional && isEmpty(field) {
+		return nil
+	}
+
 	var errs Errors
-	if tag.Enable {
-		valid, err := tag.validateFn(ctx, field, FuncOption{Params: tag.Params, Optional: tag.Optional, v: v})
+	for _, tag := range chunk.Tags {
+		valid, err := tag.validateFn(ctx, field, FuncOption{Params: tag.Params, v: v})
 		if !valid || err != nil {
 			errs = append(errs, Error{Field: field, Tag: tag, Err: err, SuppressErrorFieldValue: v.SuppressErrorFieldValue})
 		}
 	}
-
-	tag.Enable = true // for dig
 
 	var val = field.current
 	switch val.Kind() {
@@ -193,13 +181,7 @@ func (v *Validator) validate(ctx context.Context, field Field, tag Tag) error {
 		for _, k := range val.MapKeys() {
 			value := val.MapIndex(k)
 
-			var err error
-			if value.Kind() == reflect.Struct || (value.Kind() == reflect.Ptr && value.Elem().Kind() == reflect.Struct) {
-				err = v.validateStruct(ctx, newFieldWithParent(fmt.Sprintf("[%v]", k), value, value, field))
-			} else if tag.isDig {
-				err = v.validate(ctx, newFieldWithParent(fmt.Sprintf("[%v]", k), value, v.extractVar(value), field), tag)
-			}
-
+			err := v.validate(ctx, newFieldWithParent(fmt.Sprintf("[%v]", k), value, v.extractVar(value), field), chunk.Next)
 			if err != nil {
 				if es, ok := err.(Errors); ok {
 					errs = append(errs, es...)
@@ -213,13 +195,7 @@ func (v *Validator) validate(ctx context.Context, field Field, tag Tag) error {
 		for i := 0; i < val.Len(); i++ {
 			value := val.Index(i)
 
-			var err error
-			if value.Kind() == reflect.Struct || (value.Kind() == reflect.Ptr && value.Elem().Kind() == reflect.Struct) {
-				err = v.validateStruct(ctx, newFieldWithParent(fmt.Sprintf("[%d]", i), value, value, field))
-			} else if tag.isDig {
-				err = v.validate(ctx, newFieldWithParent(fmt.Sprintf("[%d]", i), value, v.extractVar(value), field), tag)
-			}
-
+			err := v.validate(ctx, newFieldWithParent(fmt.Sprintf("[%d]", i), value, v.extractVar(value), field), chunk.Next)
 			if err != nil {
 				if es, ok := err.(Errors); ok {
 					errs = append(errs, es...)

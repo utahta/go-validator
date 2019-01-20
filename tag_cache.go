@@ -14,16 +14,16 @@ type (
 
 func newTagCache() *tagCache {
 	c := tagCache{}
-	c.v.Store(make(map[string][]Tag))
+	c.v.Store(make(map[string]*tagChunk))
 	return &c
 }
 
-func (c *tagCache) Load(k string) ([]Tag, bool) {
-	v, ok := c.v.Load().(map[string][]Tag)[k]
+func (c *tagCache) Load(k string) (*tagChunk, bool) {
+	v, ok := c.v.Load().(map[string]*tagChunk)[k]
 	return v, ok
 }
 
-func (c *tagCache) Store(k string, tags []Tag) {
+func (c *tagCache) Store(k string, chunk *tagChunk) {
 	c.mux.Lock()
 	defer c.mux.Unlock()
 
@@ -32,11 +32,11 @@ func (c *tagCache) Store(k string, tags []Tag) {
 		return
 	}
 
-	tmp := c.v.Load().(map[string][]Tag)
-	m := make(map[string][]Tag, len(tmp)+1)
+	tmp := c.v.Load().(map[string]*tagChunk)
+	m := make(map[string]*tagChunk, len(tmp)+1)
 	for k, v := range tmp {
 		m[k] = v
 	}
-	m[k] = tags
+	m[k] = chunk
 	c.v.Store(m)
 }
