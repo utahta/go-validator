@@ -113,18 +113,6 @@ func (v *Validator) validateStruct(ctx context.Context, field Field) error {
 				return err
 			}
 		}
-
-		if fieldCaches[i].tagValue == "" {
-			if valueField.Kind() == reflect.Struct || (valueField.Kind() == reflect.Ptr && valueField.Elem().Kind() == reflect.Struct) {
-				if err := v.validateStruct(ctx, newFieldWithParent(fieldCaches[i].name, originField, valueField, field)); err != nil {
-					if es, ok := err.(Errors); ok {
-						errs = append(errs, es...)
-					} else {
-						return err
-					}
-				}
-			}
-		}
 	}
 
 	if !hasCache {
@@ -150,7 +138,7 @@ func (v *Validator) ValidateVarContext(ctx context.Context, s interface{}, rawTa
 }
 
 func (v *Validator) validateVar(ctx context.Context, field Field, rawTag string) error {
-	if rawTag == "-" || rawTag == "" {
+	if rawTag == "-" {
 		return nil
 	}
 
@@ -175,9 +163,6 @@ func (v *Validator) validateVar(ctx context.Context, field Field, rawTag string)
 }
 
 func (v *Validator) validate(ctx context.Context, field Field, chunk *tagChunk) error {
-	if chunk == nil {
-		return nil
-	}
 	if chunk.Optional && isEmpty(field) {
 		return nil
 	}
