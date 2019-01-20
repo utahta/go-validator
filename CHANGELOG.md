@@ -1,5 +1,17 @@
 # Changelog
 
+<a name="0.0.5"></a>
+## [0.0.5] - 2019-01-20
+### Code Refactoring
+- tests
+- remove unnecessary code
+- fix to optional tag behavior
+- Fix to error handling at validate
+
+### Pull Requests
+- Merge pull request [#4](https://github.com/utahta/go-validator/issues/4) from utahta/refactor-tags
+
+
 <a name="0.0.4"></a>
 ## [0.0.4] - 2018-11-04
 ### Features
@@ -50,6 +62,7 @@ Removed SetAdapter function from Validator.
 
 <a name="0.0.1"></a>
 ## 0.0.1 - 2018-10-08
+[0.0.5]: https://github.com/utahta/go-validator/compare/0.0.4...0.0.5
 [0.0.4]: https://github.com/utahta/go-validator/compare/0.0.3...0.0.4
 [0.0.3]: https://github.com/utahta/go-validator/compare/0.0.2...0.0.3
 [0.0.2]: https://github.com/utahta/go-validator/compare/0.0.1...0.0.2
