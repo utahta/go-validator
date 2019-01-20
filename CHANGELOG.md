@@ -1,5 +1,14 @@
 # Changelog
 
+<a name="0.0.6"></a>
+## [0.0.6] - 2019-01-21
+### Bug Fixes
+- tag parser
+
+### Pull Requests
+- Merge pull request [#5](https://github.com/utahta/go-validator/issues/5) from utahta/fix-optional-in-array
+
+
 <a name="0.0.5"></a>
 ## [0.0.5] - 2019-01-20
 ### Code Refactoring
@@ -62,6 +71,7 @@ Removed SetAdapter function from Validator.
 
 <a name="0.0.1"></a>
 ## 0.0.1 - 2018-10-08
+[0.0.6]: https://github.com/utahta/go-validator/compare/0.0.5...0.0.6
 [0.0.5]: https://github.com/utahta/go-validator/compare/0.0.4...0.0.5
 [0.0.4]: https://github.com/utahta/go-validator/compare/0.0.3...0.0.4
 [0.0.3]: https://github.com/utahta/go-validator/compare/0.0.2...0.0.3
