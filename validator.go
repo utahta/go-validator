@@ -163,12 +163,12 @@ func (v *Validator) validateVar(ctx context.Context, field Field, rawTag string)
 }
 
 func (v *Validator) validate(ctx context.Context, field Field, chunk *tagChunk) error {
-	if chunk.Optional && isEmpty(field) {
+	if chunk.IsOptional() && isEmpty(field) {
 		return nil
 	}
 
 	var errs Errors
-	for _, tag := range chunk.Tags {
+	for _, tag := range chunk.GetTags() {
 		valid, err := tag.validateFn(ctx, field, FuncOption{Params: tag.Params, v: v})
 		if !valid || err != nil {
 			errs = append(errs, Error{Field: field, Tag: tag, Err: err, SuppressErrorFieldValue: v.SuppressErrorFieldValue})
@@ -206,10 +206,7 @@ func (v *Validator) validate(ctx context.Context, field Field, chunk *tagChunk) 
 		}
 
 	case reflect.Interface, reflect.Ptr:
-		if val.IsNil() {
-			break
-		}
-		// unreachable
+		// do nothing
 
 	case reflect.Struct:
 		err := v.validateStruct(ctx, newFieldWithParent("", field.origin, val, field))

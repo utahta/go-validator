@@ -99,12 +99,6 @@ loop:
 		}
 	}
 
-	if rootTagChunk.Next == nil {
-		rootTagChunk.Next = &tagChunk{
-			Tags:     rootTagChunk.Tags[:],
-			Optional: rootTagChunk.Optional,
-		}
-	}
 	v.tagCache.Store(rawTag, &rootTagChunk)
 
 	return &rootTagChunk, nil

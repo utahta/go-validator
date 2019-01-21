@@ -36,3 +36,17 @@ func (t Tag) String() string {
 	}
 	return t.Name
 }
+
+func (c *tagChunk) GetTags() []Tag {
+	if c == nil {
+		return nil
+	}
+	return c.Tags
+}
+
+func (c *tagChunk) IsOptional() bool {
+	if c == nil {
+		return false
+	}
+	return c.Optional
+}
