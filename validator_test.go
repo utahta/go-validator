@@ -149,6 +149,10 @@ func TestValidateStruct_Array(t *testing.T) {
 		}
 
 		OptionalArrayCatTest struct {
+			S []Cat `valid:"optional"`
+		}
+
+		OptionalArrayCatTest2 struct {
 			S []Cat `valid:"optional ;"`
 		}
 
@@ -158,10 +162,6 @@ func TestValidateStruct_Array(t *testing.T) {
 
 		OptionalArrayOptionalCatTest struct {
 			S []Cat `valid:"optional ; optional"`
-		}
-
-		OptionalArrayOptionalCatTest2 struct {
-			S []Cat `valid:"optional"`
 		}
 
 		ArrayInterfaceTest struct {
@@ -257,11 +257,11 @@ func TestValidateStruct_Array(t *testing.T) {
 			wantNoErr: true,
 		},
 		{
-			name: "Invalid ArrayCatTest.S[1] is empty",
+			name: "Invalid ArrayCatTest.S empty",
 			s: ArrayCatTest{
-				S: []Cat{{Name: "neko", Age: 5}, {}},
+				S: []Cat{},
 			},
-			wantMessage: "S[1]: 'Cat' does validate as 'required';S[1].Name: '' does validate as 'required';S[1].Name: '' does validate as 'alpha';S[1].Age: '0' does validate as 'required'",
+			wantMessage: "S: '<Array>' does validate as 'required'",
 		},
 
 		// OptionalArrayCatTest
@@ -289,6 +289,36 @@ func TestValidateStruct_Array(t *testing.T) {
 		{
 			name: "Invalid OptionalArrayCatTest.S[1]",
 			s: OptionalArrayCatTest{
+				S: []Cat{{Name: "neko", Age: 5}, {}},
+			},
+			wantMessage: "S[1].Name: '' does validate as 'required';S[1].Name: '' does validate as 'alpha';S[1].Age: '0' does validate as 'required'",
+		},
+
+		// OptionalArrayCatTest2
+		{
+			name: "Valid OptionalArrayCatTest2 empty",
+			s: OptionalArrayCatTest2{
+				S: []Cat{},
+			},
+			wantNoErr: true,
+		},
+		{
+			name: "Valid OptionalArrayCatTest2 nil",
+			s: OptionalArrayCatTest2{
+				S: nil,
+			},
+			wantNoErr: true,
+		},
+		{
+			name: "Valid OptionalArrayCatTest2",
+			s: OptionalArrayCatTest2{
+				S: []Cat{{Name: "neko", Age: 5}},
+			},
+			wantNoErr: true,
+		},
+		{
+			name: "Invalid OptionalArrayCatTest2.S[1]",
+			s: OptionalArrayCatTest2{
 				S: []Cat{{Name: "neko", Age: 5}, {}},
 			},
 			wantMessage: "S[1].Name: '' does validate as 'required';S[1].Name: '' does validate as 'alpha';S[1].Age: '0' does validate as 'required'",
@@ -347,36 +377,6 @@ func TestValidateStruct_Array(t *testing.T) {
 			wantMessage: "S[0].Name: '123' does validate as 'alpha'",
 		},
 
-		// OptionalArrayOptionalCatTest2
-		{
-			name: "Valid OptionalArrayOptionalCatTest2 empty",
-			s: OptionalArrayOptionalCatTest2{
-				S: []Cat{},
-			},
-			wantNoErr: true,
-		},
-		{
-			name: "Valid OptionalArrayOptionalCatTest2 nil",
-			s: OptionalArrayOptionalCatTest2{
-				S: nil,
-			},
-			wantNoErr: true,
-		},
-		{
-			name: "Valid OptionalArrayOptionalCatTest2",
-			s: OptionalArrayOptionalCatTest2{
-				S: []Cat{{}},
-			},
-			wantNoErr: true,
-		},
-		{
-			name: "Invalid OptionalArrayOptionalCatTest2.S[0]",
-			s: OptionalArrayOptionalCatTest2{
-				S: []Cat{{Name: "123", Age: 5}},
-			},
-			wantMessage: "S[0].Name: '123' does validate as 'alpha'",
-		},
-
 		// ArrayInterfaceTest
 		{
 			name: "Valid ArrayInterfaceTest",
@@ -386,11 +386,25 @@ func TestValidateStruct_Array(t *testing.T) {
 			wantNoErr: true,
 		},
 		{
+			name: "Valid ArrayInterfaceTest.S[1] nil",
+			s: ArrayInterfaceTest{
+				S: []interface{}{Cat{Name: "neko", Age: 5}, nil},
+			},
+			wantNoErr: true,
+		},
+		{
+			name: "Invalid ArrayInterfaceTest.S empty",
+			s: ArrayInterfaceTest{
+				S: []interface{}{},
+			},
+			wantMessage: "S: '<Array>' does validate as 'required'",
+		},
+		{
 			name: "Invalid ArrayInterfaceTest.S[1] empty",
 			s: ArrayInterfaceTest{
 				S: []interface{}{Cat{Name: "neko", Age: 5}, Cat{}},
 			},
-			wantMessage: "S[1]: 'Cat' does validate as 'required';S[1].Name: '' does validate as 'required';S[1].Name: '' does validate as 'alpha';S[1].Age: '0' does validate as 'required'",
+			wantMessage: "S[1].Name: '' does validate as 'required';S[1].Name: '' does validate as 'alpha';S[1].Age: '0' does validate as 'required'",
 		},
 
 		// ArrayPointerTest
@@ -402,18 +416,25 @@ func TestValidateStruct_Array(t *testing.T) {
 			wantNoErr: true,
 		},
 		{
+			name: "Valid ArrayPointerTest.S[1] nil",
+			s: ArrayPointerTest{
+				S: []*Cat{{Name: "neko", Age: 5}, nil},
+			},
+			wantNoErr: true,
+		},
+		{
+			name: "Invalid ArrayPointerTest.S empty",
+			s: ArrayPointerTest{
+				S: []*Cat{},
+			},
+			wantMessage: "S: '<Array>' does validate as 'required'",
+		},
+		{
 			name: "Invalid ArrayPointerTest.S[1] empty",
 			s: ArrayPointerTest{
 				S: []*Cat{{Name: "neko", Age: 5}, {}},
 			},
-			wantMessage: "S[1]: 'Cat' does validate as 'required';S[1].Name: '' does validate as 'required';S[1].Name: '' does validate as 'alpha';S[1].Age: '0' does validate as 'required'",
-		},
-		{
-			name: "Invalid ArrayPointerTest.S[1] nil",
-			s: ArrayPointerTest{
-				S: []*Cat{{Name: "neko", Age: 5}, nil},
-			},
-			wantMessage: "S[1]: '<nil>' does validate as 'required'",
+			wantMessage: "S[1].Name: '' does validate as 'required';S[1].Name: '' does validate as 'alpha';S[1].Age: '0' does validate as 'required'",
 		},
 	}
 
@@ -456,6 +477,10 @@ func TestValidateStruct_Map(t *testing.T) {
 		}
 
 		OptionalMapCatTest struct {
+			M map[string]Cat `valid:"optional"`
+		}
+
+		OptionalMapCatTest2 struct {
 			M map[string]Cat `valid:"optional ;"`
 		}
 
@@ -465,10 +490,6 @@ func TestValidateStruct_Map(t *testing.T) {
 
 		OptionalMapOptionalCatTest struct {
 			M map[string]Cat `valid:"optional ; optional"`
-		}
-
-		OptionalMapOptionalCatTest2 struct {
-			M map[string]Cat `valid:"optional"`
 		}
 
 		MapInterfaceTest struct {
@@ -577,7 +598,7 @@ func TestValidateStruct_Map(t *testing.T) {
 			s: MapCatTest{
 				M: map[string]Cat{"key1": {}},
 			},
-			wantMessage: "M[key1]: 'Cat' does validate as 'required';M[key1].Name: '' does validate as 'required';M[key1].Name: '' does validate as 'alpha';M[key1].Age: '0' does validate as 'required'",
+			wantMessage: "M[key1].Name: '' does validate as 'required';M[key1].Name: '' does validate as 'alpha';M[key1].Age: '0' does validate as 'required'",
 		},
 
 		// OptionalMapCatTest
@@ -598,6 +619,31 @@ func TestValidateStruct_Map(t *testing.T) {
 		{
 			name: "Invalid OptionalMapCatTest.M[key1]",
 			s: OptionalMapCatTest{
+				M: map[string]Cat{
+					"key1": {Name: "123", Age: 5},
+				},
+			},
+			wantMessage: "M[key1].Name: '123' does validate as 'alpha'",
+		},
+
+		// OptionalMapCatTest2
+		{
+			name: "Valid OptionalMapCatTest2 empty",
+			s: OptionalMapCatTest2{
+				M: map[string]Cat{},
+			},
+			wantNoErr: true,
+		},
+		{
+			name: "Valid OptionalMapCatTest2 nil",
+			s: OptionalMapCatTest2{
+				M: nil,
+			},
+			wantNoErr: true,
+		},
+		{
+			name: "Invalid OptionalMapCatTest2.M[key1]",
+			s: OptionalMapCatTest2{
 				M: map[string]Cat{
 					"key1": {Name: "123", Age: 5},
 				},
@@ -666,40 +712,6 @@ func TestValidateStruct_Map(t *testing.T) {
 			wantMessage: "M[key1].Name: '123' does validate as 'alpha'",
 		},
 
-		// OptionalMapOptionalCatTest2
-		{
-			name: "Valid OptionalMapOptionalCatTest2 empty",
-			s: OptionalMapOptionalCatTest2{
-				M: map[string]Cat{},
-			},
-			wantNoErr: true,
-		},
-		{
-			name: "Valid OptionalMapOptionalCatTest2 nil",
-			s: OptionalMapOptionalCatTest2{
-				M: nil,
-			},
-			wantNoErr: true,
-		},
-		{
-			name: "Valid OptionalMapOptionalCatTest2",
-			s: OptionalMapOptionalCatTest2{
-				M: map[string]Cat{
-					"key1": {},
-				},
-			},
-			wantNoErr: true,
-		},
-		{
-			name: "Invalid OptionalMapOptionalCatTest2.M[key1]",
-			s: OptionalMapOptionalCatTest2{
-				M: map[string]Cat{
-					"key1": {Name: "123", Age: 5},
-				},
-			},
-			wantMessage: "M[key1].Name: '123' does validate as 'alpha'",
-		},
-
 		// MapInterfaceTest
 		{
 			name: "Valid MapInterfaceTest",
@@ -711,18 +723,32 @@ func TestValidateStruct_Map(t *testing.T) {
 			wantNoErr: true,
 		},
 		{
-			name: "Invalid MapInterfaceTest",
+			name: "Valid MapInterfaceTest.M[key1] nil",
+			s: MapInterfaceTest{
+				M: map[string]interface{}{"key1": nil},
+			},
+			wantNoErr: true,
+		},
+		{
+			name: "Invalid MapInterfaceTest.M empty",
+			s: MapInterfaceTest{
+				M: map[string]interface{}{},
+			},
+			wantMessage: "M: '<Map>' does validate as 'required'",
+		},
+		{
+			name: "Invalid MapInterfaceTest.M nil",
 			s: MapInterfaceTest{
 				M: nil,
 			},
 			wantMessage: "M: '<Map>' does validate as 'required'",
 		},
 		{
-			name: "Invalid MapInterfaceTest.M[key1]",
+			name: "Invalid MapInterfaceTest.M[key1] empty",
 			s: MapInterfaceTest{
 				M: map[string]interface{}{"key1": Cat{}},
 			},
-			wantMessage: "M[key1]: 'Cat' does validate as 'required';M[key1].Name: '' does validate as 'required';M[key1].Name: '' does validate as 'alpha';M[key1].Age: '0' does validate as 'required'",
+			wantMessage: "M[key1].Name: '' does validate as 'required';M[key1].Name: '' does validate as 'alpha';M[key1].Age: '0' does validate as 'required'",
 		},
 
 		// MapPointerTest
@@ -736,7 +762,14 @@ func TestValidateStruct_Map(t *testing.T) {
 			wantNoErr: true,
 		},
 		{
-			name: "Invalid MapPointerTest",
+			name: "Valid MapPointerTest.M[key1] nil",
+			s: MapPointerTest{
+				M: map[string]*Cat{"key1": nil},
+			},
+			wantNoErr: true,
+		},
+		{
+			name: "Invalid MapPointerTest.M nil",
 			s: MapPointerTest{
 				M: nil,
 			},
@@ -747,14 +780,7 @@ func TestValidateStruct_Map(t *testing.T) {
 			s: MapPointerTest{
 				M: map[string]*Cat{"key1": {}},
 			},
-			wantMessage: "M[key1]: 'Cat' does validate as 'required';M[key1].Name: '' does validate as 'required';M[key1].Name: '' does validate as 'alpha';M[key1].Age: '0' does validate as 'required'",
-		},
-		{
-			name: "Invalid MapPointerTest.M[key1] nil",
-			s: MapPointerTest{
-				M: map[string]*Cat{"key1": nil},
-			},
-			wantMessage: "M[key1]: '<nil>' does validate as 'required'",
+			wantMessage: "M[key1].Name: '' does validate as 'required';M[key1].Name: '' does validate as 'alpha';M[key1].Age: '0' does validate as 'required'",
 		},
 	}
 
@@ -871,11 +897,11 @@ func TestValidateStruct_InvalidTag(t *testing.T) {
 		}
 
 		ArrayInvalidTagTest struct {
-			S []InvalidTag `valid:"required"`
+			S []InvalidTag `valid:"required; required"`
 		}
 
 		MapInvalidTagTest struct {
-			M map[string]InvalidTag `valid:"required"`
+			M map[string]InvalidTag `valid:"required; required"`
 		}
 	)
 
@@ -936,6 +962,9 @@ func TestValidateStruct_InvalidTag(t *testing.T) {
 				return
 			}
 
+			if err == nil {
+				t.Fatal("err is nil")
+			}
 			if err.Error() != tc.wantMessage {
 				t.Fatalf("Message want %v, but got %v", tc.wantMessage, err)
 			}

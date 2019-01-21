@@ -11,27 +11,21 @@ func Test_tagParse(t *testing.T) {
 			rawTag: "required",
 			want: tagChunk{
 				Tags: []Tag{{Name: "required"}},
-				Next: &tagChunk{
-					Tags: []Tag{{Name: "required"}},
-				},
+				Next: nil,
 			},
 		},
 		{
 			rawTag: "len(3)",
 			want: tagChunk{
 				Tags: []Tag{{Name: "len", Params: []string{"3"}}},
-				Next: &tagChunk{
-					Tags: []Tag{{Name: "len", Params: []string{"3"}}},
-				},
+				Next: nil,
 			},
 		},
 		{
 			rawTag: "len(1|3)",
 			want: tagChunk{
 				Tags: []Tag{{Name: "len", Params: []string{"1", "3"}}},
-				Next: &tagChunk{
-					Tags: []Tag{{Name: "len", Params: []string{"1", "3"}}},
-				},
+				Next: nil,
 			},
 		},
 		{
@@ -41,12 +35,7 @@ func Test_tagParse(t *testing.T) {
 					{Name: "len", Params: []string{"1", "3"}},
 					{Name: "len", Params: []string{"AAA", "BBB", "CCC"}},
 				},
-				Next: &tagChunk{
-					Tags: []Tag{
-						{Name: "len", Params: []string{"1", "3"}},
-						{Name: "len", Params: []string{"AAA", "BBB", "CCC"}},
-					},
-				},
+				Next: nil,
 			},
 		},
 		{
@@ -56,12 +45,7 @@ func Test_tagParse(t *testing.T) {
 					{Name: "required"},
 					{Name: "len", Params: []string{"3"}},
 				},
-				Next: &tagChunk{
-					Tags: []Tag{
-						{Name: "required"},
-						{Name: "len", Params: []string{"3"}},
-					},
-				},
+				Next: nil,
 			},
 		},
 		{
@@ -72,13 +56,7 @@ func Test_tagParse(t *testing.T) {
 					{Name: "len", Params: []string{"3"}},
 					{Name: "len", Params: []string{"1", "3"}},
 				},
-				Next: &tagChunk{
-					Tags: []Tag{
-						{Name: "required"},
-						{Name: "len", Params: []string{"3"}},
-						{Name: "len", Params: []string{"1", "3"}},
-					},
-				},
+				Next: nil,
 			},
 		},
 
@@ -140,10 +118,7 @@ func Test_tagParse(t *testing.T) {
 			want: tagChunk{
 				Tags:     []Tag{},
 				Optional: true,
-				Next: &tagChunk{
-					Tags:     []Tag{},
-					Optional: true,
-				},
+				Next:     nil,
 			},
 		},
 		{
@@ -151,10 +126,7 @@ func Test_tagParse(t *testing.T) {
 			want: tagChunk{
 				Tags:     []Tag{{Name: "required"}},
 				Optional: true,
-				Next: &tagChunk{
-					Tags:     []Tag{{Name: "required"}},
-					Optional: true,
-				},
+				Next:     nil,
 			},
 		},
 		{
@@ -162,10 +134,7 @@ func Test_tagParse(t *testing.T) {
 			want: tagChunk{
 				Tags:     []Tag{{Name: "required"}},
 				Optional: true,
-				Next: &tagChunk{
-					Tags:     []Tag{{Name: "required"}},
-					Optional: true,
-				},
+				Next:     nil,
 			},
 		},
 		{
@@ -176,13 +145,7 @@ func Test_tagParse(t *testing.T) {
 					{Name: "required"},
 				},
 				Optional: true,
-				Next: &tagChunk{
-					Tags: []Tag{
-						{Name: "len", Params: []string{"3"}},
-						{Name: "required"},
-					},
-					Optional: true,
-				},
+				Next:     nil,
 			},
 		},
 
@@ -263,18 +226,14 @@ func Test_tagParse(t *testing.T) {
 			rawTag: "alpha|numeric",
 			want: tagChunk{
 				Tags: []Tag{{Name: "or", Params: []string{"alpha", "numeric"}}},
-				Next: &tagChunk{
-					Tags: []Tag{{Name: "or", Params: []string{"alpha", "numeric"}}},
-				},
+				Next: nil,
 			},
 		},
 		{
 			rawTag: "alpha|numeric|len(1|10)",
 			want: tagChunk{
 				Tags: []Tag{{Name: "or", Params: []string{"alpha", "numeric", "len(1|10)"}}},
-				Next: &tagChunk{
-					Tags: []Tag{{Name: "or", Params: []string{"alpha", "numeric", "len(1|10)"}}},
-				},
+				Next: nil,
 			},
 		},
 		{
@@ -282,19 +241,14 @@ func Test_tagParse(t *testing.T) {
 			want: tagChunk{
 				Tags:     []Tag{{Name: "or", Params: []string{"alpha", "numeric"}}},
 				Optional: true,
-				Next: &tagChunk{
-					Tags:     []Tag{{Name: "or", Params: []string{"alpha", "numeric"}}},
-					Optional: true,
-				},
+				Next:     nil,
 			},
 		},
 		{
 			rawTag: "or(req|numeric)",
 			want: tagChunk{
 				Tags: []Tag{{Name: "or", Params: []string{"req", "numeric"}}},
-				Next: &tagChunk{
-					Tags: []Tag{{Name: "or", Params: []string{"req", "numeric"}}},
-				},
+				Next: nil,
 			},
 		},
 
@@ -306,12 +260,7 @@ func Test_tagParse(t *testing.T) {
 					{Name: "or", Params: []string{"alpha", "numeric"}},
 					{Name: "len", Params: []string{"1", "10"}},
 				},
-				Next: &tagChunk{
-					Tags: []Tag{
-						{Name: "or", Params: []string{"alpha", "numeric"}},
-						{Name: "len", Params: []string{"1", "10"}},
-					},
-				},
+				Next: nil,
 			},
 		},
 		{
@@ -322,13 +271,7 @@ func Test_tagParse(t *testing.T) {
 					{Name: "min", Params: []string{"1"}},
 					{Name: "max", Params: []string{"10"}},
 				},
-				Next: &tagChunk{
-					Tags: []Tag{
-						{Name: "or", Params: []string{"alpha", "numeric"}},
-						{Name: "min", Params: []string{"1"}},
-						{Name: "max", Params: []string{"10"}},
-					},
-				},
+				Next: nil,
 			},
 		},
 		{
@@ -338,12 +281,7 @@ func Test_tagParse(t *testing.T) {
 					{Name: "or", Params: []string{"alpha", "numeric"}},
 					{Name: "or", Params: []string{"min(1)", "max(10)"}},
 				},
-				Next: &tagChunk{
-					Tags: []Tag{
-						{Name: "or", Params: []string{"alpha", "numeric"}},
-						{Name: "or", Params: []string{"min(1)", "max(10)"}},
-					},
-				},
+				Next: nil,
 			},
 		},
 
@@ -397,6 +335,12 @@ func Test_tagParse(t *testing.T) {
 				}
 			}
 
+			if tc.want.Next == nil {
+				if chunk.Next != nil {
+					t.Fatalf("want next is nil, but got %v", chunk.Next)
+				}
+				return
+			}
 			if len(tc.want.Next.Tags) != len(chunk.Next.Tags) {
 				t.Fatalf("want next tag len %v, but got %v", len(tc.want.Next.Tags), len(chunk.Next.Tags))
 			}
@@ -488,25 +432,9 @@ func Test_tagCache(t *testing.T) {
 		}
 	}
 
-	if len(want.Next.Tags) != len(got.Next.Tags) {
-		t.Fatalf("want next tag len %v, but got %v", len(want.Next.Tags), len(got.Next.Tags))
-	}
-	if want.Next.Optional != got.Next.Optional {
-		t.Fatalf("want next optional %v, but got %v", want.Next.Optional, got.Next.Optional)
-	}
-	for i, nextTag := range want.Next.Tags {
-		if nextTag.Name != got.Next.Tags[i].Name {
-			t.Errorf("want tag name %v, but got %v", nextTag.Name, got.Next.Tags[i].Name)
-		}
-
-		if len(nextTag.Params) != len(got.Next.Tags[i].Params) {
-			t.Errorf("want tag params len %v, but got %v", len(nextTag.Params), len(got.Next.Tags[i].Params))
-		}
-
-		for j := range nextTag.Params {
-			if nextTag.Params[j] != got.Next.Tags[i].Params[j] {
-				t.Errorf("want tag params[%d] %v, but got %v", j, nextTag.Params[j], got.Next.Tags[i].Params[j])
-			}
+	if want.Next == nil {
+		if got.Next != nil {
+			t.Fatalf("want next nil, but got %v", got)
 		}
 	}
 }
