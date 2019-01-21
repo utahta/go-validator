@@ -1,5 +1,14 @@
 # Changelog
 
+<a name="0.0.7"></a>
+## [0.0.7] - 2019-01-21
+### Bug Fixes
+- break backwards compatibility
+
+### Pull Requests
+- Merge pull request [#6](https://github.com/utahta/go-validator/issues/6) from utahta/fix-backwards-compatibility
+
+
 <a name="0.0.6"></a>
 ## [0.0.6] - 2019-01-21
 ### Bug Fixes
@@ -71,6 +80,7 @@ Removed SetAdapter function from Validator.
 
 <a name="0.0.1"></a>
 ## 0.0.1 - 2018-10-08
+[0.0.7]: https://github.com/utahta/go-validator/compare/0.0.6...0.0.7
 [0.0.6]: https://github.com/utahta/go-validator/compare/0.0.5...0.0.6
 [0.0.5]: https://github.com/utahta/go-validator/compare/0.0.4...0.0.5
 [0.0.4]: https://github.com/utahta/go-validator/compare/0.0.3...0.0.4
