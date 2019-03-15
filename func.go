@@ -32,8 +32,8 @@ var (
 	defaultFuncMap = FuncMap{
 		"required":        hasValue,
 		"req":             hasValue,
-		"empty":           zeroValue,
-		"zero":            zeroValue,
+		"empty":           isZeroValue,
+		"zero":            isZeroValue,
 		"alpha":           isAlpha,
 		"alphanum":        isAlphaNum,
 		"alphaunicode":    isAlphaUnicode,
@@ -124,7 +124,7 @@ func hasValue(_ context.Context, f Field, _ FuncOption) (bool, error) {
 	return !isEmpty(f), nil
 }
 
-func zeroValue(_ context.Context, f Field, _ FuncOption) (bool, error) {
+func isZeroValue(_ context.Context, f Field, _ FuncOption) (bool, error) {
 	return isEmpty(f), nil
 }
 
@@ -293,11 +293,11 @@ func minLength(_ context.Context, f Field, opt FuncOption) (bool, error) {
 	v := f.current
 	switch v.Kind() {
 	case reflect.String, reflect.Array, reflect.Map, reflect.Slice:
-		min, err := strconv.Atoi(minStr)
+		min, err := strconv.ParseInt(minStr, 10, 64)
 		if err != nil {
 			return false, err
 		}
-		return min <= v.Len(), nil
+		return min <= int64(v.Len()), nil
 
 	case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
 		min, err := strconv.ParseInt(minStr, 10, 64)
@@ -334,11 +334,11 @@ func maxLength(_ context.Context, f Field, opt FuncOption) (bool, error) {
 	v := f.current
 	switch v.Kind() {
 	case reflect.String, reflect.Array, reflect.Map, reflect.Slice:
-		max, err := strconv.Atoi(maxStr)
+		max, err := strconv.ParseInt(maxStr, 10, 64)
 		if err != nil {
 			return false, err
 		}
-		return v.Len() <= max, nil
+		return int64(v.Len()) <= max, nil
 
 	case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
 		max, err := strconv.ParseInt(maxStr, 10, 64)
@@ -373,11 +373,11 @@ func eqLength(_ context.Context, f Field, opt FuncOption) (bool, error) {
 	v := f.current
 	switch v.Kind() {
 	case reflect.String, reflect.Array, reflect.Map, reflect.Slice:
-		i, err := strconv.Atoi(str)
+		i, err := strconv.ParseInt(str, 10, 64)
 		if err != nil {
 			return false, err
 		}
-		return v.Len() == i, nil
+		return int64(v.Len()) == i, nil
 
 	case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
 		i, err := strconv.ParseInt(str, 10, 64)

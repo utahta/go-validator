@@ -49,7 +49,9 @@ func BenchmarkValidateVarSuccess(b *testing.B) {
 
 	b.ResetTimer()
 	for n := 0; n < b.N; n++ {
-		v.ValidateVar(&s, "len(1)")
+		if err := v.ValidateVar(&s, "len(1)"); err != nil {
+			b.Fatal(err)
+		}
 	}
 }
 
@@ -61,7 +63,9 @@ func BenchmarkValidateVarParallelSuccess(b *testing.B) {
 	b.ResetTimer()
 	b.RunParallel(func(pb *testing.PB) {
 		for pb.Next() {
-			v.ValidateVar(&s, "len(1)")
+			if err := v.ValidateVar(&s, "len(1)"); err != nil {
+				b.Fatal(err)
+			}
 		}
 	})
 }
@@ -78,7 +82,9 @@ func BenchmarkValidateStructSuccess(b *testing.B) {
 
 	b.ResetTimer()
 	for n := 0; n < b.N; n++ {
-		v.ValidateStruct(s)
+		if err := v.ValidateStruct(s); err != nil {
+			b.Fatal(err)
+		}
 	}
 }
 
@@ -95,7 +101,9 @@ func BenchmarkValidateStructParallelSuccess(b *testing.B) {
 	b.ResetTimer()
 	b.RunParallel(func(pb *testing.PB) {
 		for pb.Next() {
-			v.ValidateStruct(s)
+			if err := v.ValidateStruct(s); err != nil {
+				b.Fatal(err)
+			}
 		}
 	})
 }
@@ -104,15 +112,15 @@ func BenchmarkValidateStructComplexSuccess(b *testing.B) {
 	v := New()
 
 	s := &TestString{
-		Required:  "Required",
-		Len:       "length==10",
-		Min:       "min=1",
+		Required:  "12345",
+		Len:       "1234567890",
+		Min:       "1",
 		Max:       "1234567890",
 		MinMax:    "12345",
-		Lt:        "012345678",
-		Lte:       "0123456789",
-		Gt:        "01234567890",
-		Gte:       "0123456789",
+		Lt:        "123456789",
+		Lte:       "1234567890",
+		Gt:        "12345678901",
+		Gte:       "1234567890",
 		OmitEmpty: "",
 		Sub: &SubTest{
 			Test: "1",
@@ -132,7 +140,9 @@ func BenchmarkValidateStructComplexSuccess(b *testing.B) {
 
 	b.ResetTimer()
 	for n := 0; n < b.N; n++ {
-		v.ValidateStruct(s)
+		if err := v.ValidateStruct(s); err != nil {
+			b.Fatal(err)
+		}
 	}
 }
 
@@ -140,15 +150,15 @@ func BenchmarkValidateStructComplexParallelSuccess(b *testing.B) {
 	v := New()
 
 	s := &TestString{
-		Required:  "Required",
-		Len:       "length==10",
-		Min:       "min=1",
+		Required:  "12345",
+		Len:       "1234567890",
+		Min:       "1",
 		Max:       "1234567890",
 		MinMax:    "12345",
-		Lt:        "012345678",
-		Lte:       "0123456789",
-		Gt:        "01234567890",
-		Gte:       "0123456789",
+		Lt:        "123456789",
+		Lte:       "1234567890",
+		Gt:        "12345678901",
+		Gte:       "1234567890",
 		OmitEmpty: "",
 		Sub: &SubTest{
 			Test: "1",
@@ -169,7 +179,22 @@ func BenchmarkValidateStructComplexParallelSuccess(b *testing.B) {
 	b.ResetTimer()
 	b.RunParallel(func(pb *testing.PB) {
 		for pb.Next() {
-			v.ValidateStruct(s)
+			if err := v.ValidateStruct(s); err != nil {
+				b.Fatal(err)
+			}
 		}
 	})
+}
+
+func BenchmarkValidateVarFailure(b *testing.B) {
+	v := New()
+
+	s := "12"
+
+	b.ResetTimer()
+	for n := 0; n < b.N; n++ {
+		if err := v.ValidateVar(&s, "len(1)"); err == nil {
+			b.Fatal("want invalid argument error, but got nil")
+		}
+	}
 }

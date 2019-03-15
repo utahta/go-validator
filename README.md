@@ -13,3 +13,19 @@ go-validator is a data validation library for Go.
 ```sh
 go get -u github.com/utahta/go-validator
 ```
+
+# Benchmarks
+
+3.2 GHz Intel Core i7, 64 GB 2667 MHz DDR4
+```go
+goos: darwin
+goarch: amd64
+pkg: github.com/utahta/go-validator
+BenchmarkValidateVarSuccess-12                          20000000                57.5 ns/op             0 B/op          0 allocs/op
+BenchmarkValidateVarParallelSuccess-12                  100000000               12.8 ns/op             0 B/op          0 allocs/op
+BenchmarkValidateStructSuccess-12                       10000000               184 ns/op               0 B/op          0 allocs/op
+BenchmarkValidateStructParallelSuccess-12               50000000                34.2 ns/op             0 B/op          0 allocs/op
+BenchmarkValidateStructComplexSuccess-12                 1000000              1072 ns/op              32 B/op          3 allocs/op
+BenchmarkValidateStructComplexParallelSuccess-12        10000000               216 ns/op              32 B/op          3 allocs/op
+BenchmarkValidateVarFailure-12                          10000000               173 ns/op             208 B/op          2 allocs/op
+```

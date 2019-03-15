@@ -18,6 +18,16 @@ jobs:
     steps:
       - checkout
       - run:
+          name: Run test
+          command: make test
+
+  "go-1.12":
+    docker:
+      - image: circleci/golang:1.12
+    working_directory: /go/src/github.com/utahta/go-validator
+    steps:
+      - checkout
+      - run:
           name: Run test and coverage
           command: |
             make coverage
@@ -29,3 +39,4 @@ workflows:
     jobs:
       - "go-1.10"
       - "go-1.11"
+      - "go-1.12"

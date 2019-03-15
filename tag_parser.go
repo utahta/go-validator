@@ -5,19 +5,19 @@ import (
 	"strings"
 )
 
-func (v *Validator) tagParse(rawTag string) (*tagChunk, error) {
+func (v *Validator) parseTag(rawTag string) (*tagChunk, error) {
 	if tags, ok := v.tagCache.Load(rawTag); ok {
 		return tags, nil
 	}
 
 	var (
-		rootTagChunk tagChunk
-		chunk        *tagChunk
-		orParsing    = false
+		rootChunk tagChunk
+		chunk     *tagChunk
+		orParsing = false
 	)
 	const optionalTagName = "optional"
 
-	chunk = &rootTagChunk
+	chunk = &rootChunk
 
 	s := newTagScanner(rawTag)
 loop:
@@ -37,7 +37,8 @@ loop:
 			}
 
 			if orParsing {
-				chunk.Tags[len(chunk.Tags)-1].Params = append(chunk.Tags[len(chunk.Tags)-1].Params, lit)
+				idx := len(chunk.Tags) - 1
+				chunk.Tags[idx].Params = append(chunk.Tags[idx].Params, lit)
 			} else {
 				tag, err := v.newTag(lit)
 				if err != nil {
@@ -56,7 +57,8 @@ loop:
 			}
 
 			if orParsing {
-				chunk.Tags[len(chunk.Tags)-1].Params = append(chunk.Tags[len(chunk.Tags)-1].Params, lit)
+				idx := len(chunk.Tags) - 1
+				chunk.Tags[idx].Params = append(chunk.Tags[idx].Params, lit)
 			} else {
 				tag, err := v.newTag(lit)
 				if err != nil {
@@ -75,7 +77,8 @@ loop:
 			}
 
 			if orParsing {
-				chunk.Tags[len(chunk.Tags)-1].Params = append(chunk.Tags[len(chunk.Tags)-1].Params, lit)
+				idx := len(chunk.Tags) - 1
+				chunk.Tags[idx].Params = append(chunk.Tags[idx].Params, lit)
 			} else {
 				chunk.Tags = append(chunk.Tags, Tag{Name: "or", Params: []string{lit}, validateFn: v.FuncMap["or"]})
 			}
@@ -84,7 +87,8 @@ loop:
 		case nextSeparator:
 			if lit != "" && lit != optionalTagName {
 				if orParsing {
-					chunk.Tags[len(chunk.Tags)-1].Params = append(chunk.Tags[len(chunk.Tags)-1].Params, lit)
+					idx := len(chunk.Tags) - 1
+					chunk.Tags[idx].Params = append(chunk.Tags[idx].Params, lit)
 				} else {
 					tag, err := v.newTag(lit)
 					if err != nil {
@@ -99,9 +103,9 @@ loop:
 		}
 	}
 
-	v.tagCache.Store(rawTag, &rootTagChunk)
+	v.tagCache.Store(rawTag, &rootChunk)
 
-	return &rootTagChunk, nil
+	return &rootChunk, nil
 }
 
 // newTag returns Tag.
