@@ -87,9 +87,10 @@ var (
 	defaultAdapters []Adapter
 )
 
+// apply applies left to right.
 func apply(fn Func, adapters ...Adapter) Func {
-	for _, adapter := range adapters {
-		fn = adapter(fn)
+	for i := len(adapters) - 1; i >= 0; i-- {
+		fn = adapters[i](fn)
 	}
 	return fn
 }
