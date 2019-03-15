@@ -1073,8 +1073,8 @@ func TestValidator_SetAdapter(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if str != "321" {
-		t.Errorf("want 321, got %v", str)
+	if str != "123" {
+		t.Errorf("want 123, got %v", str)
 	}
 }
 
