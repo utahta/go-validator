@@ -1,5 +1,11 @@
 # Changelog
 
+<a name="1.1.0"></a>
+## [1.1.0] - 2019-04-18
+### Features
+- add empty tag
+
+
 <a name="1.0.0"></a>
 ## [1.0.0] - 2019-03-16
 ### Bug Fixes
@@ -93,6 +99,7 @@ Removed SetAdapter function from Validator.
 
 <a name="0.0.1"></a>
 ## 0.0.1 - 2018-10-08
+[1.1.0]: https://github.com/utahta/go-validator/compare/1.0.0...1.1.0
 [1.0.0]: https://github.com/utahta/go-validator/compare/0.0.7...1.0.0
 [0.0.7]: https://github.com/utahta/go-validator/compare/0.0.6...0.0.7
 [0.0.6]: https://github.com/utahta/go-validator/compare/0.0.5...0.0.6
