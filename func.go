@@ -32,6 +32,8 @@ var (
 	defaultFuncMap = FuncMap{
 		"required":        hasValue,
 		"req":             hasValue,
+		"empty":           zeroValue,
+		"zero":            zeroValue,
 		"alpha":           isAlpha,
 		"alphanum":        isAlphaNum,
 		"alphaunicode":    isAlphaUnicode,
@@ -120,6 +122,10 @@ func isEmpty(f Field) bool {
 
 func hasValue(_ context.Context, f Field, _ FuncOption) (bool, error) {
 	return !isEmpty(f), nil
+}
+
+func zeroValue(_ context.Context, f Field, _ FuncOption) (bool, error) {
+	return isEmpty(f), nil
 }
 
 func isAlpha(_ context.Context, f Field, _ FuncOption) (bool, error) {
