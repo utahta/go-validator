@@ -61,7 +61,83 @@ func Test_required(t *testing.T) {
 		{"invalid map", v.ValidateVar(map[int]int{}, tag), true},
 		{"invalid ptr", v.ValidateVar((*Cat)(nil), tag), true},
 		{"invalid struct", v.ValidateVar(Cat{}, tag), true},
-		{"valid bool", v.ValidateVar(false, tag), true},
+		{"invalid bool", v.ValidateVar(false, tag), true},
+	}
+
+	for _, tc := range testcases {
+		t.Run(tc.name, func(t *testing.T) {
+			gotErrs, hasErr := tc.err.(validator.Errors)
+			if tc.hasErr != hasErr {
+				t.Errorf("want hasErr %v, got %v", tc.hasErr, hasErr)
+			}
+			if tc.hasErr {
+				if len(gotErrs) == 0 {
+					t.Fatal("errors is empty")
+				}
+				if gotErrs[0].Tag.String() != tag {
+					t.Errorf("want tag name %v, got %v", tag, gotErrs[0].Tag)
+				}
+			}
+		})
+	}
+}
+
+func Test_zero(t *testing.T) {
+	t.Parallel()
+
+	type (
+		Cat struct {
+			Name string `valid:"zero"`
+		}
+	)
+	const tag = "zero"
+	v := validator.New()
+
+	testcases := []struct {
+		name   string
+		err    error
+		hasErr bool
+	}{
+		{"valid string", v.ValidateVar("", tag), false},
+		{"valid int", v.ValidateVar(0, tag), false},
+		{"valid int8", v.ValidateVar(int8(0), tag), false},
+		{"valid int16", v.ValidateVar(int16(0), tag), false},
+		{"valid int32", v.ValidateVar(int32(0), tag), false},
+		{"valid int64", v.ValidateVar(int64(0), tag), false},
+		{"valid uint", v.ValidateVar(uint(0), tag), false},
+		{"valid uint8", v.ValidateVar(uint8(0), tag), false},
+		{"valid uint16", v.ValidateVar(uint16(0), tag), false},
+		{"valid uint32", v.ValidateVar(uint32(0), tag), false},
+		{"valid uint64", v.ValidateVar(uint64(0), tag), false},
+		{"valid float32", v.ValidateVar(float32(0.0), tag), false},
+		{"valid float64", v.ValidateVar(float64(0.0), tag), false},
+		{"valid slice", v.ValidateVar([]int{}, tag), false},
+		{"valid array", v.ValidateVar([0]int{}, tag), false},
+		{"valid map", v.ValidateVar(map[int]int{}, tag), false},
+		{"valid ptr", v.ValidateVar((*Cat)(nil), tag), false},
+		{"valid struct", v.ValidateVar(Cat{}, tag), false},
+		{"valid bool", v.ValidateVar(false, tag), false},
+
+		{"invalid string", v.ValidateVar("str", tag), true},
+		{"invalid int", v.ValidateVar(1, tag), true},
+		{"invalid int8", v.ValidateVar(int8(1), tag), true},
+		{"invalid int16", v.ValidateVar(int16(1), tag), true},
+		{"invalid int32", v.ValidateVar(int32(1), tag), true},
+		{"invalid int64", v.ValidateVar(int64(1), tag), true},
+		{"invalid uint", v.ValidateVar(uint(1), tag), true},
+		{"invalid uint8", v.ValidateVar(uint8(1), tag), true},
+		{"invalid uint16", v.ValidateVar(uint16(1), tag), true},
+		{"invalid uint32", v.ValidateVar(uint32(1), tag), true},
+		{"invalid uint64", v.ValidateVar(uint64(1), tag), true},
+		{"invalid float32", v.ValidateVar(float32(1.0), tag), true},
+		{"invalid float64", v.ValidateVar(float64(1.0), tag), true},
+		{"invalid slice", v.ValidateVar([]int{1}, tag), true},
+		{"invalid array", v.ValidateVar([1]int{1}, tag), true},
+		{"invalid array2", v.ValidateVar([1]int{}, tag), true},
+		{"invalid map", v.ValidateVar(map[int]int{1: 1}, tag), true},
+		{"invalid ptr", v.ValidateVar(&Cat{Name: "str"}, tag), true},
+		{"invalid struct", v.ValidateVar(Cat{Name: "str"}, tag), true},
+		{"invalid bool", v.ValidateVar(true, tag), true},
 	}
 
 	for _, tc := range testcases {
