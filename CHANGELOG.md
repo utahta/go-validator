@@ -1,5 +1,17 @@
 # Changelog
 
+<a name="1.2.0"></a>
+## [1.2.0] - 2019-05-11
+### Performance Improvements
+- now 30% faster than before
+
+### Tests
+- Add complex validation benchmark
+
+### Pull Requests
+- Merge pull request [#7](https://github.com/utahta/go-validator/issues/7) from utahta/improve-performance
+
+
 <a name="1.1.0"></a>
 ## [1.1.0] - 2019-04-18
 ### Features
@@ -99,6 +111,7 @@ Removed SetAdapter function from Validator.
 
 <a name="0.0.1"></a>
 ## 0.0.1 - 2018-10-08
+[1.2.0]: https://github.com/utahta/go-validator/compare/1.1.0...1.2.0
 [1.1.0]: https://github.com/utahta/go-validator/compare/1.0.0...1.1.0
 [1.0.0]: https://github.com/utahta/go-validator/compare/0.0.7...1.0.0
 [0.0.7]: https://github.com/utahta/go-validator/compare/0.0.6...0.0.7
