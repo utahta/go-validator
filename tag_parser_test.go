@@ -308,7 +308,7 @@ func Test_tagParse(t *testing.T) {
 
 	for _, tc := range testcases {
 		t.Run(tc.rawTag, func(t *testing.T) {
-			chunk, err := New().tagParse(tc.rawTag)
+			chunk, err := New().parseTag(tc.rawTag)
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -390,7 +390,7 @@ func Test_tagParseInvalid(t *testing.T) {
 	}
 
 	for _, tc := range testcases {
-		_, err := New().tagParse(tc.rawTag)
+		_, err := New().parseTag(tc.rawTag)
 		if err.Error() != tc.wantError {
 			t.Errorf("want `%v`, got `%v`", tc.wantError, err.Error())
 		}
@@ -400,7 +400,7 @@ func Test_tagParseInvalid(t *testing.T) {
 func Test_tagCache(t *testing.T) {
 	const rawTag = "required,min(1),max(10)"
 	v := New()
-	want, err := v.tagParse(rawTag)
+	want, err := v.parseTag(rawTag)
 	if err != nil {
 		t.Fatal(err)
 	}

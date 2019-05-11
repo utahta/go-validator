@@ -88,35 +88,45 @@ func (v *Validator) validateStruct(ctx context.Context, field Field) error {
 
 	valueType := val.Type()
 	fieldCaches, hasCache := v.structCache.Load(valueType)
-
-	var errs Errors
-	for i := 0; i < val.NumField(); i++ {
-		if !hasCache {
+	if !hasCache {
+		for i := 0; i < val.NumField(); i++ {
 			typeField := valueType.Field(i)
-			fieldCaches = append(fieldCaches, fieldCache{
+			cache := fieldCache{
+				index:     i,
 				isPrivate: typeField.PkgPath != "", // private field
 				tagValue:  typeField.Tag.Get(tagName),
 				name:      typeField.Name,
-			})
-		}
-		if fieldCaches[i].isPrivate || fieldCaches[i].tagValue == "-" {
-			continue
-		}
+			}
+			if cache.isPrivate {
+				continue
+			}
+			if !v.canValidate(cache.tagValue, v.extractVar(val.Field(i)).Kind()) {
+				continue
+			}
 
-		originField := val.Field(i)
+			chunk, err := v.parseTag(cache.tagValue)
+			if err != nil {
+				return err
+			}
+			cache.tagChunk = chunk
+
+			fieldCaches = append(fieldCaches, cache)
+		}
+		v.structCache.Store(valueType, fieldCaches)
+	}
+
+	var errs Errors
+	for i := 0; i < len(fieldCaches); i++ {
+		originField := val.Field(fieldCaches[i].index)
 		valueField := v.extractVar(originField)
 
-		if err := v.validateVar(ctx, newFieldWithParent(fieldCaches[i].name, originField, valueField, field), fieldCaches[i].tagValue); err != nil {
+		if err := v.validate(ctx, newFieldWithParent(fieldCaches[i].name, originField, valueField, field), fieldCaches[i].tagChunk); err != nil {
 			if es, ok := err.(Errors); ok {
 				errs = append(errs, es...)
 			} else {
 				return err
 			}
 		}
-	}
-
-	if !hasCache {
-		v.structCache.Store(valueType, fieldCaches)
 	}
 
 	if len(errs) > 0 {
@@ -138,28 +148,16 @@ func (v *Validator) ValidateVarContext(ctx context.Context, s interface{}, rawTa
 }
 
 func (v *Validator) validateVar(ctx context.Context, field Field, rawTag string) error {
-	if rawTag == "-" {
+	if !v.canValidate(rawTag, field.current.Kind()) {
 		return nil
 	}
 
-	chunk, err := v.tagParse(rawTag)
+	chunk, err := v.parseTag(rawTag)
 	if err != nil {
 		return err
 	}
 
-	var errs Errors
-	if err := v.validate(ctx, field, chunk); err != nil {
-		if es, ok := err.(Errors); ok {
-			errs = append(errs, es...)
-		} else {
-			return err
-		}
-	}
-
-	if len(errs) > 0 {
-		return errs
-	}
-	return nil
+	return v.validate(ctx, field, chunk)
 }
 
 func (v *Validator) validate(ctx context.Context, field Field, chunk *tagChunk) error {
@@ -239,6 +237,24 @@ func (v *Validator) extractVar(in reflect.Value) reflect.Value {
 			return val
 		}
 	}
+}
+
+func (v *Validator) canValidate(rawTag string, kind reflect.Kind) bool {
+	if rawTag == "-" {
+		return false
+	}
+
+	if rawTag == "" {
+		switch kind {
+		case reflect.String, reflect.Bool,
+			reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64,
+			reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64, reflect.Uintptr,
+			reflect.Float32, reflect.Float64:
+			// these kinds do not perform recursive process so let's skip validation
+			return false
+		}
+	}
+	return true
 }
 
 // DefaultValidator returns default validator.
