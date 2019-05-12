@@ -1,5 +1,18 @@
 # Changelog
 
+<a name="1.3.0"></a>
+## [1.3.0] - 2019-05-12
+### Code Refactoring
+- made behavior simple
+- using parseXXX functions
+
+### BREAKING CHANGE
+
+using utf8.RuneCountInString by len, min and max
+
+removed `zero` from default tags (can use `empty` instead)
+
+
 <a name="1.2.0"></a>
 ## [1.2.0] - 2019-05-11
 ### Performance Improvements
@@ -111,6 +124,7 @@ Removed SetAdapter function from Validator.
 
 <a name="0.0.1"></a>
 ## 0.0.1 - 2018-10-08
+[1.3.0]: https://github.com/utahta/go-validator/compare/1.2.0...1.3.0
 [1.2.0]: https://github.com/utahta/go-validator/compare/1.1.0...1.2.0
 [1.1.0]: https://github.com/utahta/go-validator/compare/1.0.0...1.1.0
 [1.0.0]: https://github.com/utahta/go-validator/compare/0.0.7...1.0.0
