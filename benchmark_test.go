@@ -198,3 +198,81 @@ func BenchmarkValidateVarFailure(b *testing.B) {
 		}
 	}
 }
+
+func BenchmarkStructComplexFailure(b *testing.B) {
+	v := New()
+
+	s := &TestString{
+		Required:  "",
+		Len:       "",
+		Min:       "",
+		Max:       "12345678901",
+		MinMax:    "",
+		Lt:        "1234567890",
+		Lte:       "12345678901",
+		Gt:        "1",
+		Gte:       "1",
+		OmitEmpty: "12345678901",
+		Sub: &SubTest{
+			Test: "",
+		},
+		SubIgnore: &SubTest{
+			Test: "",
+		},
+		Anonymous: struct {
+			A string `valid:"required"`
+		}{
+			A: "",
+		},
+		Iface: &Impl{
+			F: "12",
+		},
+	}
+
+	b.ResetTimer()
+	for n := 0; n < b.N; n++ {
+		if err := v.ValidateStruct(s); err == nil {
+			b.Fatal("want validation errors, but got nil")
+		}
+	}
+}
+
+func BenchmarkStructComplexParallelFailure(b *testing.B) {
+	v := New()
+
+	s := &TestString{
+		Required:  "",
+		Len:       "",
+		Min:       "",
+		Max:       "12345678901",
+		MinMax:    "",
+		Lt:        "1234567890",
+		Lte:       "12345678901",
+		Gt:        "1",
+		Gte:       "1",
+		OmitEmpty: "12345678901",
+		Sub: &SubTest{
+			Test: "",
+		},
+		SubIgnore: &SubTest{
+			Test: "",
+		},
+		Anonymous: struct {
+			A string `valid:"required"`
+		}{
+			A: "",
+		},
+		Iface: &Impl{
+			F: "12",
+		},
+	}
+
+	b.ResetTimer()
+	b.RunParallel(func(pb *testing.PB) {
+		for pb.Next() {
+			if err := v.ValidateStruct(s); err == nil {
+				b.Fatal("want validation errors, but got nil")
+			}
+		}
+	})
+}
