@@ -1587,10 +1587,45 @@ func Test_length_equal(t *testing.T) {
 	}
 }
 
-func Test_strlength_minmax(t *testing.T) {
+func Test_length_invalidTag(t *testing.T) {
 	t.Parallel()
 
-	const tag = "strlen(2|3)"
+	v := validator.New()
+
+	testcases := []struct {
+		name           string
+		err            error
+		wantErrMessage string
+	}{
+		{"equal", v.ValidateVar("a", "len(aaa)"), `: an error occurred in 'len(aaa)': strconv.ParseInt: parsing "aaa": invalid syntax`},
+		{"min", v.ValidateVar("a", "len(aaa|3)"), `: an error occurred in 'len(aaa|3)': strconv.ParseInt: parsing "aaa": invalid syntax`},
+		{"max", v.ValidateVar("a", "len(1|aaa)"), `: an error occurred in 'len(1|aaa)': strconv.ParseInt: parsing "aaa": invalid syntax`},
+	}
+
+	for _, tc := range testcases {
+		t.Run(tc.name, func(t *testing.T) {
+			if tc.err == nil {
+				t.Error("want error, but got nil")
+				return
+			}
+
+			gotErrs, has := tc.err.(validator.Errors)
+			if !has {
+				t.Errorf("want validator Errors, but not %v", gotErrs)
+				return
+			}
+
+			if want, got := tc.wantErrMessage, gotErrs[0].Error(); want != got {
+				t.Errorf("want error message %v, but got %v", want, got)
+			}
+		})
+	}
+}
+
+func Test_eqlength(t *testing.T) {
+	t.Parallel()
+
+	const tag = "eq(2)"
 	v := validator.New()
 
 	testcases := []struct {
@@ -1598,11 +1633,17 @@ func Test_strlength_minmax(t *testing.T) {
 		err    error
 		hasErr bool
 	}{
-		{"valid string min", v.ValidateVar("ああ", tag), false},
-		{"valid string max", v.ValidateVar("あああ", tag), false},
+		{"valid string", v.ValidateVar("aa", tag), false},
+		{"valid multibyte string", v.ValidateVar("ああ", tag), false},
+		{"valid int", v.ValidateVar(2, tag), false},
+		{"valid slice", v.ValidateVar([]int{2, 2}, tag), false},
+		{"valid map", v.ValidateVar(map[int]int{1: 2, 2: 2}, tag), false},
 
-		{"invalid string min", v.ValidateVar("あ", tag), true},
-		{"invalid string max", v.ValidateVar("ああああ", tag), true},
+		{"invalid string", v.ValidateVar("a", tag), true},
+		{"invalid multibyte string", v.ValidateVar("あ", tag), true},
+		{"invalid int", v.ValidateVar(1, tag), true},
+		{"invalid slice", v.ValidateVar([]int{2}, tag), true},
+		{"invalid map", v.ValidateVar(map[int]int{1: 2}, tag), true},
 	}
 
 	for _, tc := range testcases {
@@ -1620,40 +1661,52 @@ func Test_strlength_minmax(t *testing.T) {
 	}
 
 	t.Run("invalid param len", func(t *testing.T) {
-		wantError := ": an error occurred in 'strlen(2|3|4)': invalid params len"
-		err := v.ValidateVar("あああ", "strlen(2|3|4)")
+		wantError := ": an error occurred in 'eq(2|3)': invalid params len"
+		err := v.ValidateVar("aa", "eq(2|3)")
+		if err == nil {
+			t.Error("want error, but got nil")
+			return
+		}
 		if err.Error() != wantError {
 			t.Errorf("want `%v`, got `%v`", wantError, err)
 		}
 	})
 }
 
-func Test_strlength_equal(t *testing.T) {
+func Test_eqlength_invalidTag(t *testing.T) {
 	t.Parallel()
 
-	const tag = "strlen(2)"
+	const tag = "eq(aaa)"
 	v := validator.New()
 
 	testcases := []struct {
-		name   string
-		err    error
-		hasErr bool
+		name           string
+		err            error
+		wantErrMessage string
 	}{
-		{"valid string", v.ValidateVar("ああ", tag), false},
-
-		{"invalid string", v.ValidateVar("あ", tag), true},
+		{"string", v.ValidateVar("a", tag), `: an error occurred in 'eq(aaa)': strconv.ParseInt: parsing "aaa": invalid syntax`},
+		{"int", v.ValidateVar(int(1), tag), `: an error occurred in 'eq(aaa)': strconv.ParseInt: parsing "aaa": invalid syntax`},
+		{"uint", v.ValidateVar(uint(1), tag), `: an error occurred in 'eq(aaa)': strconv.ParseUint: parsing "aaa": invalid syntax`},
+		{"float", v.ValidateVar(float64(1), tag), `: an error occurred in 'eq(aaa)': strconv.ParseFloat: parsing "aaa": invalid syntax`},
+		{"slice", v.ValidateVar([]int{2}, tag), `: an error occurred in 'eq(aaa)': strconv.ParseInt: parsing "aaa": invalid syntax`},
+		{"map", v.ValidateVar(map[int]int{1: 2}, tag), `: an error occurred in 'eq(aaa)': strconv.ParseInt: parsing "aaa": invalid syntax`},
 	}
 
 	for _, tc := range testcases {
 		t.Run(tc.name, func(t *testing.T) {
-			gotErrs, _ := tc.err.(validator.Errors)
-			if tc.hasErr {
-				if len(gotErrs) == 0 {
-					t.Fatal("errors is empty")
-				}
-				if gotErrs[0].Tag.String() != tag {
-					t.Errorf("want tag name %v, got %v", tag, gotErrs[0].Tag)
-				}
+			if tc.err == nil {
+				t.Error("want error, but got nil")
+				return
+			}
+
+			gotErrs, has := tc.err.(validator.Errors)
+			if !has {
+				t.Errorf("want validator Errors, but not %v", gotErrs)
+				return
+			}
+
+			if want, got := tc.wantErrMessage, gotErrs[0].Error(); want != got {
+				t.Errorf("want error message %v, but got %v", want, got)
 			}
 		})
 	}
@@ -1671,11 +1724,13 @@ func Test_minlength(t *testing.T) {
 		hasErr bool
 	}{
 		{"valid string", v.ValidateVar("aa", tag), false},
+		{"valid multibyte string", v.ValidateVar("ああ", tag), false},
 		{"valid int", v.ValidateVar(2, tag), false},
 		{"valid slice", v.ValidateVar([]int{2, 2}, tag), false},
 		{"valid map", v.ValidateVar(map[int]int{1: 2, 2: 2}, tag), false},
 
 		{"invalid string", v.ValidateVar("a", tag), true},
+		{"invalid multibyte string", v.ValidateVar("あ", tag), true},
 		{"invalid int", v.ValidateVar(1, tag), true},
 		{"invalid slice", v.ValidateVar([]int{2}, tag), true},
 		{"invalid map", v.ValidateVar(map[int]int{1: 2}, tag), true},
@@ -1698,10 +1753,53 @@ func Test_minlength(t *testing.T) {
 	t.Run("invalid param len", func(t *testing.T) {
 		wantError := ": an error occurred in 'min(2|3)': invalid params len"
 		err := v.ValidateVar("aa", "min(2|3)")
+		if err == nil {
+			t.Error("want error, but got nil")
+			return
+		}
 		if err.Error() != wantError {
 			t.Errorf("want `%v`, got `%v`", wantError, err)
 		}
 	})
+}
+
+func Test_minlength_invalidTag(t *testing.T) {
+	t.Parallel()
+
+	const tag = "min(aaa)"
+	v := validator.New()
+
+	testcases := []struct {
+		name           string
+		err            error
+		wantErrMessage string
+	}{
+		{"string", v.ValidateVar("a", tag), `: an error occurred in 'min(aaa)': strconv.ParseInt: parsing "aaa": invalid syntax`},
+		{"int", v.ValidateVar(int(1), tag), `: an error occurred in 'min(aaa)': strconv.ParseInt: parsing "aaa": invalid syntax`},
+		{"uint", v.ValidateVar(uint(1), tag), `: an error occurred in 'min(aaa)': strconv.ParseUint: parsing "aaa": invalid syntax`},
+		{"float", v.ValidateVar(float64(1), tag), `: an error occurred in 'min(aaa)': strconv.ParseFloat: parsing "aaa": invalid syntax`},
+		{"slice", v.ValidateVar([]int{2}, tag), `: an error occurred in 'min(aaa)': strconv.ParseInt: parsing "aaa": invalid syntax`},
+		{"map", v.ValidateVar(map[int]int{1: 2}, tag), `: an error occurred in 'min(aaa)': strconv.ParseInt: parsing "aaa": invalid syntax`},
+	}
+
+	for _, tc := range testcases {
+		t.Run(tc.name, func(t *testing.T) {
+			if tc.err == nil {
+				t.Error("want error, but got nil")
+				return
+			}
+
+			gotErrs, has := tc.err.(validator.Errors)
+			if !has {
+				t.Errorf("want validator Errors, but not %v", gotErrs)
+				return
+			}
+
+			if want, got := tc.wantErrMessage, gotErrs[0].Error(); want != got {
+				t.Errorf("want error message %v, but got %v", want, got)
+			}
+		})
+	}
 }
 
 func Test_maxlength(t *testing.T) {
@@ -1716,11 +1814,13 @@ func Test_maxlength(t *testing.T) {
 		hasErr bool
 	}{
 		{"valid string", v.ValidateVar("aa", tag), false},
+		{"valid multibyte string", v.ValidateVar("ああ", tag), false},
 		{"valid int", v.ValidateVar(2, tag), false},
 		{"valid slice", v.ValidateVar([]int{2, 2}, tag), false},
 		{"valid map", v.ValidateVar(map[int]int{1: 2, 2: 2}, tag), false},
 
 		{"invalid string", v.ValidateVar("aaa", tag), true},
+		{"invalid multibyte string", v.ValidateVar("あああ", tag), true},
 		{"invalid int", v.ValidateVar(3, tag), true},
 		{"invalid slice", v.ValidateVar([]int{2, 2, 2}, tag), true},
 		{"invalid map", v.ValidateVar(map[int]int{1: 2, 2: 2, 3: 2}, tag), true},
@@ -1743,94 +1843,53 @@ func Test_maxlength(t *testing.T) {
 	t.Run("invalid param len", func(t *testing.T) {
 		wantError := ": an error occurred in 'max(2|3)': invalid params len"
 		err := v.ValidateVar("aa", "max(2|3)")
+		if err == nil {
+			t.Error("want error, but got nil")
+			return
+		}
 		if err.Error() != wantError {
 			t.Errorf("want `%v`, got `%v`", wantError, err)
 		}
 	})
 }
 
-func Test_strminlength(t *testing.T) {
+func Test_maxlength_invalidTag(t *testing.T) {
 	t.Parallel()
 
-	const tag = "strmin(2)"
+	const tag = "max(aaa)"
 	v := validator.New()
 
 	testcases := []struct {
-		name   string
-		err    error
-		hasErr bool
+		name           string
+		err            error
+		wantErrMessage string
 	}{
-		{"valid string", v.ValidateVar("ああ", tag), false},
-
-		{"invalid string", v.ValidateVar("あ", tag), true},
+		{"string", v.ValidateVar("a", tag), `: an error occurred in 'max(aaa)': strconv.ParseInt: parsing "aaa": invalid syntax`},
+		{"int", v.ValidateVar(int(1), tag), `: an error occurred in 'max(aaa)': strconv.ParseInt: parsing "aaa": invalid syntax`},
+		{"uint", v.ValidateVar(uint(1), tag), `: an error occurred in 'max(aaa)': strconv.ParseUint: parsing "aaa": invalid syntax`},
+		{"float", v.ValidateVar(float64(1), tag), `: an error occurred in 'max(aaa)': strconv.ParseFloat: parsing "aaa": invalid syntax`},
+		{"slice", v.ValidateVar([]int{2}, tag), `: an error occurred in 'max(aaa)': strconv.ParseInt: parsing "aaa": invalid syntax`},
+		{"map", v.ValidateVar(map[int]int{1: 2}, tag), `: an error occurred in 'max(aaa)': strconv.ParseInt: parsing "aaa": invalid syntax`},
 	}
 
 	for _, tc := range testcases {
 		t.Run(tc.name, func(t *testing.T) {
-			gotErrs, hasErr := tc.err.(validator.Errors)
-			if tc.hasErr != hasErr {
-				t.Errorf("want hasErr %v, got %v", tc.hasErr, hasErr)
+			if tc.err == nil {
+				t.Error("want error, but got nil")
+				return
 			}
-			if tc.hasErr {
-				if len(gotErrs) == 0 {
-					t.Fatal("errors is empty")
-				}
-				if gotErrs[0].Tag.String() != tag {
-					t.Errorf("want tag name %v, got %v", tag, gotErrs[0].Tag)
-				}
+
+			gotErrs, has := tc.err.(validator.Errors)
+			if !has {
+				t.Errorf("want validator Errors, but not %v", gotErrs)
+				return
 			}
-		})
-	}
 
-	t.Run("invalid param len", func(t *testing.T) {
-		wantError := ": an error occurred in 'strmin(2|3)': invalid params len"
-		err := v.ValidateVar("aa", "strmin(2|3)")
-		if err.Error() != wantError {
-			t.Errorf("want %q, got %q", wantError, err)
-		}
-	})
-}
-
-func Test_strmaxlength(t *testing.T) {
-	t.Parallel()
-
-	const tag = "strmax(2)"
-	v := validator.New()
-
-	testcases := []struct {
-		name   string
-		err    error
-		hasErr bool
-	}{
-		{"valid string", v.ValidateVar("ああ", tag), false},
-
-		{"invalid string", v.ValidateVar("あああ", tag), true},
-	}
-
-	for _, tc := range testcases {
-		t.Run(tc.name, func(t *testing.T) {
-			gotErrs, hasErr := tc.err.(validator.Errors)
-			if tc.hasErr != hasErr {
-				t.Errorf("want hasErr %v, got %v", tc.hasErr, hasErr)
-			}
-			if tc.hasErr {
-				if len(gotErrs) == 0 {
-					t.Fatal("errors is empty")
-				}
-				if gotErrs[0].Tag.String() != tag {
-					t.Errorf("want tag name %v, got %v", tag, gotErrs[0].Tag)
-				}
+			if want, got := tc.wantErrMessage, gotErrs[0].Error(); want != got {
+				t.Errorf("want error message %v, but got %v", want, got)
 			}
 		})
 	}
-
-	t.Run("invalid param len", func(t *testing.T) {
-		wantError := ": an error occurred in 'strmax(2|3)': invalid params len"
-		err := v.ValidateVar("aa", "strmax(2|3)")
-		if err.Error() != wantError {
-			t.Errorf("want %q, got %q", wantError, err)
-		}
-	})
 }
 
 func Test_or(t *testing.T) {
@@ -1869,6 +1928,10 @@ func Test_or(t *testing.T) {
 	t.Run("invalid tag", func(t *testing.T) {
 		wantError := ": an error occurred in 'or(unknown|numeric)': parse: tag unknown function not found"
 		err := v.ValidateVar("===", "or(unknown|numeric)")
+		if err == nil {
+			t.Error("want error, but got nil")
+			return
+		}
 		if err.Error() != wantError {
 			t.Errorf("want `%v`, got `%v`", wantError, err)
 		}

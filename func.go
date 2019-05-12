@@ -74,12 +74,13 @@ var (
 		// has parameters.
 		"len":    length,
 		"length": length,
-		"range":  length,
+		"eq":     eqLength,
 		"min":    minLength,
 		"max":    maxLength,
 		"or":     or,
 
 		// DEPRECATED. these are expected to be removed entirely sometime in the future.
+		"range":      length,
 		"strlen":     length,
 		"strlength":  length,
 		"strmin":     minLength,

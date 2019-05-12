@@ -975,29 +975,63 @@ func TestValidateStruct_InvalidTag(t *testing.T) {
 func TestValidateStruct_NotStruct(t *testing.T) {
 	testcases := []struct {
 		s          interface{}
-		wantErr    bool
+		wantGotErr bool
 		wantErrStr string
 	}{
 		{
 			s:          nil,
-			wantErr:    false,
+			wantGotErr: false,
 			wantErrStr: "",
 		},
 		{
 			s:          "test",
-			wantErr:    true,
+			wantGotErr: true,
 			wantErrStr: "struct type required",
 		},
 	}
 
 	for _, tc := range testcases {
 		err := validator.ValidateStruct(tc.s)
-		if tc.wantErr {
+		if tc.wantGotErr {
+			if err == nil {
+				t.Fatal("want error, but got nil")
+			}
 			if tc.wantErrStr != err.Error() {
 				t.Errorf("want %v, got %v", tc.wantErrStr, err)
 			}
 		} else if err != nil {
 			t.Errorf("want nil, got %v", err)
+		}
+	}
+}
+
+func TestValidateStruct_PrivateField(t *testing.T) {
+	type (
+		privateFieldTest struct {
+			name string `valid:"numeric"`
+		}
+	)
+
+	testcases := []struct {
+		name string
+		s    interface{}
+	}{
+		{
+			name: "Valid not numeric value",
+			s: privateFieldTest{
+				name: "abc",
+			},
+		},
+		{
+			name: "Valid empty value",
+			s:    privateFieldTest{},
+		},
+	}
+
+	for _, tc := range testcases {
+		err := validator.ValidateStruct(tc.s)
+		if err != nil {
+			t.Errorf("want nil, but got %v", err)
 		}
 	}
 }

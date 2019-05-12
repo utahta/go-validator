@@ -387,6 +387,14 @@ func Test_tagParseInvalid(t *testing.T) {
 			rawTag:    "unknown",
 			wantError: "parse: tag unknown function not found",
 		},
+		{
+			rawTag:    "unknown,req",
+			wantError: "parse: tag unknown function not found",
+		},
+		{
+			rawTag:    "unknown;req",
+			wantError: "parse: tag unknown function not found",
+		},
 	}
 
 	for _, tc := range testcases {
