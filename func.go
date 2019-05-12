@@ -293,28 +293,28 @@ func minLength(_ context.Context, f Field, opt FuncOption) (bool, error) {
 	v := f.current
 	switch v.Kind() {
 	case reflect.String, reflect.Array, reflect.Map, reflect.Slice:
-		min, err := strconv.ParseInt(minStr, 10, 64)
+		min, err := parseInt64(minStr)
 		if err != nil {
 			return false, err
 		}
 		return min <= int64(v.Len()), nil
 
 	case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
-		min, err := strconv.ParseInt(minStr, 10, 64)
+		min, err := parseInt64(minStr)
 		if err != nil {
 			return false, err
 		}
 		return min <= v.Int(), nil
 
 	case reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64, reflect.Uintptr:
-		min, err := strconv.ParseUint(minStr, 10, 64)
+		min, err := parseUint64(minStr)
 		if err != nil {
 			return false, err
 		}
 		return min <= v.Uint(), nil
 
 	case reflect.Float32, reflect.Float64:
-		min, err := strconv.ParseFloat(minStr, 64)
+		min, err := parseFloat64(minStr)
 		if err != nil {
 			return false, err
 		}
@@ -334,28 +334,28 @@ func maxLength(_ context.Context, f Field, opt FuncOption) (bool, error) {
 	v := f.current
 	switch v.Kind() {
 	case reflect.String, reflect.Array, reflect.Map, reflect.Slice:
-		max, err := strconv.ParseInt(maxStr, 10, 64)
+		max, err := parseInt64(maxStr)
 		if err != nil {
 			return false, err
 		}
 		return int64(v.Len()) <= max, nil
 
 	case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
-		max, err := strconv.ParseInt(maxStr, 10, 64)
+		max, err := parseInt64(maxStr)
 		if err != nil {
 			return false, err
 		}
 		return v.Int() <= max, nil
 
 	case reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64, reflect.Uintptr:
-		max, err := strconv.ParseUint(maxStr, 10, 64)
+		max, err := parseUint64(maxStr)
 		if err != nil {
 			return false, err
 		}
 		return v.Uint() <= max, nil
 
 	case reflect.Float32, reflect.Float64:
-		max, err := strconv.ParseFloat(maxStr, 64)
+		max, err := parseFloat64(maxStr)
 		if err != nil {
 			return false, err
 		}
@@ -373,28 +373,28 @@ func eqLength(_ context.Context, f Field, opt FuncOption) (bool, error) {
 	v := f.current
 	switch v.Kind() {
 	case reflect.String, reflect.Array, reflect.Map, reflect.Slice:
-		i, err := strconv.ParseInt(str, 10, 64)
+		i, err := parseInt64(str)
 		if err != nil {
 			return false, err
 		}
 		return int64(v.Len()) == i, nil
 
 	case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
-		i, err := strconv.ParseInt(str, 10, 64)
+		i, err := parseInt64(str)
 		if err != nil {
 			return false, err
 		}
 		return v.Int() == i, nil
 
 	case reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64, reflect.Uintptr:
-		i, err := strconv.ParseUint(str, 10, 64)
+		i, err := parseUint64(str)
 		if err != nil {
 			return false, err
 		}
 		return v.Uint() == i, nil
 
 	case reflect.Float32, reflect.Float64:
-		i, err := strconv.ParseFloat(str, 64)
+		i, err := parseFloat64(str)
 		if err != nil {
 			return false, err
 		}
@@ -435,11 +435,11 @@ func strMinLength(_ context.Context, f Field, opt FuncOption) (bool, error) {
 	v := f.current
 	switch v.Kind() {
 	case reflect.String:
-		min, err := strconv.Atoi(opt.Params[0])
+		min, err := parseInt64(opt.Params[0])
 		if err != nil {
 			return false, err
 		}
-		return min <= utf8.RuneCountInString(v.String()), nil
+		return min <= int64(utf8.RuneCountInString(v.String())), nil
 	}
 	return false, nil
 }
@@ -452,11 +452,11 @@ func strMaxLength(_ context.Context, f Field, opt FuncOption) (bool, error) {
 	v := f.current
 	switch v.Kind() {
 	case reflect.String:
-		max, err := strconv.Atoi(opt.Params[0])
+		max, err := parseInt64(opt.Params[0])
 		if err != nil {
 			return false, err
 		}
-		return utf8.RuneCountInString(v.String()) <= max, nil
+		return int64(utf8.RuneCountInString(v.String())) <= max, nil
 	}
 	return false, nil
 }
@@ -469,11 +469,11 @@ func strEqLength(_ context.Context, f Field, opt FuncOption) (bool, error) {
 	v := f.current
 	switch v.Kind() {
 	case reflect.String:
-		i, err := strconv.Atoi(opt.Params[0])
+		i, err := parseInt64(opt.Params[0])
 		if err != nil {
 			return false, err
 		}
-		return utf8.RuneCountInString(v.String()) == i, nil
+		return int64(utf8.RuneCountInString(v.String())) == i, nil
 	}
 	return false, nil
 }
@@ -517,4 +517,16 @@ func or(_ context.Context, f Field, opt FuncOption) (bool, error) {
 		}
 	}
 	return false, nil
+}
+
+func parseInt64(s string) (int64, error) {
+	return strconv.ParseInt(s, 10, 64)
+}
+
+func parseUint64(s string) (uint64, error) {
+	return strconv.ParseUint(s, 10, 64)
+}
+
+func parseFloat64(s string) (float64, error) {
+	return strconv.ParseFloat(s, 64)
 }
