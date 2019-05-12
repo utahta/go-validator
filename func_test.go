@@ -82,15 +82,15 @@ func Test_required(t *testing.T) {
 	}
 }
 
-func Test_zero(t *testing.T) {
+func Test_empty(t *testing.T) {
 	t.Parallel()
 
 	type (
 		Cat struct {
-			Name string `valid:"zero"`
+			Name string `valid:"empty"`
 		}
 	)
-	const tag = "zero"
+	const tag = "empty"
 	v := validator.New()
 
 	testcases := []struct {
@@ -1490,6 +1490,8 @@ func Test_length_minmax(t *testing.T) {
 	}{
 		{"valid string min", v.ValidateVar("aa", tag), false},
 		{"valid string max", v.ValidateVar("aaa", tag), false},
+		{"valid multibyte string min", v.ValidateVar("ああ", tag), false},
+		{"valid multibyte string max", v.ValidateVar("あああ", tag), false},
 		{"valid int min", v.ValidateVar(2, tag), false},
 		{"valid int max", v.ValidateVar(3, tag), false},
 		{"valid uint min", v.ValidateVar(uint(2), tag), false},
@@ -1503,6 +1505,8 @@ func Test_length_minmax(t *testing.T) {
 
 		{"invalid string min", v.ValidateVar("a", tag), true},
 		{"invalid string max", v.ValidateVar("aaaa", tag), true},
+		{"invalid multibyte string min", v.ValidateVar("あ", tag), false},
+		{"invalid multibyte string max", v.ValidateVar("ああああ", tag), false},
 		{"invalid int min", v.ValidateVar(1, tag), true},
 		{"invalid int max", v.ValidateVar(4, tag), true},
 		{"invalid uint min", v.ValidateVar(uint(1), tag), true},
@@ -1551,6 +1555,7 @@ func Test_length_equal(t *testing.T) {
 		hasErr bool
 	}{
 		{"valid string", v.ValidateVar("aa", tag), false},
+		{"valid multibyte string", v.ValidateVar("ああ", tag), false},
 		{"valid int", v.ValidateVar(2, tag), false},
 		{"valid uint", v.ValidateVar(uint(2), tag), false},
 		{"valid float", v.ValidateVar(float32(2.0), tag), false},
@@ -1558,6 +1563,7 @@ func Test_length_equal(t *testing.T) {
 		{"valid map", v.ValidateVar(map[int]int{1: 2, 2: 2}, tag), false},
 
 		{"invalid string", v.ValidateVar("a", tag), true},
+		{"invalid multibyte string", v.ValidateVar("あ", tag), false},
 		{"invalid int", v.ValidateVar(1, tag), true},
 		{"invalid uint", v.ValidateVar(uint(1), tag), true},
 		{"invalid float", v.ValidateVar(float32(1.0), tag), true},
@@ -1597,7 +1603,6 @@ func Test_strlength_minmax(t *testing.T) {
 
 		{"invalid string min", v.ValidateVar("あ", tag), true},
 		{"invalid string max", v.ValidateVar("ああああ", tag), true},
-		{"invalid int", v.ValidateVar(3, tag), true},
 	}
 
 	for _, tc := range testcases {
@@ -1637,7 +1642,6 @@ func Test_strlength_equal(t *testing.T) {
 		{"valid string", v.ValidateVar("ああ", tag), false},
 
 		{"invalid string", v.ValidateVar("あ", tag), true},
-		{"invalid int", v.ValidateVar(2, tag), true},
 	}
 
 	for _, tc := range testcases {

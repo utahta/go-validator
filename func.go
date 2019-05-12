@@ -21,6 +21,7 @@ type (
 		// Params has any parameters.
 		Params []string
 
+		//TODO: move context
 		v *Validator
 	}
 
@@ -33,7 +34,6 @@ var (
 		"required":        hasValue,
 		"req":             hasValue,
 		"empty":           isZeroValue,
-		"zero":            isZeroValue,
 		"alpha":           isAlpha,
 		"alphanum":        isAlphaNum,
 		"alphaunicode":    isAlphaUnicode,
@@ -71,19 +71,21 @@ var (
 		"fullwidth":       isFullWidth,
 		"halfwidth":       isHalfWidth,
 
-		// has parameters
-		"len":        length,
-		"length":     length,
-		"range":      length,
-		"min":        minLength,
-		"max":        maxLength,
-		"strlen":     strLength,
-		"strlength":  strLength,
-		"strmin":     strMinLength,
-		"strmax":     strMaxLength,
-		"runelen":    strLength,
-		"runelength": strLength,
-		"or":         or,
+		// has parameters.
+		"len":    length,
+		"length": length,
+		"range":  length,
+		"min":    minLength,
+		"max":    maxLength,
+		"or":     or,
+
+		// DEPRECATED. these are expected to be removed entirely sometime in the future.
+		"strlen":     length,
+		"strlength":  length,
+		"strmin":     minLength,
+		"strmax":     maxLength,
+		"runelen":    length,
+		"runelength": length,
 	}
 
 	defaultAdapters []Adapter
@@ -292,7 +294,14 @@ func minLength(_ context.Context, f Field, opt FuncOption) (bool, error) {
 
 	v := f.current
 	switch v.Kind() {
-	case reflect.String, reflect.Array, reflect.Map, reflect.Slice:
+	case reflect.String:
+		min, err := parseInt64(minStr)
+		if err != nil {
+			return false, err
+		}
+		return min <= int64(utf8.RuneCountInString(v.String())), nil
+
+	case reflect.Array, reflect.Map, reflect.Slice:
 		min, err := parseInt64(minStr)
 		if err != nil {
 			return false, err
@@ -333,7 +342,14 @@ func maxLength(_ context.Context, f Field, opt FuncOption) (bool, error) {
 
 	v := f.current
 	switch v.Kind() {
-	case reflect.String, reflect.Array, reflect.Map, reflect.Slice:
+	case reflect.String:
+		max, err := parseInt64(maxStr)
+		if err != nil {
+			return false, err
+		}
+		return int64(utf8.RuneCountInString(v.String())) <= max, nil
+
+	case reflect.Array, reflect.Map, reflect.Slice:
 		max, err := parseInt64(maxStr)
 		if err != nil {
 			return false, err
@@ -372,7 +388,14 @@ func eqLength(_ context.Context, f Field, opt FuncOption) (bool, error) {
 
 	v := f.current
 	switch v.Kind() {
-	case reflect.String, reflect.Array, reflect.Map, reflect.Slice:
+	case reflect.String:
+		i, err := parseInt64(str)
+		if err != nil {
+			return false, err
+		}
+		return int64(utf8.RuneCountInString(v.String())) == i, nil
+
+	case reflect.Array, reflect.Map, reflect.Slice:
 		i, err := parseInt64(str)
 		if err != nil {
 			return false, err
@@ -418,81 +441,6 @@ func length(ctx context.Context, f Field, opt FuncOption) (bool, error) {
 			return false, err
 		}
 		max, err := maxLength(ctx, f, FuncOption{Params: opt.Params[1:]})
-		if err != nil {
-			return false, err
-		}
-		return min && max, nil
-
-	}
-	return false, fmt.Errorf("invalid params len")
-}
-
-func strMinLength(_ context.Context, f Field, opt FuncOption) (bool, error) {
-	if len(opt.Params) != 1 {
-		return false, fmt.Errorf("invalid params len")
-	}
-
-	v := f.current
-	switch v.Kind() {
-	case reflect.String:
-		min, err := parseInt64(opt.Params[0])
-		if err != nil {
-			return false, err
-		}
-		return min <= int64(utf8.RuneCountInString(v.String())), nil
-	}
-	return false, nil
-}
-
-func strMaxLength(_ context.Context, f Field, opt FuncOption) (bool, error) {
-	if len(opt.Params) != 1 {
-		return false, fmt.Errorf("invalid params len")
-	}
-
-	v := f.current
-	switch v.Kind() {
-	case reflect.String:
-		max, err := parseInt64(opt.Params[0])
-		if err != nil {
-			return false, err
-		}
-		return int64(utf8.RuneCountInString(v.String())) <= max, nil
-	}
-	return false, nil
-}
-
-func strEqLength(_ context.Context, f Field, opt FuncOption) (bool, error) {
-	if len(opt.Params) != 1 {
-		return false, fmt.Errorf("invalid params len")
-	}
-
-	v := f.current
-	switch v.Kind() {
-	case reflect.String:
-		i, err := parseInt64(opt.Params[0])
-		if err != nil {
-			return false, err
-		}
-		return int64(utf8.RuneCountInString(v.String())) == i, nil
-	}
-	return false, nil
-}
-
-func strLength(ctx context.Context, f Field, opt FuncOption) (bool, error) {
-	switch len(opt.Params) {
-	case 1:
-		eq, err := strEqLength(ctx, f, FuncOption{Params: opt.Params})
-		if err != nil {
-			return false, err
-		}
-		return eq, nil
-
-	case 2:
-		min, err := strMinLength(ctx, f, FuncOption{Params: opt.Params[:1]})
-		if err != nil {
-			return false, err
-		}
-		max, err := strMaxLength(ctx, f, FuncOption{Params: opt.Params[1:]})
 		if err != nil {
 			return false, err
 		}
