@@ -21,7 +21,7 @@ type (
 		// Params has any parameters.
 		Params []string
 
-		//TODO: move context
+		// v is a Validator instance that is processing validation.
 		v *Validator
 	}
 
@@ -452,10 +452,6 @@ func length(ctx context.Context, f Field, opt FuncOption) (bool, error) {
 }
 
 func or(_ context.Context, f Field, opt FuncOption) (bool, error) {
-	if opt.v == nil {
-		return false, fmt.Errorf("validator is nil")
-	}
-
 	for _, rawTag := range opt.Params {
 		err := opt.v.ValidateVar(f.Interface(), rawTag)
 		if err == nil {
