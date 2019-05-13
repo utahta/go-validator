@@ -6,6 +6,11 @@ type (
 		pos int
 	}
 
+	tagParamsScanner struct {
+		buf string
+		pos int
+	}
+
 	tagToken int
 )
 
@@ -23,7 +28,7 @@ func newTagScanner(buf string) *tagScanner {
 
 func (s *tagScanner) Scan() (tagToken, string) {
 	var (
-		lit        string
+		lit        []byte
 		depthParen int
 	)
 	for {
@@ -34,21 +39,23 @@ func (s *tagScanner) Scan() (tagToken, string) {
 		ch := s.read()
 		switch ch {
 		case ' ', '\t', '\r', '\n':
-			continue
+			if depthParen == 0 {
+				continue
+			}
 
 		case ',':
 			if depthParen == 0 {
-				return tagSeparator, lit
+				return tagSeparator, string(lit)
 			}
 
 		case '|':
 			if depthParen == 0 {
-				return orSeparator, lit
+				return orSeparator, string(lit)
 			}
 
 		case ';':
 			if depthParen == 0 {
-				return nextSeparator, lit
+				return nextSeparator, string(lit)
 			}
 
 		case '(':
@@ -58,10 +65,10 @@ func (s *tagScanner) Scan() (tagToken, string) {
 			depthParen--
 		}
 
-		lit += string(ch)
+		lit = append(lit, ch)
 	}
 
-	return eof, lit
+	return eof, string(lit)
 }
 
 func (s *tagScanner) read() (ch byte) {
@@ -71,5 +78,38 @@ func (s *tagScanner) read() (ch byte) {
 }
 
 func (s *tagScanner) eof() bool {
+	return len(s.buf) == s.pos
+}
+
+func newTagParamsScanner(buf string) *tagParamsScanner {
+	return &tagParamsScanner{buf: buf}
+}
+
+func (s *tagParamsScanner) Scan() (tagToken, string) {
+	var lit []byte
+	for {
+		if s.eof() {
+			break
+		}
+
+		ch := s.read()
+		switch ch {
+		case '|':
+			return orSeparator, string(lit)
+		}
+
+		lit = append(lit, ch)
+	}
+
+	return eof, string(lit)
+}
+
+func (s *tagParamsScanner) read() (ch byte) {
+	ch = s.buf[s.pos]
+	s.pos++
+	return
+}
+
+func (s *tagParamsScanner) eof() bool {
 	return len(s.buf) == s.pos
 }

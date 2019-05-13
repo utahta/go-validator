@@ -1,6 +1,9 @@
 package validator
 
-import "testing"
+import (
+	"context"
+	"testing"
+)
 
 func Test_tagParse(t *testing.T) {
 	testcases := []struct {
@@ -25,6 +28,48 @@ func Test_tagParse(t *testing.T) {
 			rawTag: "len(1|3)",
 			want: tagChunk{
 				Tags: []Tag{{Name: "len", Params: []string{"1", "3"}}},
+				Next: nil,
+			},
+		},
+		{
+			rawTag: "tmp(text/plain;charset=UTF-8)",
+			want: tagChunk{
+				Tags: []Tag{{Name: "tmp", Params: []string{"text/plain;charset=UTF-8"}}},
+				Next: nil,
+			},
+		},
+		{
+			rawTag: "tmp(a,b,c)",
+			want: tagChunk{
+				Tags: []Tag{{Name: "tmp", Params: []string{"a,b,c"}}},
+				Next: nil,
+			},
+		},
+		{
+			rawTag: "tmp(a b　c\t)",
+			want: tagChunk{
+				Tags: []Tag{{Name: "tmp", Params: []string{"a b　c\t"}}},
+				Next: nil,
+			},
+		},
+		{
+			rawTag: "tmp(あいうえお)",
+			want: tagChunk{
+				Tags: []Tag{{Name: "tmp", Params: []string{"あいうえお"}}},
+				Next: nil,
+			},
+		},
+		{
+			rawTag: "tmp((a,b,c))",
+			want: tagChunk{
+				Tags: []Tag{{Name: "tmp", Params: []string{"(a,b,c)"}}},
+				Next: nil,
+			},
+		},
+		{
+			rawTag: "tmp(a\nb\nc)",
+			want: tagChunk{
+				Tags: []Tag{{Name: "tmp", Params: []string{"a\nb\nc"}}},
 				Next: nil,
 			},
 		},
@@ -308,7 +353,10 @@ func Test_tagParse(t *testing.T) {
 
 	for _, tc := range testcases {
 		t.Run(tc.rawTag, func(t *testing.T) {
-			chunk, err := New().parseTag(tc.rawTag)
+			v := New()
+			v.SetFunc("tmp", func(context.Context, Field, FuncOption) (bool, error) { return true, nil })
+
+			chunk, err := v.parseTag(tc.rawTag)
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -380,10 +428,6 @@ func Test_tagParseInvalid(t *testing.T) {
 			wantError: "parse: invalid literal in or separator",
 		},
 		{
-			rawTag:    "len(1,2)",
-			wantError: "parse: failed to new tag",
-		},
-		{
 			rawTag:    "unknown",
 			wantError: "parse: tag unknown function not found",
 		},
@@ -398,10 +442,15 @@ func Test_tagParseInvalid(t *testing.T) {
 	}
 
 	for _, tc := range testcases {
-		_, err := New().parseTag(tc.rawTag)
-		if err.Error() != tc.wantError {
-			t.Errorf("want `%v`, got `%v`", tc.wantError, err.Error())
-		}
+		t.Run(tc.rawTag, func(t *testing.T) {
+			_, err := New().parseTag(tc.rawTag)
+			if err == nil {
+				t.Fatal("want error, but got nil")
+			}
+			if err.Error() != tc.wantError {
+				t.Errorf("want `%v`, got `%v`", tc.wantError, err.Error())
+			}
+		})
 	}
 }
 
