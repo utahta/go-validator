@@ -74,8 +74,8 @@ func Test_required(t *testing.T) {
 				if len(gotErrs) == 0 {
 					t.Fatal("errors is empty")
 				}
-				if gotErrs[0].Tag.String() != tag {
-					t.Errorf("want tag name %v, got %v", tag, gotErrs[0].Tag)
+				if gotErrs[0].Tag().String() != tag {
+					t.Errorf("want tag name %v, got %v", tag, gotErrs[0].Tag())
 				}
 			}
 		})
@@ -150,8 +150,8 @@ func Test_empty(t *testing.T) {
 				if len(gotErrs) == 0 {
 					t.Fatal("errors is empty")
 				}
-				if gotErrs[0].Tag.String() != tag {
-					t.Errorf("want tag name %v, got %v", tag, gotErrs[0].Tag)
+				if gotErrs[0].Tag().String() != tag {
+					t.Errorf("want tag name %v, got %v", tag, gotErrs[0].Tag())
 				}
 			}
 		})
@@ -187,8 +187,8 @@ func Test_alpha(t *testing.T) {
 				if len(gotErrs) == 0 {
 					t.Fatal("errors is empty")
 				}
-				if gotErrs[0].Tag.String() != tag {
-					t.Errorf("want tag name %v, got %v", tag, gotErrs[0].Tag)
+				if gotErrs[0].Tag().String() != tag {
+					t.Errorf("want tag name %v, got %v", tag, gotErrs[0].Tag())
 				}
 			}
 		})
@@ -223,8 +223,8 @@ func Test_alphanum(t *testing.T) {
 				if len(gotErrs) == 0 {
 					t.Fatal("errors is empty")
 				}
-				if gotErrs[0].Tag.String() != tag {
-					t.Errorf("want tag name %v, got %v", tag, gotErrs[0].Tag)
+				if gotErrs[0].Tag().String() != tag {
+					t.Errorf("want tag name %v, got %v", tag, gotErrs[0].Tag())
 				}
 			}
 		})
@@ -259,8 +259,8 @@ func Test_alphaunicode(t *testing.T) {
 				if len(gotErrs) == 0 {
 					t.Fatal("errors is empty")
 				}
-				if gotErrs[0].Tag.String() != tag {
-					t.Errorf("want tag name %v, got %v", tag, gotErrs[0].Tag)
+				if gotErrs[0].Tag().String() != tag {
+					t.Errorf("want tag name %v, got %v", tag, gotErrs[0].Tag())
 				}
 			}
 		})
@@ -294,8 +294,8 @@ func Test_alphanumunicode(t *testing.T) {
 				if len(gotErrs) == 0 {
 					t.Fatal("errors is empty")
 				}
-				if gotErrs[0].Tag.String() != tag {
-					t.Errorf("want tag name %v, got %v", tag, gotErrs[0].Tag)
+				if gotErrs[0].Tag().String() != tag {
+					t.Errorf("want tag name %v, got %v", tag, gotErrs[0].Tag())
 				}
 			}
 		})
@@ -332,8 +332,8 @@ func Test_numeric(t *testing.T) {
 				if len(gotErrs) == 0 {
 					t.Fatal("errors is empty")
 				}
-				if gotErrs[0].Tag.String() != tag {
-					t.Errorf("want tag name %v, got %v", tag, gotErrs[0].Tag)
+				if gotErrs[0].Tag().String() != tag {
+					t.Errorf("want tag name %v, got %v", tag, gotErrs[0].Tag())
 				}
 			}
 		})
@@ -370,8 +370,8 @@ func Test_number(t *testing.T) {
 				if len(gotErrs) == 0 {
 					t.Fatal("errors is empty")
 				}
-				if gotErrs[0].Tag.String() != tag {
-					t.Errorf("want tag name %v, got %v", tag, gotErrs[0].Tag)
+				if gotErrs[0].Tag().String() != tag {
+					t.Errorf("want tag name %v, got %v", tag, gotErrs[0].Tag())
 				}
 			}
 		})
@@ -405,8 +405,8 @@ func Test_hexadecimal(t *testing.T) {
 				if len(gotErrs) == 0 {
 					t.Fatal("errors is empty")
 				}
-				if gotErrs[0].Tag.String() != tag {
-					t.Errorf("want tag name %v, got %v", tag, gotErrs[0].Tag)
+				if gotErrs[0].Tag().String() != tag {
+					t.Errorf("want tag name %v, got %v", tag, gotErrs[0].Tag())
 				}
 			}
 		})
@@ -447,8 +447,8 @@ func Test_hexcolor(t *testing.T) {
 				if len(gotErrs) == 0 {
 					t.Fatal("errors is empty")
 				}
-				if gotErrs[0].Tag.String() != tag {
-					t.Errorf("want tag name %v, got %v", tag, gotErrs[0].Tag)
+				if gotErrs[0].Tag().String() != tag {
+					t.Errorf("want tag name %v, got %v", tag, gotErrs[0].Tag())
 				}
 			}
 		})
@@ -484,8 +484,8 @@ func Test_rgb(t *testing.T) {
 				if len(gotErrs) == 0 {
 					t.Fatal("errors is empty")
 				}
-				if gotErrs[0].Tag.String() != tag {
-					t.Errorf("want tag name %v, got %v", tag, gotErrs[0].Tag)
+				if gotErrs[0].Tag().String() != tag {
+					t.Errorf("want tag name %v, got %v", tag, gotErrs[0].Tag())
 				}
 			}
 		})
@@ -522,8 +522,8 @@ func Test_rgba(t *testing.T) {
 				if len(gotErrs) == 0 {
 					t.Fatal("errors is empty")
 				}
-				if gotErrs[0].Tag.String() != tag {
-					t.Errorf("want tag name %v, got %v", tag, gotErrs[0].Tag)
+				if gotErrs[0].Tag().String() != tag {
+					t.Errorf("want tag name %v, got %v", tag, gotErrs[0].Tag())
 				}
 			}
 		})
@@ -563,8 +563,8 @@ func Test_hsl(t *testing.T) {
 				if len(gotErrs) == 0 {
 					t.Fatal("errors is empty")
 				}
-				if gotErrs[0].Tag.String() != tag {
-					t.Errorf("want tag name %v, got %v", tag, gotErrs[0].Tag)
+				if gotErrs[0].Tag().String() != tag {
+					t.Errorf("want tag name %v, got %v", tag, gotErrs[0].Tag())
 				}
 			}
 		})
@@ -606,8 +606,8 @@ func Test_hsla(t *testing.T) {
 				if len(gotErrs) == 0 {
 					t.Fatal("errors is empty")
 				}
-				if gotErrs[0].Tag.String() != tag {
-					t.Errorf("want tag name %v, got %v", tag, gotErrs[0].Tag)
+				if gotErrs[0].Tag().String() != tag {
+					t.Errorf("want tag name %v, got %v", tag, gotErrs[0].Tag())
 				}
 			}
 		})
@@ -643,8 +643,8 @@ func Test_email(t *testing.T) {
 				if len(gotErrs) == 0 {
 					t.Fatal("errors is empty")
 				}
-				if gotErrs[0].Tag.String() != tag {
-					t.Errorf("want tag name %v, got %v", tag, gotErrs[0].Tag)
+				if gotErrs[0].Tag().String() != tag {
+					t.Errorf("want tag name %v, got %v", tag, gotErrs[0].Tag())
 				}
 			}
 		})
@@ -681,8 +681,8 @@ func Test_base64(t *testing.T) {
 				if len(gotErrs) == 0 {
 					t.Fatal("errors is empty")
 				}
-				if gotErrs[0].Tag.String() != tag {
-					t.Errorf("want tag name %v, got %v", tag, gotErrs[0].Tag)
+				if gotErrs[0].Tag().String() != tag {
+					t.Errorf("want tag name %v, got %v", tag, gotErrs[0].Tag())
 				}
 			}
 		})
@@ -719,8 +719,8 @@ func Test_base64url(t *testing.T) {
 				if len(gotErrs) == 0 {
 					t.Fatal("errors is empty")
 				}
-				if gotErrs[0].Tag.String() != tag {
-					t.Errorf("want tag name %v, got %v", tag, gotErrs[0].Tag)
+				if gotErrs[0].Tag().String() != tag {
+					t.Errorf("want tag name %v, got %v", tag, gotErrs[0].Tag())
 				}
 			}
 		})
@@ -757,8 +757,8 @@ func Test_isbn10(t *testing.T) {
 				if len(gotErrs) == 0 {
 					t.Fatal("errors is empty")
 				}
-				if gotErrs[0].Tag.String() != tag {
-					t.Errorf("want tag name %v, got %v", tag, gotErrs[0].Tag)
+				if gotErrs[0].Tag().String() != tag {
+					t.Errorf("want tag name %v, got %v", tag, gotErrs[0].Tag())
 				}
 			}
 		})
@@ -795,8 +795,8 @@ func Test_isbn13(t *testing.T) {
 				if len(gotErrs) == 0 {
 					t.Fatal("errors is empty")
 				}
-				if gotErrs[0].Tag.String() != tag {
-					t.Errorf("want tag name %v, got %v", tag, gotErrs[0].Tag)
+				if gotErrs[0].Tag().String() != tag {
+					t.Errorf("want tag name %v, got %v", tag, gotErrs[0].Tag())
 				}
 			}
 		})
@@ -832,8 +832,8 @@ func Test_url(t *testing.T) {
 				if len(gotErrs) == 0 {
 					t.Fatal("errors is empty")
 				}
-				if gotErrs[0].Tag.String() != tag {
-					t.Errorf("want tag name %v, got %v", tag, gotErrs[0].Tag)
+				if gotErrs[0].Tag().String() != tag {
+					t.Errorf("want tag name %v, got %v", tag, gotErrs[0].Tag())
 				}
 			}
 		})
@@ -869,8 +869,8 @@ func Test_uri(t *testing.T) {
 				if len(gotErrs) == 0 {
 					t.Fatal("errors is empty")
 				}
-				if gotErrs[0].Tag.String() != tag {
-					t.Errorf("want tag name %v, got %v", tag, gotErrs[0].Tag)
+				if gotErrs[0].Tag().String() != tag {
+					t.Errorf("want tag name %v, got %v", tag, gotErrs[0].Tag())
 				}
 			}
 		})
@@ -905,8 +905,8 @@ func Test_uuid(t *testing.T) {
 				if len(gotErrs) == 0 {
 					t.Fatal("errors is empty")
 				}
-				if gotErrs[0].Tag.String() != tag {
-					t.Errorf("want tag name %v, got %v", tag, gotErrs[0].Tag)
+				if gotErrs[0].Tag().String() != tag {
+					t.Errorf("want tag name %v, got %v", tag, gotErrs[0].Tag())
 				}
 			}
 		})
@@ -941,8 +941,8 @@ func Test_uuid3(t *testing.T) {
 				if len(gotErrs) == 0 {
 					t.Fatal("errors is empty")
 				}
-				if gotErrs[0].Tag.String() != tag {
-					t.Errorf("want tag name %v, got %v", tag, gotErrs[0].Tag)
+				if gotErrs[0].Tag().String() != tag {
+					t.Errorf("want tag name %v, got %v", tag, gotErrs[0].Tag())
 				}
 			}
 		})
@@ -978,8 +978,8 @@ func Test_uuid4(t *testing.T) {
 				if len(gotErrs) == 0 {
 					t.Fatal("errors is empty")
 				}
-				if gotErrs[0].Tag.String() != tag {
-					t.Errorf("want tag name %v, got %v", tag, gotErrs[0].Tag)
+				if gotErrs[0].Tag().String() != tag {
+					t.Errorf("want tag name %v, got %v", tag, gotErrs[0].Tag())
 				}
 			}
 		})
@@ -1015,8 +1015,8 @@ func Test_uuid5(t *testing.T) {
 				if len(gotErrs) == 0 {
 					t.Fatal("errors is empty")
 				}
-				if gotErrs[0].Tag.String() != tag {
-					t.Errorf("want tag name %v, got %v", tag, gotErrs[0].Tag)
+				if gotErrs[0].Tag().String() != tag {
+					t.Errorf("want tag name %v, got %v", tag, gotErrs[0].Tag())
 				}
 			}
 		})
@@ -1050,8 +1050,8 @@ func Test_ascii(t *testing.T) {
 				if len(gotErrs) == 0 {
 					t.Fatal("errors is empty")
 				}
-				if gotErrs[0].Tag.String() != tag {
-					t.Errorf("want tag name %v, got %v", tag, gotErrs[0].Tag)
+				if gotErrs[0].Tag().String() != tag {
+					t.Errorf("want tag name %v, got %v", tag, gotErrs[0].Tag())
 				}
 			}
 		})
@@ -1087,8 +1087,8 @@ func Test_printableascii(t *testing.T) {
 				if len(gotErrs) == 0 {
 					t.Fatal("errors is empty")
 				}
-				if gotErrs[0].Tag.String() != tag {
-					t.Errorf("want tag name %v, got %v", tag, gotErrs[0].Tag)
+				if gotErrs[0].Tag().String() != tag {
+					t.Errorf("want tag name %v, got %v", tag, gotErrs[0].Tag())
 				}
 			}
 		})
@@ -1123,8 +1123,8 @@ func Test_multibyte(t *testing.T) {
 				if len(gotErrs) == 0 {
 					t.Fatal("errors is empty")
 				}
-				if gotErrs[0].Tag.String() != tag {
-					t.Errorf("want tag name %v, got %v", tag, gotErrs[0].Tag)
+				if gotErrs[0].Tag().String() != tag {
+					t.Errorf("want tag name %v, got %v", tag, gotErrs[0].Tag())
 				}
 			}
 		})
@@ -1160,8 +1160,8 @@ func Test_datauri(t *testing.T) {
 				if len(gotErrs) == 0 {
 					t.Fatal("errors is empty")
 				}
-				if gotErrs[0].Tag.String() != tag {
-					t.Errorf("want tag name %v, got %v", tag, gotErrs[0].Tag)
+				if gotErrs[0].Tag().String() != tag {
+					t.Errorf("want tag name %v, got %v", tag, gotErrs[0].Tag())
 				}
 			}
 		})
@@ -1199,8 +1199,8 @@ func Test_latitude(t *testing.T) {
 				if len(gotErrs) == 0 {
 					t.Fatal("errors is empty")
 				}
-				if gotErrs[0].Tag.String() != tag {
-					t.Errorf("want tag name %v, got %v", tag, gotErrs[0].Tag)
+				if gotErrs[0].Tag().String() != tag {
+					t.Errorf("want tag name %v, got %v", tag, gotErrs[0].Tag())
 				}
 			}
 		})
@@ -1238,8 +1238,8 @@ func Test_longitude(t *testing.T) {
 				if len(gotErrs) == 0 {
 					t.Fatal("errors is empty")
 				}
-				if gotErrs[0].Tag.String() != tag {
-					t.Errorf("want tag name %v, got %v", tag, gotErrs[0].Tag)
+				if gotErrs[0].Tag().String() != tag {
+					t.Errorf("want tag name %v, got %v", tag, gotErrs[0].Tag())
 				}
 			}
 		})
@@ -1276,8 +1276,8 @@ func Test_ssn(t *testing.T) {
 				if len(gotErrs) == 0 {
 					t.Fatal("errors is empty")
 				}
-				if gotErrs[0].Tag.String() != tag {
-					t.Errorf("want tag name %v, got %v", tag, gotErrs[0].Tag)
+				if gotErrs[0].Tag().String() != tag {
+					t.Errorf("want tag name %v, got %v", tag, gotErrs[0].Tag())
 				}
 			}
 		})
@@ -1315,8 +1315,8 @@ func Test_semver(t *testing.T) {
 				if len(gotErrs) == 0 {
 					t.Fatal("errors is empty")
 				}
-				if gotErrs[0].Tag.String() != tag {
-					t.Errorf("want tag name %v, got %v", tag, gotErrs[0].Tag)
+				if gotErrs[0].Tag().String() != tag {
+					t.Errorf("want tag name %v, got %v", tag, gotErrs[0].Tag())
 				}
 			}
 		})
@@ -1353,8 +1353,8 @@ func Test_katakana(t *testing.T) {
 				if len(gotErrs) == 0 {
 					t.Fatal("errors is empty")
 				}
-				if gotErrs[0].Tag.String() != tag {
-					t.Errorf("want tag name %v, got %v", tag, gotErrs[0].Tag)
+				if gotErrs[0].Tag().String() != tag {
+					t.Errorf("want tag name %v, got %v", tag, gotErrs[0].Tag())
 				}
 			}
 		})
@@ -1391,8 +1391,8 @@ func Test_hiragana(t *testing.T) {
 				if len(gotErrs) == 0 {
 					t.Fatal("errors is empty")
 				}
-				if gotErrs[0].Tag.String() != tag {
-					t.Errorf("want tag name %v, got %v", tag, gotErrs[0].Tag)
+				if gotErrs[0].Tag().String() != tag {
+					t.Errorf("want tag name %v, got %v", tag, gotErrs[0].Tag())
 				}
 			}
 		})
@@ -1431,8 +1431,8 @@ func Test_fullwidth(t *testing.T) {
 				if len(gotErrs) == 0 {
 					t.Fatal("errors is empty")
 				}
-				if gotErrs[0].Tag.String() != tag {
-					t.Errorf("want tag name %v, got %v", tag, gotErrs[0].Tag)
+				if gotErrs[0].Tag().String() != tag {
+					t.Errorf("want tag name %v, got %v", tag, gotErrs[0].Tag())
 				}
 			}
 		})
@@ -1469,8 +1469,8 @@ func Test_halfwidth(t *testing.T) {
 				if len(gotErrs) == 0 {
 					t.Fatal("errors is empty")
 				}
-				if gotErrs[0].Tag.String() != tag {
-					t.Errorf("want tag name %v, got %v", tag, gotErrs[0].Tag)
+				if gotErrs[0].Tag().String() != tag {
+					t.Errorf("want tag name %v, got %v", tag, gotErrs[0].Tag())
 				}
 			}
 		})
@@ -1527,15 +1527,15 @@ func Test_length_minmax(t *testing.T) {
 				if len(gotErrs) == 0 {
 					t.Fatal("errors is empty")
 				}
-				if gotErrs[0].Tag.String() != tag {
-					t.Errorf("want tag name %v, got %v", tag, gotErrs[0].Tag)
+				if gotErrs[0].Tag().String() != tag {
+					t.Errorf("want tag name %v, got %v", tag, gotErrs[0].Tag())
 				}
 			}
 		})
 	}
 
 	t.Run("invalid param len", func(t *testing.T) {
-		wantError := ": an error occurred in 'len(2|3|4)': invalid params len"
+		wantError := ": an internal error occurred in 'len(2|3|4)': invalid params len"
 		err := v.ValidateVar(2, "len(2|3|4)")
 		if err.Error() != wantError {
 			t.Errorf("want `%v`, got `%v`", wantError, err)
@@ -1579,8 +1579,8 @@ func Test_length_equal(t *testing.T) {
 				if len(gotErrs) == 0 {
 					t.Fatal("errors is empty")
 				}
-				if gotErrs[0].Tag.String() != tag {
-					t.Errorf("want tag name %v, got %v", tag, gotErrs[0].Tag)
+				if gotErrs[0].Tag().String() != tag {
+					t.Errorf("want tag name %v, got %v", tag, gotErrs[0].Tag())
 				}
 			}
 		})
@@ -1597,9 +1597,9 @@ func Test_length_invalidTag(t *testing.T) {
 		err            error
 		wantErrMessage string
 	}{
-		{"equal", v.ValidateVar("a", "len(aaa)"), `: an error occurred in 'len(aaa)': strconv.ParseInt: parsing "aaa": invalid syntax`},
-		{"min", v.ValidateVar("a", "len(aaa|3)"), `: an error occurred in 'len(aaa|3)': strconv.ParseInt: parsing "aaa": invalid syntax`},
-		{"max", v.ValidateVar("a", "len(1|aaa)"), `: an error occurred in 'len(1|aaa)': strconv.ParseInt: parsing "aaa": invalid syntax`},
+		{"equal", v.ValidateVar("a", "len(aaa)"), `: an internal error occurred in 'len(aaa)': strconv.ParseInt: parsing "aaa": invalid syntax`},
+		{"min", v.ValidateVar("a", "len(aaa|3)"), `: an internal error occurred in 'len(aaa|3)': strconv.ParseInt: parsing "aaa": invalid syntax`},
+		{"max", v.ValidateVar("a", "len(1|aaa)"), `: an internal error occurred in 'len(1|aaa)': strconv.ParseInt: parsing "aaa": invalid syntax`},
 	}
 
 	for _, tc := range testcases {
@@ -1653,15 +1653,15 @@ func Test_eqlength(t *testing.T) {
 				if len(gotErrs) == 0 {
 					t.Fatal("errors is empty")
 				}
-				if gotErrs[0].Tag.String() != tag {
-					t.Errorf("want tag name %v, got %v", tag, gotErrs[0].Tag)
+				if gotErrs[0].Tag().String() != tag {
+					t.Errorf("want tag name %v, got %v", tag, gotErrs[0].Tag())
 				}
 			}
 		})
 	}
 
 	t.Run("invalid param len", func(t *testing.T) {
-		wantError := ": an error occurred in 'eq(2|3)': invalid params len"
+		wantError := ": an internal error occurred in 'eq(2|3)': invalid params len"
 		err := v.ValidateVar("aa", "eq(2|3)")
 		if err == nil {
 			t.Error("want error, but got nil")
@@ -1684,12 +1684,12 @@ func Test_eqlength_invalidTag(t *testing.T) {
 		err            error
 		wantErrMessage string
 	}{
-		{"string", v.ValidateVar("a", tag), `: an error occurred in 'eq(aaa)': strconv.ParseInt: parsing "aaa": invalid syntax`},
-		{"int", v.ValidateVar(int(1), tag), `: an error occurred in 'eq(aaa)': strconv.ParseInt: parsing "aaa": invalid syntax`},
-		{"uint", v.ValidateVar(uint(1), tag), `: an error occurred in 'eq(aaa)': strconv.ParseUint: parsing "aaa": invalid syntax`},
-		{"float", v.ValidateVar(float64(1), tag), `: an error occurred in 'eq(aaa)': strconv.ParseFloat: parsing "aaa": invalid syntax`},
-		{"slice", v.ValidateVar([]int{2}, tag), `: an error occurred in 'eq(aaa)': strconv.ParseInt: parsing "aaa": invalid syntax`},
-		{"map", v.ValidateVar(map[int]int{1: 2}, tag), `: an error occurred in 'eq(aaa)': strconv.ParseInt: parsing "aaa": invalid syntax`},
+		{"string", v.ValidateVar("a", tag), `: an internal error occurred in 'eq(aaa)': strconv.ParseInt: parsing "aaa": invalid syntax`},
+		{"int", v.ValidateVar(int(1), tag), `: an internal error occurred in 'eq(aaa)': strconv.ParseInt: parsing "aaa": invalid syntax`},
+		{"uint", v.ValidateVar(uint(1), tag), `: an internal error occurred in 'eq(aaa)': strconv.ParseUint: parsing "aaa": invalid syntax`},
+		{"float", v.ValidateVar(float64(1), tag), `: an internal error occurred in 'eq(aaa)': strconv.ParseFloat: parsing "aaa": invalid syntax`},
+		{"slice", v.ValidateVar([]int{2}, tag), `: an internal error occurred in 'eq(aaa)': strconv.ParseInt: parsing "aaa": invalid syntax`},
+		{"map", v.ValidateVar(map[int]int{1: 2}, tag), `: an internal error occurred in 'eq(aaa)': strconv.ParseInt: parsing "aaa": invalid syntax`},
 	}
 
 	for _, tc := range testcases {
@@ -1743,15 +1743,15 @@ func Test_minlength(t *testing.T) {
 				if len(gotErrs) == 0 {
 					t.Fatal("errors is empty")
 				}
-				if gotErrs[0].Tag.String() != tag {
-					t.Errorf("want tag name %v, got %v", tag, gotErrs[0].Tag)
+				if gotErrs[0].Tag().String() != tag {
+					t.Errorf("want tag name %v, got %v", tag, gotErrs[0].Tag())
 				}
 			}
 		})
 	}
 
 	t.Run("invalid param len", func(t *testing.T) {
-		wantError := ": an error occurred in 'min(2|3)': invalid params len"
+		wantError := ": an internal error occurred in 'min(2|3)': invalid params len"
 		err := v.ValidateVar("aa", "min(2|3)")
 		if err == nil {
 			t.Error("want error, but got nil")
@@ -1774,12 +1774,12 @@ func Test_minlength_invalidTag(t *testing.T) {
 		err            error
 		wantErrMessage string
 	}{
-		{"string", v.ValidateVar("a", tag), `: an error occurred in 'min(aaa)': strconv.ParseInt: parsing "aaa": invalid syntax`},
-		{"int", v.ValidateVar(int(1), tag), `: an error occurred in 'min(aaa)': strconv.ParseInt: parsing "aaa": invalid syntax`},
-		{"uint", v.ValidateVar(uint(1), tag), `: an error occurred in 'min(aaa)': strconv.ParseUint: parsing "aaa": invalid syntax`},
-		{"float", v.ValidateVar(float64(1), tag), `: an error occurred in 'min(aaa)': strconv.ParseFloat: parsing "aaa": invalid syntax`},
-		{"slice", v.ValidateVar([]int{2}, tag), `: an error occurred in 'min(aaa)': strconv.ParseInt: parsing "aaa": invalid syntax`},
-		{"map", v.ValidateVar(map[int]int{1: 2}, tag), `: an error occurred in 'min(aaa)': strconv.ParseInt: parsing "aaa": invalid syntax`},
+		{"string", v.ValidateVar("a", tag), `: an internal error occurred in 'min(aaa)': strconv.ParseInt: parsing "aaa": invalid syntax`},
+		{"int", v.ValidateVar(int(1), tag), `: an internal error occurred in 'min(aaa)': strconv.ParseInt: parsing "aaa": invalid syntax`},
+		{"uint", v.ValidateVar(uint(1), tag), `: an internal error occurred in 'min(aaa)': strconv.ParseUint: parsing "aaa": invalid syntax`},
+		{"float", v.ValidateVar(float64(1), tag), `: an internal error occurred in 'min(aaa)': strconv.ParseFloat: parsing "aaa": invalid syntax`},
+		{"slice", v.ValidateVar([]int{2}, tag), `: an internal error occurred in 'min(aaa)': strconv.ParseInt: parsing "aaa": invalid syntax`},
+		{"map", v.ValidateVar(map[int]int{1: 2}, tag), `: an internal error occurred in 'min(aaa)': strconv.ParseInt: parsing "aaa": invalid syntax`},
 	}
 
 	for _, tc := range testcases {
@@ -1833,15 +1833,15 @@ func Test_maxlength(t *testing.T) {
 				if len(gotErrs) == 0 {
 					t.Fatal("errors is empty")
 				}
-				if gotErrs[0].Tag.String() != tag {
-					t.Errorf("want tag name %v, got %v", tag, gotErrs[0].Tag)
+				if gotErrs[0].Tag().String() != tag {
+					t.Errorf("want tag name %v, got %v", tag, gotErrs[0].Tag())
 				}
 			}
 		})
 	}
 
 	t.Run("invalid param len", func(t *testing.T) {
-		wantError := ": an error occurred in 'max(2|3)': invalid params len"
+		wantError := ": an internal error occurred in 'max(2|3)': invalid params len"
 		err := v.ValidateVar("aa", "max(2|3)")
 		if err == nil {
 			t.Error("want error, but got nil")
@@ -1864,12 +1864,12 @@ func Test_maxlength_invalidTag(t *testing.T) {
 		err            error
 		wantErrMessage string
 	}{
-		{"string", v.ValidateVar("a", tag), `: an error occurred in 'max(aaa)': strconv.ParseInt: parsing "aaa": invalid syntax`},
-		{"int", v.ValidateVar(int(1), tag), `: an error occurred in 'max(aaa)': strconv.ParseInt: parsing "aaa": invalid syntax`},
-		{"uint", v.ValidateVar(uint(1), tag), `: an error occurred in 'max(aaa)': strconv.ParseUint: parsing "aaa": invalid syntax`},
-		{"float", v.ValidateVar(float64(1), tag), `: an error occurred in 'max(aaa)': strconv.ParseFloat: parsing "aaa": invalid syntax`},
-		{"slice", v.ValidateVar([]int{2}, tag), `: an error occurred in 'max(aaa)': strconv.ParseInt: parsing "aaa": invalid syntax`},
-		{"map", v.ValidateVar(map[int]int{1: 2}, tag), `: an error occurred in 'max(aaa)': strconv.ParseInt: parsing "aaa": invalid syntax`},
+		{"string", v.ValidateVar("a", tag), `: an internal error occurred in 'max(aaa)': strconv.ParseInt: parsing "aaa": invalid syntax`},
+		{"int", v.ValidateVar(int(1), tag), `: an internal error occurred in 'max(aaa)': strconv.ParseInt: parsing "aaa": invalid syntax`},
+		{"uint", v.ValidateVar(uint(1), tag), `: an internal error occurred in 'max(aaa)': strconv.ParseUint: parsing "aaa": invalid syntax`},
+		{"float", v.ValidateVar(float64(1), tag), `: an internal error occurred in 'max(aaa)': strconv.ParseFloat: parsing "aaa": invalid syntax`},
+		{"slice", v.ValidateVar([]int{2}, tag), `: an internal error occurred in 'max(aaa)': strconv.ParseInt: parsing "aaa": invalid syntax`},
+		{"map", v.ValidateVar(map[int]int{1: 2}, tag), `: an internal error occurred in 'max(aaa)': strconv.ParseInt: parsing "aaa": invalid syntax`},
 	}
 
 	for _, tc := range testcases {
@@ -1918,15 +1918,15 @@ func Test_or(t *testing.T) {
 				if len(gotErrs) == 0 {
 					t.Fatal("errors is empty")
 				}
-				if gotErrs[0].Tag.String() != tag {
-					t.Errorf("want tag name %v, got %v", tag, gotErrs[0].Tag)
+				if gotErrs[0].Tag().String() != tag {
+					t.Errorf("want tag name %v, got %v", tag, gotErrs[0].Tag())
 				}
 			}
 		})
 	}
 
 	t.Run("invalid tag", func(t *testing.T) {
-		wantError := ": an error occurred in 'or(unknown|numeric)': parse: tag unknown function not found"
+		wantError := ": an internal error occurred in 'or(unknown|numeric)': parse: tag unknown function not found"
 		err := v.ValidateVar("===", "or(unknown|numeric)")
 		if err == nil {
 			t.Error("want error, but got nil")

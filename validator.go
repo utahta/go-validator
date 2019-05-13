@@ -169,7 +169,7 @@ func (v *Validator) validate(ctx context.Context, field Field, chunk *tagChunk) 
 	for _, tag := range chunk.GetTags() {
 		valid, err := tag.validateFn(ctx, field, FuncOption{Params: tag.Params, v: v})
 		if !valid || err != nil {
-			errs = append(errs, Error{Field: field, Tag: tag, Err: err, SuppressErrorFieldValue: v.SuppressErrorFieldValue})
+			errs = append(errs, &fieldError{field: field, tag: tag, err: err, suppressErrorFieldValue: v.SuppressErrorFieldValue})
 		}
 	}
 
