@@ -52,7 +52,7 @@ func (e *fieldError) Tag() Tag {
 
 func (e *fieldError) Error() string {
 	if e.err != nil {
-		return fmt.Sprintf("%s: an error occurred in '%s': %v", e.field.Name(), e.tag, e.err)
+		return fmt.Sprintf("%s: an internal error occurred in '%s': %v", e.field.Name(), e.tag, e.err)
 	}
 
 	if e.suppressErrorFieldValue {

@@ -1535,7 +1535,7 @@ func Test_length_minmax(t *testing.T) {
 	}
 
 	t.Run("invalid param len", func(t *testing.T) {
-		wantError := ": an error occurred in 'len(2|3|4)': invalid params len"
+		wantError := ": an internal error occurred in 'len(2|3|4)': invalid params len"
 		err := v.ValidateVar(2, "len(2|3|4)")
 		if err.Error() != wantError {
 			t.Errorf("want `%v`, got `%v`", wantError, err)
@@ -1597,9 +1597,9 @@ func Test_length_invalidTag(t *testing.T) {
 		err            error
 		wantErrMessage string
 	}{
-		{"equal", v.ValidateVar("a", "len(aaa)"), `: an error occurred in 'len(aaa)': strconv.ParseInt: parsing "aaa": invalid syntax`},
-		{"min", v.ValidateVar("a", "len(aaa|3)"), `: an error occurred in 'len(aaa|3)': strconv.ParseInt: parsing "aaa": invalid syntax`},
-		{"max", v.ValidateVar("a", "len(1|aaa)"), `: an error occurred in 'len(1|aaa)': strconv.ParseInt: parsing "aaa": invalid syntax`},
+		{"equal", v.ValidateVar("a", "len(aaa)"), `: an internal error occurred in 'len(aaa)': strconv.ParseInt: parsing "aaa": invalid syntax`},
+		{"min", v.ValidateVar("a", "len(aaa|3)"), `: an internal error occurred in 'len(aaa|3)': strconv.ParseInt: parsing "aaa": invalid syntax`},
+		{"max", v.ValidateVar("a", "len(1|aaa)"), `: an internal error occurred in 'len(1|aaa)': strconv.ParseInt: parsing "aaa": invalid syntax`},
 	}
 
 	for _, tc := range testcases {
@@ -1661,7 +1661,7 @@ func Test_eqlength(t *testing.T) {
 	}
 
 	t.Run("invalid param len", func(t *testing.T) {
-		wantError := ": an error occurred in 'eq(2|3)': invalid params len"
+		wantError := ": an internal error occurred in 'eq(2|3)': invalid params len"
 		err := v.ValidateVar("aa", "eq(2|3)")
 		if err == nil {
 			t.Error("want error, but got nil")
@@ -1684,12 +1684,12 @@ func Test_eqlength_invalidTag(t *testing.T) {
 		err            error
 		wantErrMessage string
 	}{
-		{"string", v.ValidateVar("a", tag), `: an error occurred in 'eq(aaa)': strconv.ParseInt: parsing "aaa": invalid syntax`},
-		{"int", v.ValidateVar(int(1), tag), `: an error occurred in 'eq(aaa)': strconv.ParseInt: parsing "aaa": invalid syntax`},
-		{"uint", v.ValidateVar(uint(1), tag), `: an error occurred in 'eq(aaa)': strconv.ParseUint: parsing "aaa": invalid syntax`},
-		{"float", v.ValidateVar(float64(1), tag), `: an error occurred in 'eq(aaa)': strconv.ParseFloat: parsing "aaa": invalid syntax`},
-		{"slice", v.ValidateVar([]int{2}, tag), `: an error occurred in 'eq(aaa)': strconv.ParseInt: parsing "aaa": invalid syntax`},
-		{"map", v.ValidateVar(map[int]int{1: 2}, tag), `: an error occurred in 'eq(aaa)': strconv.ParseInt: parsing "aaa": invalid syntax`},
+		{"string", v.ValidateVar("a", tag), `: an internal error occurred in 'eq(aaa)': strconv.ParseInt: parsing "aaa": invalid syntax`},
+		{"int", v.ValidateVar(int(1), tag), `: an internal error occurred in 'eq(aaa)': strconv.ParseInt: parsing "aaa": invalid syntax`},
+		{"uint", v.ValidateVar(uint(1), tag), `: an internal error occurred in 'eq(aaa)': strconv.ParseUint: parsing "aaa": invalid syntax`},
+		{"float", v.ValidateVar(float64(1), tag), `: an internal error occurred in 'eq(aaa)': strconv.ParseFloat: parsing "aaa": invalid syntax`},
+		{"slice", v.ValidateVar([]int{2}, tag), `: an internal error occurred in 'eq(aaa)': strconv.ParseInt: parsing "aaa": invalid syntax`},
+		{"map", v.ValidateVar(map[int]int{1: 2}, tag), `: an internal error occurred in 'eq(aaa)': strconv.ParseInt: parsing "aaa": invalid syntax`},
 	}
 
 	for _, tc := range testcases {
@@ -1751,7 +1751,7 @@ func Test_minlength(t *testing.T) {
 	}
 
 	t.Run("invalid param len", func(t *testing.T) {
-		wantError := ": an error occurred in 'min(2|3)': invalid params len"
+		wantError := ": an internal error occurred in 'min(2|3)': invalid params len"
 		err := v.ValidateVar("aa", "min(2|3)")
 		if err == nil {
 			t.Error("want error, but got nil")
@@ -1774,12 +1774,12 @@ func Test_minlength_invalidTag(t *testing.T) {
 		err            error
 		wantErrMessage string
 	}{
-		{"string", v.ValidateVar("a", tag), `: an error occurred in 'min(aaa)': strconv.ParseInt: parsing "aaa": invalid syntax`},
-		{"int", v.ValidateVar(int(1), tag), `: an error occurred in 'min(aaa)': strconv.ParseInt: parsing "aaa": invalid syntax`},
-		{"uint", v.ValidateVar(uint(1), tag), `: an error occurred in 'min(aaa)': strconv.ParseUint: parsing "aaa": invalid syntax`},
-		{"float", v.ValidateVar(float64(1), tag), `: an error occurred in 'min(aaa)': strconv.ParseFloat: parsing "aaa": invalid syntax`},
-		{"slice", v.ValidateVar([]int{2}, tag), `: an error occurred in 'min(aaa)': strconv.ParseInt: parsing "aaa": invalid syntax`},
-		{"map", v.ValidateVar(map[int]int{1: 2}, tag), `: an error occurred in 'min(aaa)': strconv.ParseInt: parsing "aaa": invalid syntax`},
+		{"string", v.ValidateVar("a", tag), `: an internal error occurred in 'min(aaa)': strconv.ParseInt: parsing "aaa": invalid syntax`},
+		{"int", v.ValidateVar(int(1), tag), `: an internal error occurred in 'min(aaa)': strconv.ParseInt: parsing "aaa": invalid syntax`},
+		{"uint", v.ValidateVar(uint(1), tag), `: an internal error occurred in 'min(aaa)': strconv.ParseUint: parsing "aaa": invalid syntax`},
+		{"float", v.ValidateVar(float64(1), tag), `: an internal error occurred in 'min(aaa)': strconv.ParseFloat: parsing "aaa": invalid syntax`},
+		{"slice", v.ValidateVar([]int{2}, tag), `: an internal error occurred in 'min(aaa)': strconv.ParseInt: parsing "aaa": invalid syntax`},
+		{"map", v.ValidateVar(map[int]int{1: 2}, tag), `: an internal error occurred in 'min(aaa)': strconv.ParseInt: parsing "aaa": invalid syntax`},
 	}
 
 	for _, tc := range testcases {
@@ -1841,7 +1841,7 @@ func Test_maxlength(t *testing.T) {
 	}
 
 	t.Run("invalid param len", func(t *testing.T) {
-		wantError := ": an error occurred in 'max(2|3)': invalid params len"
+		wantError := ": an internal error occurred in 'max(2|3)': invalid params len"
 		err := v.ValidateVar("aa", "max(2|3)")
 		if err == nil {
 			t.Error("want error, but got nil")
@@ -1864,12 +1864,12 @@ func Test_maxlength_invalidTag(t *testing.T) {
 		err            error
 		wantErrMessage string
 	}{
-		{"string", v.ValidateVar("a", tag), `: an error occurred in 'max(aaa)': strconv.ParseInt: parsing "aaa": invalid syntax`},
-		{"int", v.ValidateVar(int(1), tag), `: an error occurred in 'max(aaa)': strconv.ParseInt: parsing "aaa": invalid syntax`},
-		{"uint", v.ValidateVar(uint(1), tag), `: an error occurred in 'max(aaa)': strconv.ParseUint: parsing "aaa": invalid syntax`},
-		{"float", v.ValidateVar(float64(1), tag), `: an error occurred in 'max(aaa)': strconv.ParseFloat: parsing "aaa": invalid syntax`},
-		{"slice", v.ValidateVar([]int{2}, tag), `: an error occurred in 'max(aaa)': strconv.ParseInt: parsing "aaa": invalid syntax`},
-		{"map", v.ValidateVar(map[int]int{1: 2}, tag), `: an error occurred in 'max(aaa)': strconv.ParseInt: parsing "aaa": invalid syntax`},
+		{"string", v.ValidateVar("a", tag), `: an internal error occurred in 'max(aaa)': strconv.ParseInt: parsing "aaa": invalid syntax`},
+		{"int", v.ValidateVar(int(1), tag), `: an internal error occurred in 'max(aaa)': strconv.ParseInt: parsing "aaa": invalid syntax`},
+		{"uint", v.ValidateVar(uint(1), tag), `: an internal error occurred in 'max(aaa)': strconv.ParseUint: parsing "aaa": invalid syntax`},
+		{"float", v.ValidateVar(float64(1), tag), `: an internal error occurred in 'max(aaa)': strconv.ParseFloat: parsing "aaa": invalid syntax`},
+		{"slice", v.ValidateVar([]int{2}, tag), `: an internal error occurred in 'max(aaa)': strconv.ParseInt: parsing "aaa": invalid syntax`},
+		{"map", v.ValidateVar(map[int]int{1: 2}, tag), `: an internal error occurred in 'max(aaa)': strconv.ParseInt: parsing "aaa": invalid syntax`},
 	}
 
 	for _, tc := range testcases {
@@ -1926,7 +1926,7 @@ func Test_or(t *testing.T) {
 	}
 
 	t.Run("invalid tag", func(t *testing.T) {
-		wantError := ": an error occurred in 'or(unknown|numeric)': parse: tag unknown function not found"
+		wantError := ": an internal error occurred in 'or(unknown|numeric)': parse: tag unknown function not found"
 		err := v.ValidateVar("===", "or(unknown|numeric)")
 		if err == nil {
 			t.Error("want error, but got nil")

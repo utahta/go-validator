@@ -1071,7 +1071,7 @@ func TestValidator_SetFunc(t *testing.T) {
 		return false, fmt.Errorf("set func failure")
 	})
 
-	wantError := ": an error occurred in 'test': set func failure"
+	wantError := ": an internal error occurred in 'test': set func failure"
 	if err := v.ValidateVar("", "test"); err.Error() != wantError {
 		t.Errorf("want %q, got %q", wantError, err)
 	}
