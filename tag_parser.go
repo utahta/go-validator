@@ -131,9 +131,6 @@ func (v *Validator) newTag(lit string) (Tag, error) {
 
 			case orSeparator:
 				params = append(params, lit)
-
-			default:
-				return Tag{}, fmt.Errorf("parse: failed to new tag")
 			}
 		}
 	}
