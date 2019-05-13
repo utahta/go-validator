@@ -6,22 +6,30 @@ import (
 )
 
 type (
-	// Error represents a validation error
-	Error struct {
-		// Field is a validation field.
-		Field Field
+	// Error is an interface that represents a validation error
+	Error interface {
+		// Field returns a validation field.
+		Field() Field
 
-		// Tag is a validation tag.
-		Tag Tag
+		// Tag returns a validation tag.
+		Tag() Tag
 
-		// Err is a internal error.
-		Err error
+		// Error returns an error message string.
+		Error() string
+	}
 
-		// CustomMessage is a custom error message. TODO:
-		CustomMessage string
+	fieldError struct {
+		field Field
+		tag   Tag
 
-		// SuppressErrorFieldValue suppress output of field value.
-		SuppressErrorFieldValue bool
+		// err is an internal error.
+		err error
+
+		// customMessage is a custom error message. TODO:
+		customMessage string
+
+		// suppressErrorFieldValue suppress output of field value.
+		suppressErrorFieldValue bool
 	}
 
 	// Errors represents validation errors
@@ -34,15 +42,23 @@ func ToErrors(err error) (Errors, bool) {
 	return es, ok
 }
 
-func (e Error) Error() string {
-	if e.Err != nil {
-		return fmt.Sprintf("%s: an error occurred in '%s': %v", e.Field.Name(), e.Tag, e.Err)
+func (e *fieldError) Field() Field {
+	return e.field
+}
+
+func (e *fieldError) Tag() Tag {
+	return e.tag
+}
+
+func (e *fieldError) Error() string {
+	if e.err != nil {
+		return fmt.Sprintf("%s: an error occurred in '%s': %v", e.field.Name(), e.tag, e.err)
 	}
 
-	if e.SuppressErrorFieldValue {
-		return fmt.Sprintf("%s: The value does validate as '%s'", e.Field.Name(), e.Tag)
+	if e.suppressErrorFieldValue {
+		return fmt.Sprintf("%s: The value does validate as '%s'", e.field.Name(), e.tag)
 	}
-	return fmt.Sprintf("%s: '%s' does validate as '%s'", e.Field.Name(), e.Field.ShortString(), e.Tag)
+	return fmt.Sprintf("%s: '%s' does validate as '%s'", e.field.Name(), e.field.ShortString(), e.tag)
 }
 
 func (es Errors) Error() string {
