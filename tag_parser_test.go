@@ -39,6 +39,20 @@ func Test_tagParse(t *testing.T) {
 			},
 		},
 		{
+			rawTag: "tmp(a|b|c)",
+			want: tagChunk{
+				Tags: []Tag{{Name: "tmp", Params: []string{"a", "b", "c"}}},
+				Next: nil,
+			},
+		},
+		{
+			rawTag: "tmp(a\\|b\\|c)",
+			want: tagChunk{
+				Tags: []Tag{{Name: "tmp", Params: []string{"a|b|c"}}},
+				Next: nil,
+			},
+		},
+		{
 			rawTag: "tmp(a,b,c)",
 			want: tagChunk{
 				Tags: []Tag{{Name: "tmp", Params: []string{"a,b,c"}}},

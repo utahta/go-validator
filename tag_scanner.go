@@ -96,6 +96,14 @@ func (s *tagParamsScanner) Scan() (tagToken, string) {
 		switch ch {
 		case '|':
 			return orSeparator, string(lit)
+
+		case '\\':
+			switch s.read() {
+			case '|':
+				ch = '|'
+			default:
+				s.unread()
+			}
 		}
 
 		lit = append(lit, ch)
@@ -108,6 +116,12 @@ func (s *tagParamsScanner) read() (ch byte) {
 	ch = s.buf[s.pos]
 	s.pos++
 	return
+}
+
+func (s *tagParamsScanner) unread() {
+	if s.pos > 0 {
+		s.pos--
+	}
 }
 
 func (s *tagParamsScanner) eof() bool {
