@@ -21,11 +21,13 @@ go get -u github.com/utahta/go-validator
 goos: darwin
 goarch: amd64
 pkg: github.com/utahta/go-validator
-BenchmarkValidateVarSuccess-12                          30000000                58.8 ns/op             0 B/op          0 allocs/op
+BenchmarkValidateVarSuccess-12                          20000000                58.6 ns/op             0 B/op          0 allocs/op
 BenchmarkValidateVarParallelSuccess-12                  100000000               12.1 ns/op             0 B/op          0 allocs/op
-BenchmarkValidateStructSuccess-12                       10000000               187 ns/op               0 B/op          0 allocs/op
-BenchmarkValidateStructParallelSuccess-12               50000000                36.8 ns/op             0 B/op          0 allocs/op
-BenchmarkValidateStructComplexSuccess-12                 1000000              1139 ns/op              32 B/op          3 allocs/op
-BenchmarkValidateStructComplexParallelSuccess-12        10000000               222 ns/op              32 B/op          3 allocs/op
-BenchmarkValidateVarFailure-12                          10000000               177 ns/op             208 B/op          2 allocs/op
+BenchmarkValidateStructSuccess-12                       10000000               188 ns/op               0 B/op          0 allocs/op
+BenchmarkValidateStructParallelSuccess-12               50000000                36.5 ns/op             0 B/op          0 allocs/op
+BenchmarkValidateStructComplexSuccess-12                 1000000              1122 ns/op              32 B/op          3 allocs/op
+BenchmarkValidateStructComplexParallelSuccess-12        10000000               217 ns/op              32 B/op          3 allocs/op
+BenchmarkValidateVarFailure-12                          10000000               188 ns/op             224 B/op          3 allocs/op
+BenchmarkStructComplexFailure-12                          500000              3733 ns/op            3760 B/op         60 allocs/op
+BenchmarkStructComplexParallelFailure-12                 1000000              1088 ns/op            3760 B/op         60 allocs/op
 ```
