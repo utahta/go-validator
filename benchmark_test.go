@@ -199,7 +199,7 @@ func BenchmarkValidateVarFailure(b *testing.B) {
 	}
 }
 
-func BenchmarkStructComplexFailure(b *testing.B) {
+func BenchmarkValidateStructComplexFailure(b *testing.B) {
 	v := New()
 
 	s := &TestString{
@@ -237,7 +237,7 @@ func BenchmarkStructComplexFailure(b *testing.B) {
 	}
 }
 
-func BenchmarkStructComplexParallelFailure(b *testing.B) {
+func BenchmarkValidateStructComplexParallelFailure(b *testing.B) {
 	v := New()
 
 	s := &TestString{
