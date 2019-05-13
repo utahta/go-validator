@@ -120,7 +120,7 @@ func (v *Validator) newTag(lit string) (Tag, error) {
 		name = lit
 	} else {
 		name = lit[:idx]
-		s := newTagScanner(lit[idx+1 : len(lit)-1])
+		s := newTagParamsScanner(lit[idx+1 : len(lit)-1])
 	loop:
 		for {
 			token, lit := s.Scan()
