@@ -38,7 +38,7 @@ loop:
 
 			if orParsing {
 				idx := len(chunk.Tags) - 1
-				chunk.Tags[idx].Params = append(chunk.Tags[idx].Params, lit)
+				chunk.Tags[idx].params = append(chunk.Tags[idx].params, lit)
 			} else {
 				tag, err := v.newTag(lit)
 				if err != nil {
@@ -58,7 +58,7 @@ loop:
 
 			if orParsing {
 				idx := len(chunk.Tags) - 1
-				chunk.Tags[idx].Params = append(chunk.Tags[idx].Params, lit)
+				chunk.Tags[idx].params = append(chunk.Tags[idx].params, lit)
 			} else {
 				tag, err := v.newTag(lit)
 				if err != nil {
@@ -78,9 +78,9 @@ loop:
 
 			if orParsing {
 				idx := len(chunk.Tags) - 1
-				chunk.Tags[idx].Params = append(chunk.Tags[idx].Params, lit)
+				chunk.Tags[idx].params = append(chunk.Tags[idx].params, lit)
 			} else {
-				chunk.Tags = append(chunk.Tags, Tag{Name: "or", Params: []string{lit}, validateFn: v.FuncMap["or"]})
+				chunk.Tags = append(chunk.Tags, Tag{name: "or", params: []string{lit}, validateFn: v.funcMap["or"]})
 			}
 			orParsing = true
 
@@ -88,7 +88,7 @@ loop:
 			if lit != "" && lit != optionalTagName {
 				if orParsing {
 					idx := len(chunk.Tags) - 1
-					chunk.Tags[idx].Params = append(chunk.Tags[idx].Params, lit)
+					chunk.Tags[idx].params = append(chunk.Tags[idx].params, lit)
 				} else {
 					tag, err := v.newTag(lit)
 					if err != nil {
@@ -135,14 +135,14 @@ func (v *Validator) newTag(lit string) (Tag, error) {
 		}
 	}
 
-	fn, ok := v.FuncMap[name]
+	fn, ok := v.funcMap[name]
 	if !ok {
 		return Tag{}, fmt.Errorf("parse: tag %s function not found", name)
 	}
 
 	return Tag{
-		Name:       name,
-		Params:     params,
+		name:       name,
+		params:     params,
 		validateFn: fn,
 	}, nil
 }
