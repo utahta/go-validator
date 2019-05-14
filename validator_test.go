@@ -1067,13 +1067,18 @@ func TestValidateVarContext(t *testing.T) {
 func TestValidator_SetFunc(t *testing.T) {
 	v := validator.New()
 
-	v.SetFunc("test", func(_ context.Context, _ validator.Field, _ validator.FuncOption) (bool, error) {
+	v.Apply(validator.WithFunc("test", func(_ context.Context, _ validator.Field, _ validator.FuncOption) (bool, error) {
 		return false, fmt.Errorf("set func failure")
-	})
+	}))
+
+	err := v.ValidateVar("", "test")
+	if err == nil {
+		t.Fatal("want error, but got nil")
+	}
 
 	wantError := ": an internal error occurred in 'test': set func failure"
-	if err := v.ValidateVar("", "test"); err.Error() != wantError {
-		t.Errorf("want %q, got %q", wantError, err)
+	if want, got := wantError, err.Error(); want != got {
+		t.Errorf("want %q, got %q", want, got)
 	}
 }
 
@@ -1081,7 +1086,7 @@ func TestValidator_SetAdapter(t *testing.T) {
 	v := validator.New()
 
 	var str string
-	v.SetAdapters(
+	v.Apply(validator.WithAdapters(
 		func(fn validator.Func) validator.Func {
 			return func(ctx context.Context, f validator.Field, o validator.FuncOption) (bool, error) {
 				str += "1"
@@ -1100,7 +1105,7 @@ func TestValidator_SetAdapter(t *testing.T) {
 				return fn(ctx, f, o)
 			}
 		},
-	)
+	))
 
 	err := v.ValidateVar("test", "req")
 	if err != nil {

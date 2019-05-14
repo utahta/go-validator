@@ -7,10 +7,6 @@ import (
 	"sync"
 )
 
-const (
-	tagName = "valid"
-)
-
 var (
 	defaultValidator     *Validator
 	defaultValidatorOnce sync.Once
@@ -19,45 +15,88 @@ var (
 type (
 	// Validator is a validator
 	Validator struct {
-		// FuncMap is a map of validate functions.
+		// funcMap represents a map of validating functions.
 		funcMap FuncMap
 
-		// Adapters is a validate function adapters.
+		// adapters represents a slice of validating function adapter.
 		adapters []Adapter
 
-		// SuppressErrorFieldValue is a flag that suppress output of field value in error.
-		SuppressErrorFieldValue bool
+		// tagKey is the key in the struct field's tag. the default value is `valid`.
+		tagKey string
+
+		// suppressErrorFieldValue is a flag that suppresses field value by error.
+		suppressErrorFieldValue bool
 
 		tagCache    *tagCache
 		structCache *structCache
 	}
+
+	Option func(v *Validator)
 )
 
 // New returns a Validator
-func New() *Validator {
+func New(opts ...Option) *Validator {
 	funcMap := FuncMap{}
 	for k, fn := range defaultFuncMap {
 		funcMap[k] = apply(fn, defaultAdapters...)
 	}
 
-	return &Validator{
+	v := &Validator{
 		funcMap:     funcMap,
 		adapters:    defaultAdapters,
+		tagKey:      "valid",
 		tagCache:    newTagCache(),
 		structCache: newStructCache(),
 	}
+	v.Apply(opts...)
+	return v
 }
 
-// SetFunc sets a validate function.
-func (v *Validator) SetFunc(rawTag string, fn Func) {
-	v.funcMap[rawTag] = apply(fn, v.adapters...)
+// WithFunc is a validator option that sets validating functions.
+func WithFunc(k string, fn Func) Option {
+	return func(v *Validator) {
+		v.funcMap[k] = apply(fn, v.adapters...)
+	}
 }
 
-// SetAdapters sets a validate function adapters.
-func (v *Validator) SetAdapters(adapter ...Adapter) {
-	v.adapters = append(v.adapters, adapter...)
-	for k, fn := range v.funcMap {
-		v.funcMap[k] = apply(fn, adapter...)
+// WithFuncMap is a validator option that sets validating functions.
+func WithFuncMap(funcMap FuncMap) Option {
+	return func(v *Validator) {
+		for k, fn := range funcMap {
+			v.funcMap[k] = apply(fn, v.adapters...)
+		}
+	}
+}
+
+// WithAdapters is a validator option that sets validator function adapters.
+func WithAdapters(adapters ...Adapter) Option {
+	return func(v *Validator) {
+		v.adapters = append(v.adapters, adapters...)
+		for k, fn := range v.funcMap {
+			v.funcMap[k] = apply(fn, adapters...)
+		}
+	}
+}
+
+// WithTagKey is a validator option that sets the key in the struct field's tag.
+func WithTagKey(k string) Option {
+	return func(v *Validator) {
+		v.tagKey = k
+	}
+}
+
+// WithSuppressErrorFieldValue is a validator option that enables suppress field value by error
+// If enabled this option, the field value always replaces `The value`.
+func WithSuppressErrorFieldValue() Option {
+	return func(v *Validator) {
+		v.suppressErrorFieldValue = true
+	}
+}
+
+// Apply applies validator options.
+func (v *Validator) Apply(opts ...Option) {
+	for _, o := range opts {
+		o(v)
 	}
 }
 
@@ -94,7 +133,7 @@ func (v *Validator) validateStruct(ctx context.Context, field Field) error {
 			cache := fieldCache{
 				index:     i,
 				isPrivate: typeField.PkgPath != "", // private field
-				tagValue:  typeField.Tag.Get(tagName),
+				tagValue:  typeField.Tag.Get(v.tagKey),
 				name:      typeField.Name,
 			}
 			if cache.isPrivate {
@@ -169,7 +208,7 @@ func (v *Validator) validate(ctx context.Context, field Field, chunk *tagChunk) 
 	for _, tag := range chunk.GetTags() {
 		valid, err := tag.validateFn(ctx, field, FuncOption{Params: tag.params, v: v})
 		if !valid || err != nil {
-			errs = append(errs, &fieldError{field: field, tag: tag, err: err, suppressErrorFieldValue: v.SuppressErrorFieldValue})
+			errs = append(errs, &fieldError{field: field, tag: tag, err: err, suppressErrorFieldValue: v.suppressErrorFieldValue})
 		}
 	}
 

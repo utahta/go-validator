@@ -375,7 +375,7 @@ func Test_tagParse(t *testing.T) {
 	for _, tc := range testcases {
 		t.Run(tc.rawTag, func(t *testing.T) {
 			v := New()
-			v.SetFunc("tmp", func(context.Context, Field, FuncOption) (bool, error) { return true, nil })
+			v.Apply(WithFunc("tmp", func(context.Context, Field, FuncOption) (bool, error) { return true, nil }))
 
 			chunk, err := v.parseTag(tc.rawTag)
 			if err != nil {
