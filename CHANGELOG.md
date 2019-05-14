@@ -1,5 +1,38 @@
 # Changelog
 
+<a name="1.4.0"></a>
+## [1.4.0] - 2019-05-15
+### Bug Fixes
+- failed to parse `|` character in tag parameters
+- failed to parse multibyte string in tag parameters
+
+### Chore
+- some fix
+- update comments
+- update README
+- update README
+- add comment and remove unnecessary code
+
+### Code Refactoring
+- unexport unnecessary exported struct's field
+- unexported if not neccesary
+- make an internal error clear
+- remove unreachable code
+
+### Performance Improvements
+- improve performance in failure
+
+### Tests
+- add tests for validator options
+- add struct complex failure benchmark
+- add tag parser test
+- increase test coverage
+
+### BREAKING CHANGE
+
+using Apply method instead of SetXXX methods in Validator
+
+
 <a name="1.3.0"></a>
 ## [1.3.0] - 2019-05-12
 ### Code Refactoring
@@ -124,6 +157,7 @@ Removed SetAdapter function from Validator.
 
 <a name="0.0.1"></a>
 ## 0.0.1 - 2018-10-08
+[1.4.0]: https://github.com/utahta/go-validator/compare/1.3.0...1.4.0
 [1.3.0]: https://github.com/utahta/go-validator/compare/1.2.0...1.3.0
 [1.2.0]: https://github.com/utahta/go-validator/compare/1.1.0...1.2.0
 [1.1.0]: https://github.com/utahta/go-validator/compare/1.0.0...1.1.0
