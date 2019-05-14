@@ -13,7 +13,7 @@ var (
 )
 
 type (
-	// Validator is a validator
+	// Validator is a validator that validates each fields using struct field's tag.
 	Validator struct {
 		// funcMap represents a map of validating functions.
 		funcMap FuncMap
@@ -52,7 +52,7 @@ func New(opts ...Option) *Validator {
 	return v
 }
 
-// WithFunc is a validator option that sets validating functions.
+// WithFunc is a validator option that sets a validating function.
 func WithFunc(k string, fn Func) Option {
 	return func(v *Validator) {
 		v.funcMap[k] = apply(fn, v.adapters...)
@@ -85,7 +85,7 @@ func WithTagKey(k string) Option {
 	}
 }
 
-// WithSuppressErrorFieldValue is a validator option that enables suppress field value by error
+// WithSuppressErrorFieldValue is a validator option that enables suppress validating field value by error.
 // If enabled this option, the field value always replaces `The value`.
 func WithSuppressErrorFieldValue() Option {
 	return func(v *Validator) {
@@ -100,13 +100,13 @@ func (v *Validator) Apply(opts ...Option) {
 	}
 }
 
-// ValidateStruct validates a struct that use tags for fields.
+// ValidateStruct validates a struct that uses the struct field's tag.
 func (v *Validator) ValidateStruct(s interface{}) error {
 	return v.ValidateStructContext(context.Background(), s)
 }
 
-// ValidateStructContext validates a struct that use tags for fields.
-// Pass context to each validate function.
+// ValidateStructContext validates a struct that uses the struct field's tag.
+// Pass context to each validating functions.
 func (v *Validator) ValidateStructContext(ctx context.Context, s interface{}) error {
 	if s == nil {
 		return nil
@@ -180,7 +180,7 @@ func (v *Validator) ValidateVar(s interface{}, rawTag string) error {
 }
 
 // ValidateVarContext validates a value.
-// Pass context to each validate function.
+// Pass context to each validating functions.
 func (v *Validator) ValidateVarContext(ctx context.Context, s interface{}, rawTag string) error {
 	value := reflect.ValueOf(s)
 	return v.validateVar(ctx, Field{origin: value, current: v.extractVar(value)}, rawTag)
@@ -296,7 +296,7 @@ func (v *Validator) canValidate(rawTag string, kind reflect.Kind) bool {
 	return true
 }
 
-// DefaultValidator returns default validator.
+// DefaultValidator returns a default validator.
 func DefaultValidator() *Validator {
 	defaultValidatorOnce.Do(func() {
 		defaultValidator = New()
@@ -304,13 +304,13 @@ func DefaultValidator() *Validator {
 	return defaultValidator
 }
 
-// ValidateStruct validates a struct that use tags for fields using default validator.
+// ValidateStruct validates a struct that uses the struct field's tag using default validator.
 func ValidateStruct(s interface{}) error {
 	return DefaultValidator().ValidateStruct(s)
 }
 
-// ValidateStructContext validates a struct that use tags for fields using default validator.
-// Pass context to each validate function.
+// ValidateStructContext validates a struct that uses the struct field's tag using default validator.
+// Pass context to each validating functions.
 func ValidateStructContext(ctx context.Context, s interface{}) error {
 	return DefaultValidator().ValidateStructContext(ctx, s)
 }
@@ -321,7 +321,7 @@ func ValidateVar(s interface{}, rawTag string) error {
 }
 
 // ValidateVarContext validates a value using default validator.
-// Pass context to each validate function.
+// Pass context to each validating functions.
 func ValidateVarContext(ctx context.Context, s interface{}, rawTag string) error {
 	return DefaultValidator().ValidateVarContext(ctx, s, rawTag)
 }

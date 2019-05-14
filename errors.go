@@ -8,7 +8,7 @@ import (
 type (
 	// Error is an interface that represents a validation error
 	Error interface {
-		// Field returns a validation field.
+		// Field returns a validating field.
 		Field() Field
 
 		// Tag returns a validation tag.

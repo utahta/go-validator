@@ -10,22 +10,23 @@ import (
 )
 
 type (
-	// Func is a type of validate function.
+	// Func is the type of validating function.
 	Func func(context.Context, Field, FuncOption) (bool, error)
 
-	// FuncMap is a map of validate function type.
+	// FuncMap is the type of map of validating functions.
 	FuncMap map[string]Func
 
-	// FuncOption is a option.
+	// FuncOption is the argument of validating function.
 	FuncOption struct {
-		// Params has any parameters.
+		// Params represents the validation tag parameters.
+		// e.g. len(1|2) -> []string{"1", "2"}
 		Params []string
 
-		// v is a Validator instance that is processing validation.
+		// v is a Validator instance that is validating.
 		v *Validator
 	}
 
-	// Adapter is a validate function adapter.
+	// Adapter is a validating function adapter.
 	Adapter func(Func) Func
 )
 
