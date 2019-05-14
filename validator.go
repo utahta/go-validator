@@ -208,7 +208,12 @@ func (v *Validator) validate(ctx context.Context, field Field, chunk *tagChunk) 
 	for _, tag := range chunk.GetTags() {
 		valid, err := tag.validateFn(ctx, field, FuncOption{Params: tag.params, v: v})
 		if !valid || err != nil {
-			errs = append(errs, &fieldError{field: field, tag: tag, err: err, suppressErrorFieldValue: v.suppressErrorFieldValue})
+			errs = append(errs, &fieldError{
+				field:                   field,
+				tag:                     tag,
+				err:                     err,
+				suppressErrorFieldValue: v.suppressErrorFieldValue,
+			})
 		}
 	}
 
@@ -289,7 +294,7 @@ func (v *Validator) canValidate(rawTag string, kind reflect.Kind) bool {
 			reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64,
 			reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64, reflect.Uintptr,
 			reflect.Float32, reflect.Float64:
-			// these kinds do not perform recursive process so let's skip validation
+			// these kinds do not perform recursive process so let's skip validating.
 			return false
 		}
 	}
