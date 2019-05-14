@@ -1064,7 +1064,7 @@ func TestValidateVarContext(t *testing.T) {
 	}
 }
 
-func TestValidator_SetFunc(t *testing.T) {
+func TestWithFunc(t *testing.T) {
 	v := validator.New()
 
 	v.Apply(validator.WithFunc("test", func(_ context.Context, _ validator.Field, _ validator.FuncOption) (bool, error) {
@@ -1082,7 +1082,27 @@ func TestValidator_SetFunc(t *testing.T) {
 	}
 }
 
-func TestValidator_SetAdapter(t *testing.T) {
+func TestWithFuncMap(t *testing.T) {
+	v := validator.New()
+
+	v.Apply(validator.WithFuncMap(map[string]validator.Func{
+		"test": func(_ context.Context, _ validator.Field, _ validator.FuncOption) (bool, error) {
+			return false, fmt.Errorf("set func failure")
+		},
+	}))
+
+	err := v.ValidateVar("", "test")
+	if err == nil {
+		t.Fatal("want error, but got nil")
+	}
+
+	wantError := ": an internal error occurred in 'test': set func failure"
+	if want, got := wantError, err.Error(); want != got {
+		t.Errorf("want %q, got %q", want, got)
+	}
+}
+
+func TestWithAdapters(t *testing.T) {
 	v := validator.New()
 
 	var str string
@@ -1114,6 +1134,38 @@ func TestValidator_SetAdapter(t *testing.T) {
 
 	if str != "123" {
 		t.Errorf("want 123, got %v", str)
+	}
+}
+
+func TestWithTagKey(t *testing.T) {
+	type (
+		TagKeyTest struct {
+			Name string `tag_key_test:"required"`
+		}
+	)
+	v := validator.New(validator.WithTagKey("tag_key_test"))
+
+	err := v.ValidateStruct(TagKeyTest{})
+	if err == nil {
+		t.Fatal("want error, but got nil")
+	}
+
+	wantErrMessage := "Name: '' does validate as 'required'"
+	if want, got := wantErrMessage, err.Error(); want != got {
+		t.Errorf("want error message %v, but got %v", want, got)
+	}
+}
+
+func TestWithSuppressErrorFieldValue(t *testing.T) {
+	v := validator.New(validator.WithSuppressErrorFieldValue())
+
+	err := v.ValidateVar("aaa", "numeric")
+	if err == nil {
+		t.Fatal("want error, but got nil")
+	}
+
+	if want, got := ": The value does validate as 'numeric'", err.Error(); want != got {
+		t.Errorf("want error message %v, but got %v", want, got)
 	}
 }
 
