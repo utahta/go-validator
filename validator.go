@@ -20,10 +20,10 @@ type (
 	// Validator is a validator
 	Validator struct {
 		// FuncMap is a map of validate functions.
-		FuncMap FuncMap
+		funcMap FuncMap
 
 		// Adapters is a validate function adapters.
-		Adapters []Adapter
+		adapters []Adapter
 
 		// SuppressErrorFieldValue is a flag that suppress output of field value in error.
 		SuppressErrorFieldValue bool
@@ -41,8 +41,8 @@ func New() *Validator {
 	}
 
 	return &Validator{
-		FuncMap:     funcMap,
-		Adapters:    defaultAdapters,
+		funcMap:     funcMap,
+		adapters:    defaultAdapters,
 		tagCache:    newTagCache(),
 		structCache: newStructCache(),
 	}
@@ -50,14 +50,14 @@ func New() *Validator {
 
 // SetFunc sets a validate function.
 func (v *Validator) SetFunc(rawTag string, fn Func) {
-	v.FuncMap[rawTag] = apply(fn, v.Adapters...)
+	v.funcMap[rawTag] = apply(fn, v.adapters...)
 }
 
 // SetAdapters sets a validate function adapters.
 func (v *Validator) SetAdapters(adapter ...Adapter) {
-	v.Adapters = append(v.Adapters, adapter...)
-	for k, fn := range v.FuncMap {
-		v.FuncMap[k] = apply(fn, adapter...)
+	v.adapters = append(v.adapters, adapter...)
+	for k, fn := range v.funcMap {
+		v.funcMap[k] = apply(fn, adapter...)
 	}
 }
 
@@ -167,7 +167,7 @@ func (v *Validator) validate(ctx context.Context, field Field, chunk *tagChunk) 
 
 	var errs Errors
 	for _, tag := range chunk.GetTags() {
-		valid, err := tag.validateFn(ctx, field, FuncOption{Params: tag.Params, v: v})
+		valid, err := tag.validateFn(ctx, field, FuncOption{Params: tag.params, v: v})
 		if !valid || err != nil {
 			errs = append(errs, &fieldError{field: field, tag: tag, err: err, suppressErrorFieldValue: v.SuppressErrorFieldValue})
 		}

@@ -9,10 +9,10 @@ type (
 	// Tag is a validation tag.
 	Tag struct {
 		// Name is a tag name.
-		Name string
+		name string
 
 		// Params is a tag parameter.
-		Params []string
+		params []string
 
 		// validateFn is a validate function.
 		validateFn Func
@@ -29,12 +29,16 @@ type (
 	}
 )
 
+func (t Tag) Fullname() string {
+	if len(t.params) > 0 {
+		return fmt.Sprintf("%s%s%s%s", t.name, "(", strings.Join(t.params, "|"), ")")
+	}
+	return t.name
+}
+
 // String returns tag string.
 func (t Tag) String() string {
-	if len(t.Params) > 0 {
-		return fmt.Sprintf("%s%s%s%s", t.Name, "(", strings.Join(t.Params, "|"), ")")
-	}
-	return t.Name
+	return t.Fullname()
 }
 
 func (c *tagChunk) GetTags() []Tag {

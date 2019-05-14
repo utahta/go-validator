@@ -15,7 +15,7 @@ func TestFieldError_Error(t *testing.T) {
 			name: "error",
 			err: &fieldError{
 				field: Field{name: "field", current: reflect.ValueOf("text")},
-				tag:   Tag{Name: "tag"},
+				tag:   Tag{name: "tag"},
 			},
 			wantMessage: "field: 'text' does validate as 'tag'",
 		},
@@ -23,7 +23,7 @@ func TestFieldError_Error(t *testing.T) {
 			name: "error suppress field value",
 			err: &fieldError{
 				field:                   Field{name: "field", current: reflect.ValueOf("text")},
-				tag:                     Tag{Name: "tag"},
+				tag:                     Tag{name: "tag"},
 				suppressErrorFieldValue: true,
 			},
 			wantMessage: "field: The value does validate as 'tag'",
@@ -50,11 +50,11 @@ func TestFieldError_Field(t *testing.T) {
 }
 
 func TestFieldError_Tag(t *testing.T) {
-	err := &fieldError{tag: Tag{Name: "tmp", Params: []string{"1", "2", "3"}}}
-	if want, got := "tmp", err.Tag().Name; want != got {
+	err := &fieldError{tag: Tag{name: "tmp", params: []string{"1", "2", "3"}}}
+	if want, got := "tmp", err.Tag().name; want != got {
 		t.Errorf("want %v, but got %v", want, got)
 	}
-	if want, got := "tmp(1|2|3)", err.Tag().String(); want != got {
+	if want, got := "tmp(1|2|3)", err.Tag().Fullname(); want != got {
 		t.Errorf("want %v, but got %v", want, got)
 	}
 }
