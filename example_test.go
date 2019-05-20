@@ -64,3 +64,30 @@ func ExampleValidateStruct_setFunc() {
 	// <nil>
 	// Type: 'image/bmp' does validate as 'contentType(image/jpeg|image/png|image/gif)'
 }
+
+func ExampleValidateStruct_or() {
+	type user struct {
+		ID string `valid:"or(alpha|numeric)"`
+	}
+
+	v := validator.New()
+	err := v.ValidateStruct(&user{
+		ID: "abc",
+	})
+	fmt.Println(err)
+
+	err = v.ValidateStruct(&user{
+		ID: "123",
+	})
+	fmt.Println(err)
+
+	err = v.ValidateStruct(&user{
+		ID: "abc123",
+	})
+	fmt.Println(err)
+
+	// Output:
+	// <nil>
+	// <nil>
+	// ID: 'abc123' does validate as 'or(alpha|numeric)'
+}
