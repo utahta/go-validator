@@ -18,9 +18,9 @@ type (
 
 	// FuncOption is the argument of validating function.
 	FuncOption struct {
-		// Params represents the validation tag parameters.
+		// TagParams represents the validation tag parameters.
 		// e.g. len(1|2) -> []string{"1", "2"}
-		Params []string
+		TagParams []string
 
 		// v is a Validator instance that is validating.
 		v *Validator
@@ -288,8 +288,8 @@ func isHalfWidth(_ context.Context, f Field, _ FuncOption) (bool, error) {
 
 func minLength(_ context.Context, f Field, opt FuncOption) (bool, error) {
 	var minStr string
-	if len(opt.Params) == 1 {
-		minStr = opt.Params[0]
+	if len(opt.TagParams) == 1 {
+		minStr = opt.TagParams[0]
 	} else {
 		return false, fmt.Errorf("invalid params len")
 	}
@@ -336,8 +336,8 @@ func minLength(_ context.Context, f Field, opt FuncOption) (bool, error) {
 
 func maxLength(_ context.Context, f Field, opt FuncOption) (bool, error) {
 	var maxStr string
-	if len(opt.Params) == 1 {
-		maxStr = opt.Params[0]
+	if len(opt.TagParams) == 1 {
+		maxStr = opt.TagParams[0]
 	} else {
 		return false, fmt.Errorf("invalid params len")
 	}
@@ -383,10 +383,10 @@ func maxLength(_ context.Context, f Field, opt FuncOption) (bool, error) {
 }
 
 func eqLength(_ context.Context, f Field, opt FuncOption) (bool, error) {
-	if len(opt.Params) != 1 {
+	if len(opt.TagParams) != 1 {
 		return false, fmt.Errorf("invalid params len")
 	}
-	str := opt.Params[0]
+	str := opt.TagParams[0]
 
 	v := f.current
 	switch v.Kind() {
@@ -429,20 +429,20 @@ func eqLength(_ context.Context, f Field, opt FuncOption) (bool, error) {
 }
 
 func length(ctx context.Context, f Field, opt FuncOption) (bool, error) {
-	switch len(opt.Params) {
+	switch len(opt.TagParams) {
 	case 1:
-		eq, err := eqLength(ctx, f, FuncOption{Params: opt.Params})
+		eq, err := eqLength(ctx, f, FuncOption{TagParams: opt.TagParams})
 		if err != nil {
 			return false, err
 		}
 		return eq, nil
 
 	case 2:
-		min, err := minLength(ctx, f, FuncOption{Params: opt.Params[:1]})
+		min, err := minLength(ctx, f, FuncOption{TagParams: opt.TagParams[:1]})
 		if err != nil {
 			return false, err
 		}
-		max, err := maxLength(ctx, f, FuncOption{Params: opt.Params[1:]})
+		max, err := maxLength(ctx, f, FuncOption{TagParams: opt.TagParams[1:]})
 		if err != nil {
 			return false, err
 		}
@@ -453,7 +453,7 @@ func length(ctx context.Context, f Field, opt FuncOption) (bool, error) {
 }
 
 func or(_ context.Context, f Field, opt FuncOption) (bool, error) {
-	for _, rawTag := range opt.Params {
+	for _, rawTag := range opt.TagParams {
 		err := opt.v.ValidateVar(f.Interface(), rawTag)
 		if err == nil {
 			return true, nil

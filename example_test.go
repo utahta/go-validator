@@ -42,7 +42,7 @@ func ExampleValidateStruct_setFunc() {
 	v := validator.New(
 		validator.WithFunc("contentType", func(_ context.Context, f validator.Field, opt validator.FuncOption) (bool, error) {
 			v := f.Value().String()
-			for _, param := range opt.Params {
+			for _, param := range opt.TagParams {
 				if v == param {
 					return true, nil
 				}

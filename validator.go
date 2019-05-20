@@ -206,7 +206,7 @@ func (v *Validator) validate(ctx context.Context, field Field, chunk *tagChunk) 
 
 	var errs Errors
 	for _, tag := range chunk.GetTags() {
-		valid, err := tag.validateFn(ctx, field, FuncOption{Params: tag.params, v: v})
+		valid, err := tag.validateFn(ctx, field, FuncOption{TagParams: tag.params, v: v})
 		if !valid || err != nil {
 			errs = append(errs, &fieldError{
 				field:                   field,
