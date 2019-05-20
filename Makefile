@@ -14,3 +14,6 @@ pprof:
 changelog:
 	git-chglog -o CHANGELOG.md
 
+godoc:
+	godoc -http=:6060
+
